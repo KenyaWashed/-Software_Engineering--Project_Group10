@@ -1,8 +1,11 @@
 # -Software_Engineering--Project_Group10
 
-# Các thư viện cần thiết
+# Cài đặt thư viện cần thiết
 npm install
 npm install express
+npm install mssql
+npm install express-validator
+
 
 # cách chạy
 ```bash
