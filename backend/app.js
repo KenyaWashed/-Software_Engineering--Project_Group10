@@ -2,6 +2,9 @@ const express = require("express");
 const app = express();
 const path = require("path");
 
+// Đường dẫn đến thư mục ảnh
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 
 // Kết nối DB
 require('./config/db');

@@ -1,11 +1,9 @@
-// routers/room.js
 const express = require("express");
 const router = express.Router();
 
-// Import Controller
-const { getAvailableRooms } = require("../controllers/room");
+const { getAllRooms } = require("../controllers/room");
 
-// Định tuyến cho GET /rooms
-router.get("/", getAvailableRooms);
+// Đường dẫn nên là '/' để khi gọi '/room' sẽ chạy controller này
+router.get('/', getAllRooms);
 
 module.exports = router;

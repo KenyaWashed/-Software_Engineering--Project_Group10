@@ -1,16 +1,23 @@
-// controllers/room.js
+const RoomModel = require('../models/roomModel');
 
-// Dữ liệu giả lập
-const rooms = [
-    { id: 1, name: "Phòng A101", available: true },
-    { id: 2, name: "Phòng B102", available: false },
-    { id: 3, name: "Phòng C103", available: true }
-];
+const getAllRooms = async (req, res) => {
+  try {
+    // Lấy các tham số lọc từ query
+    const { status, priceMin, priceMax } = req.query;
 
-// Controller xử lý logic lấy danh sách phòng trống
-const getAvailableRooms = (req, res) => {
-    const availableRooms = rooms.filter(room => room.available);
-    res.json(availableRooms); // Trả về dữ liệu dưới dạng JSON
+    // Tạo object filter ban đầu
+    let filter = {};
+
+    if (status) filter.status = status;
+    if (priceMin) filter.priceMin = priceMin;
+    if (priceMax) filter.priceMax = priceMax;
+
+    const rooms = await RoomModel.getAllRooms(filter);
+    res.json(rooms);
+  } catch (error) {
+    console.error('Lỗi lấy phòng:', error);
+    res.status(500).json({ error: 'Lỗi server' });
+  }
 };
 
-module.exports = { getAvailableRooms };
+module.exports = { getAllRooms };
