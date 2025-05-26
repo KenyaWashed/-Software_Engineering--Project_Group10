@@ -20,10 +20,9 @@ app.use(express.static(path.join(__dirname, '../frontend')));
 const roomRoutes = require("./routers/room");
 app.use("/room", roomRoutes);
 
+const bookingRoutes = require("./routers/booking");
+app.use("/booking", bookingRoutes);
 
-
-const authRoutes = require("./routers/auth");
-app.use("/auth", authRoutes);
 
 // homepage
 app.get('/', (req, res) => {
