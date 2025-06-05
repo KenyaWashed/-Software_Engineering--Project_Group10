@@ -2,6 +2,12 @@ const { poolPromise } = require('../config/db');
 const sql = require('mssql');
 
 async function checkRoomAvailability(pool, room_id, total_guests) {
+  // Tiến hành cập nhật các phòng đã sử dụng trước khi đăng ký tránh 
+  //lỗi vừa có khách đặt nhưng hệ thống tự động chưa cập nhật trạng thái phòng
+  const { updateAllRoomStatus } = require('../controllers/common/updateRoomStatus');
+  updateAllRoomStatus();
+
+
   const result = await pool.request()
     .input('room_id', sql.Int, room_id)
     .query(`
