@@ -156,7 +156,7 @@ export default function RoomPackageInfo({
 
         {/* Package Options */}
         <div className="space-y-4">
-          <h4 className="font-semibold text-[#002346] text-lg">Gói dịch vụ đã chọn:</h4>
+          <h4 className="font-semibold text-[#002346] text-lg">Gói dịch vụ bạn chọn:</h4>
 
           {room.packages
             .filter(pkg => !selectedPackageId || pkg.id === selectedPackageId)

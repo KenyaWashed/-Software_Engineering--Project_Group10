@@ -224,6 +224,7 @@ function BookingPageContent() {
     setCurrentStep("review")
   }
 
+  // thanh toán
   const handleProceedPayment = () => {
     // Here you would integrate with payment gateway
     console.log("Proceeding to payment with:", {
@@ -260,7 +261,7 @@ function BookingPageContent() {
               >
                 1
               </div>
-              <span className="ml-2 font-medium">Chọn phòng</span>
+              <span className="ml-2 font-medium">Phòng đã chọn</span>
             </div>
             <div className="w-8 h-px bg-gray-300"></div>
             <div className={`flex items-center ${currentStep === "details" ? "text-[#002346]" : "text-gray-400"}`}>
@@ -278,7 +279,7 @@ function BookingPageContent() {
               >
                 3
               </div>
-              <span className="ml-2 font-medium">Xác nhận</span>
+              <span className="ml-2 font-medium">x</span>
             </div>
           </div>
         </div>
