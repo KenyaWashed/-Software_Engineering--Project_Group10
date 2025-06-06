@@ -1,5 +1,5 @@
 "use client"
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -54,6 +54,12 @@ export default function RoomCard({ room, onSelectPackage, selectedPackage, booki
     { adults: bookingData.adults, children: bookingData.children },
   ])
 
+  // Reset state when bookingData changes
+  useEffect(() => {
+    setRoomQuantity(1)
+    setGuestDistribution([{ adults: bookingData.adults, children: bookingData.children }])
+  }, [bookingData.adults, bookingData.children, bookingData.nights, bookingData.checkIn, bookingData.checkOut])
+
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("vi-VN", {
       style: "currency",
@@ -65,8 +71,8 @@ export default function RoomCard({ room, onSelectPackage, selectedPackage, booki
   const updateGuestDistribution = (newQuantity: number) => {
     if (newQuantity > guestDistribution.length) {
       // Add new rooms with 0 guests
-      const newDistribution = [...guestDistribution]
-      for (let i = guestDistribution.length; i < newQuantity; i++) {
+      const newDistribution = []
+      for (let i = 0; i < newQuantity; i++) {
         newDistribution.push({ adults: 0, children: 0 })
       }
       setGuestDistribution(newDistribution)
@@ -290,7 +296,7 @@ export default function RoomCard({ room, onSelectPackage, selectedPackage, booki
                                 size="sm"
                                 onClick={() => updateGuestCount(index, "adults", 1)}
                                 className="h-6 w-6 p-0"
-                                disabled={roomGuests.adults + roomGuests.children >= room.maxGuests}
+                                disabled={roomGuests.adults + roomGuests.children >= room.maxGuests} 
                               >
                                 <Plus className="h-3 w-3" />
                               </Button>
@@ -328,8 +334,9 @@ export default function RoomCard({ room, onSelectPackage, selectedPackage, booki
                   {!isGuestCountValid && (
                     <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mt-2">
                       <p className="text-xs text-yellow-700">
-                        <strong>Lưu ý:</strong> Tổng số khách phân bổ ({totalGuests}) không khớp với số khách đã chọn (
-                        {bookingData.adults + bookingData.children}).
+                        <strong>Lưu ý:</strong> Số khách phân bổ cho từng phòng không khớp với số khách đã chọn.
+                        (Phân bổ: {guestDistribution.reduce((sum, r) => sum + r.adults, 0)} người lớn,{" "}
+                        {guestDistribution.reduce((sum, r) => sum + r.children, 0)} trẻ em. Đã chọn: {bookingData.adults} người lớn, {bookingData.children} trẻ em)
                       </p>
                     </div>
                   )}
@@ -414,7 +421,8 @@ export default function RoomCard({ room, onSelectPackage, selectedPackage, booki
                                 : "bg-[#eac271] text-[#002346] hover:bg-[#d9b05f]"
                             }`}
                             disabled={
-                              (roomQuantity > 1 && !isGuestCountValid) ||
+                              
+                              (roomQuantity >= 1 && !isGuestCountValid) ||
                               (roomQuantity > 1 && validateRoomGuestCounts.some((v) => !v.valid))
                             }
                           >

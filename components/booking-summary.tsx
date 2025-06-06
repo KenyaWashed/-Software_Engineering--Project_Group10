@@ -104,6 +104,16 @@ export default function BookingSummary({ selectedPackages, onRemovePackage }: Bo
       return
     }
 
+    // Kiểm tra ngày trả phòng phải sau ngày nhận phòng
+    if (
+      bookingData.checkIn &&
+      bookingData.checkOut &&
+      bookingData.checkOut <= bookingData.checkIn
+    ) {
+      alert("Ngày trả phòng phải sau ngày nhận phòng!")
+      return
+    }
+
     const bookingURL = createBookingURL()
     console.log("Navigating to booking page with URL:", bookingURL)
     console.log("Booking data:", {
@@ -197,14 +207,16 @@ export default function BookingSummary({ selectedPackages, onRemovePackage }: Bo
         <div>
           <h4 className="font-semibold text-[#002346] mb-3">Phòng đã chọn:</h4>
           <div className="space-y-3">
-            {packagePrices.map((pkg) => (
+            {packagePrices.map((pkg, idx) => (
               <div key={pkg.roomId} className="border rounded-lg p-3 bg-white">
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
-                    <h5 className="font-semibold text-sm text-[#002346]">{pkg.roomName}</h5>
+                    <h5 className="font-semibold text-sm text-[#002346]">
+                      {pkg.roomName} {packagePrices.length > 1 && `- Phòng ${idx + 1}`}
+                    </h5>
                     <p className="text-xs text-gray-600 mb-2">{pkg.packageName}</p>
 
-                    {/* Detailed Price Breakdown */}
+                    {/* Detailed Price Breakdown for each room */}
                     <div className="bg-gray-50 p-2 rounded text-xs space-y-1">
                       <div className="flex justify-between">
                         <span>
@@ -222,7 +234,7 @@ export default function BookingSummary({ selectedPackages, onRemovePackage }: Bo
                         </div>
                       )}
                       <div className="border-t pt-1 flex justify-between font-semibold">
-                        <span>Tổng phòng:</span>
+                        <span>Tổng phòng này:</span>
                         <span className="text-[#002346]">{formatPrice(pkg.pricing.packageTotal)}</span>
                       </div>
                     </div>

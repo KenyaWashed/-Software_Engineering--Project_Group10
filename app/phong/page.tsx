@@ -198,6 +198,7 @@ function RoomsPageContent() {
   const handleBookingDataChange = useCallback((data: BookingData) => {
     console.log("Booking data changed:", data)
     setBookingData(data)
+    setSelectedPackages([]) // Reset các lựa chọn gói/phòng khi thay đổi dữ liệu booking
   }, [])
 
   return (

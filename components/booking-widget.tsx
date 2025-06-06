@@ -148,7 +148,7 @@ export default function BookingWidget({ onBookingChange, initialData }: BookingW
       {/* Add a warning message at the top of the card */}
       <div className="absolute -top-10 left-0 right-0 text-center">
         <div className="bg-yellow-100 text-yellow-800 text-xs px-3 py-1 rounded-full inline-block shadow-sm">
-          Lưu ý: Thay đổi thông tin và ấn "TÌM PHÒNG" để cập nhật kết quả tìm kiếm
+          Lưu ý: Thay đổi thông tin và ấn "TÌM PHÒNG" để cập nhật
         </div>
       </div>
 
