@@ -1,5 +1,6 @@
 "use client"
 import { useState, useMemo, useEffect } from "react"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -17,7 +18,7 @@ interface Package {
 interface Room {
   id: number
   name: string
-  image: string
+  images: string[]
   area: string
   view: string
   maxGuests: number
@@ -41,7 +42,6 @@ interface RoomCardProps {
   onSelectPackage: (
     roomId: number,
     packageData: Package,
-    quantity: number,
     guestDistribution?: { adults: number; children: number }[],
   ) => void
   selectedPackage?: any
@@ -49,13 +49,14 @@ interface RoomCardProps {
 }
 
 export default function RoomCard({ room, onSelectPackage, selectedPackage, bookingData }: RoomCardProps) {
-  const [roomQuantity, setRoomQuantity] = useState(1)
   const [guestDistribution, setGuestDistribution] = useState<{ adults: number; children: number }[]>([
     { adults: bookingData.adults, children: bookingData.children },
   ])
+  const [currentImage, setCurrentImage] = useState(0)
+  const [showModal, setShowModal] = useState(false)
+  const totalImages = room.images.length
 
   useEffect(() => {
-    setRoomQuantity(1)
     setGuestDistribution([{ adults: bookingData.adults, children: bookingData.children }])
   }, [bookingData.adults, bookingData.children, bookingData.nights, bookingData.checkIn, bookingData.checkOut])
 
@@ -64,37 +65,6 @@ export default function RoomCard({ room, onSelectPackage, selectedPackage, booki
       style: "currency",
       currency: "VND",
     }).format(price)
-  }
-
-  // Update guest distribution when room quantity changes
-  const updateGuestDistribution = (newQuantity: number) => {
-    if (newQuantity > guestDistribution.length) {
-      // Add new rooms with 0 guests
-      const newDistribution = [...guestDistribution]
-      for (let i = guestDistribution.length; i < newQuantity; i++) {
-        newDistribution.push({ adults: 0, children: 0 })
-      }
-      setGuestDistribution(newDistribution)
-    } else if (newQuantity < guestDistribution.length) {
-      // Remove rooms
-      setGuestDistribution(guestDistribution.slice(0, newQuantity))
-    }
-  }
-
-  // Update guest count for a specific room
-  const updateGuestCount = (roomIndex: number, type: "adults" | "children", change: number) => {
-    const newDistribution = [...guestDistribution]
-    const currentValue = newDistribution[roomIndex][type]
-    const newValue = Math.max(0, currentValue + change)
-
-    // Check if the new value exceeds max guests per room
-    const otherType = type === "adults" ? "children" : "adults"
-    const otherValue = newDistribution[roomIndex][otherType]
-
-    if (newValue + otherValue <= room.maxGuests) {
-      newDistribution[roomIndex][type] = newValue
-      setGuestDistribution(newDistribution)
-    }
   }
 
   // Add a new function to check if each room's guest count is valid
@@ -157,17 +127,117 @@ export default function RoomCard({ room, onSelectPackage, selectedPackage, booki
     return <div className="w-4 h-4 bg-[#eac271] rounded-full" />
   }
 
-  const isRoomSuitable = totalGuests <= room.maxGuests * roomQuantity
+  const isRoomSuitable = totalGuests <= room.maxGuests
+
+  const handlePrevImage = () => setCurrentImage((prev) => (prev - 1 + totalImages) % totalImages)
+  const handleNextImage = () => setCurrentImage((prev) => (prev + 1) % totalImages)
 
   return (
     <Card className={`overflow-hidden shadow-lg ${!isRoomSuitable ? "opacity-60" : ""}`}>
       <CardContent className="p-0">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
-          {/* Room Image and Basic Info - Keep this section unchanged */}
+          {/* Room Image and Basic Info */}
           <div>
-            <div className="h-64 rounded-lg overflow-hidden mb-4">
-              <img src={room.image || "/placeholder.svg"} alt={room.name} className="w-full h-full object-cover" />
+            <div className="h-64 rounded-lg overflow-hidden mb-4 relative group cursor-pointer" onClick={() => setShowModal(true)}>
+              {room.images && room.images.length > 0 ? (
+                <Image
+                  src={room.images[currentImage]}
+                  alt={room.name}
+                  width={400}
+                  height={256}
+                  className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                  priority={currentImage === 0}
+                />
+              ) : (
+                <Image
+                  src="/placeholder.svg"
+                  alt="No image"
+                  width={400}
+                  height={256}
+                  className="w-full h-full object-cover"
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                />
+              )}
+              {totalImages > 1 && (
+                <>
+                  <button
+                    className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 rounded-full p-1 shadow hover:bg-white"
+                    onClick={e => { e.stopPropagation(); handlePrevImage(); }}
+                    aria-label="Previous image"
+                    type="button"
+                  >
+                    <span className="text-2xl font-bold">&#60;</span>
+                  </button>
+                  <button
+                    className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 rounded-full p-1 shadow hover:bg-white"
+                    onClick={e => { e.stopPropagation(); handleNextImage(); }}
+                    aria-label="Next image"
+                    type="button"
+                  >
+                    <span className="text-2xl font-bold">&#62;</span>
+                  </button>
+                  <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
+                    {room.images.map((_, idx) => (
+                      <span
+                        key={idx}
+                        className={`inline-block w-2 h-2 rounded-full ${idx === currentImage ? "bg-[#eac271]" : "bg-gray-300"}`}
+                      />
+                    ))}
+                  </div>
+                </>
+              )}
             </div>
+            {/* Modal for zoomed image */}
+            {showModal && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70" onClick={() => setShowModal(false)}>
+                <div className="relative max-w-2xl w-full flex flex-col items-center" onClick={e => e.stopPropagation()}>
+                  <Image
+                    src={room.images[currentImage]}
+                    alt={room.name}
+                    width={800}
+                    height={500}
+                    className="rounded-lg object-contain max-h-[80vh] bg-white"
+                    priority
+                  />
+                  <button
+                    className="absolute top-2 right-2 bg-white/80 rounded-full p-2 shadow hover:bg-white"
+                    onClick={() => setShowModal(false)}
+                    aria-label="Đóng"
+                  >
+                    <span className="text-xl font-bold">×</span>
+                  </button>
+                  {totalImages > 1 && (
+                    <div className="flex gap-2 mt-4">
+                      <button
+                        className="bg-white/80 rounded-full p-2 shadow hover:bg-white"
+                        onClick={() => setCurrentImage((prev) => (prev - 1 + totalImages) % totalImages)}
+                        aria-label="Previous image"
+                        type="button"
+                      >
+                        <span className="text-2xl font-bold">&#60;</span>
+                      </button>
+                      <button
+                        className="bg-white/80 rounded-full p-2 shadow hover:bg-white"
+                        onClick={() => setCurrentImage((prev) => (prev + 1) % totalImages)}
+                        aria-label="Next image"
+                        type="button"
+                      >
+                        <span className="text-2xl font-bold">&#62;</span>
+                      </button>
+                    </div>
+                  )}
+                  <div className="flex gap-1 mt-2">
+                    {room.images.map((_, idx) => (
+                      <span
+                        key={idx}
+                        className={`inline-block w-2 h-2 rounded-full ${idx === currentImage ? "bg-[#eac271]" : "bg-gray-300"}`}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
 
             <h3 className="text-xl font-bold text-[#002346] mb-2">{room.name}</h3>
 
@@ -190,8 +260,8 @@ export default function RoomCard({ room, onSelectPackage, selectedPackage, booki
             {!isRoomSuitable && (
               <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
                 <p className="text-sm text-red-600">
-                  <strong>Lưu ý:</strong> {roomQuantity > 1 ? `${roomQuantity} phòng loại này` : "Phòng này"} chỉ phù
-                  hợp với tối đa {room.maxGuests * roomQuantity} khách. Bạn đã chọn {totalGuests} khách.
+                  <strong>Lưu ý:</strong> Phòng này chỉ phù
+                  hợp với tối đa {room.maxGuests} khách. Bạn đã chọn {totalGuests} khách.
                 </p>
               </div>
             )}
@@ -223,10 +293,6 @@ export default function RoomCard({ room, onSelectPackage, selectedPackage, booki
           {/* Packages */}
           <div>
             <h4 className="font-semibold text-[#002346] mb-4">Gói dịch vụ:</h4>
-
-            
-
-
             <div className="space-y-4">
               {room.packages.map((pkg) => {
                 const pricing = calculateTotalPrice(pkg.discountPrice)
@@ -272,7 +338,7 @@ export default function RoomCard({ room, onSelectPackage, selectedPackage, booki
                         <div className="border-t pt-1 font-semibold">
                           <div className="flex justify-between">
                             <span>
-                              Tổng cộng ({roomQuantity} phòng, {bookingData.nights} đêm):
+                              Tổng cộng:
                             </span>
                             <span className="text-[#002346]">{formatPrice(pricing.totalPrice)}</span>
                           </div>
@@ -289,7 +355,7 @@ export default function RoomCard({ room, onSelectPackage, selectedPackage, booki
                           <span className="text-lg font-bold text-[#002346]">{formatPrice(pricing.totalPrice)}</span>
                         </div>
                         <p className="text-xs text-gray-500">
-                          Cho {roomQuantity} phòng, {bookingData.nights} đêm, {bookingData.adults} người lớn
+                          Cho {bookingData.nights} đêm, {bookingData.adults} người lớn
                           {bookingData.children > 0 && `, ${bookingData.children} trẻ em`}
                         </p>
                       </div>
@@ -297,15 +363,15 @@ export default function RoomCard({ room, onSelectPackage, selectedPackage, booki
                       <div>
                         {pkg.available && isRoomSuitable ? (
                           <Button
-                            onClick={() => onSelectPackage(room.id, pkg, roomQuantity, guestDistribution)}
+                            onClick={() => onSelectPackage(room.id, pkg, guestDistribution)}
                             className={`${
                               selectedPackage?.packageId === pkg.id
                                 ? "bg-[#002346] text-white"
                                 : "bg-[#eac271] text-[#002346] hover:bg-[#d9b05f]"
                             }`}
                             disabled={
-                              (roomQuantity > 1 && !isGuestCountValid) ||
-                              (roomQuantity > 1 && validateRoomGuestCounts.some((v) => !v.valid))
+                              (!isGuestCountValid) ||
+                              (validateRoomGuestCounts.some((v) => !v.valid))
                             }
                           >
                             {selectedPackage?.packageId === pkg.id ? "Selected" : "Select"}

@@ -36,7 +36,13 @@ const roomsData = [
   {
     id: 1,
     name: "Deluxe Ocean View",
-    image: "/placeholder.svg?height=300&width=400",
+    images: [
+      "/images/phongloai1/1.jpg",
+      "/images/phongloai1/2.jpg",
+      "/images/phongloai1/3.jpg",
+      "/images/phongloai1/4.jpeg",
+      "/images/phongloai1/5.jpeg",
+    ],
     area: "45m²",
     view: "Hướng biển",
     maxGuests: 3,
@@ -66,7 +72,13 @@ const roomsData = [
   {
     id: 2,
     name: "Executive Suite",
-    image: "/placeholder.svg?height=300&width=400",
+    images: [
+      "/images/phongloai1/1.jpg",
+      "/images/phongloai1/2.jpg",
+      "/images/phongloai1/3.jpg",
+      "/images/phongloai1/4.jpeg",
+      "/images/phongloai1/5.jpeg",
+    ],
     area: "65m²",
     view: "Hướng thành phố",
     maxGuests: 4,
@@ -96,7 +108,12 @@ const roomsData = [
   {
     id: 3,
     name: "Presidential Suite",
-    image: "/placeholder.svg?height=300&width=400",
+    images: [
+      "/images/room3-1.jpg",
+      "/images/room3-2.jpg",
+      "/images/room3-3.jpg",
+      "/placeholder.svg?height=300&width=400",
+    ],
     area: "120m²",
     view: "Hướng biển và thành phố",
     maxGuests: 6,

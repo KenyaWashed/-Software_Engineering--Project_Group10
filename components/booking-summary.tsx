@@ -234,7 +234,7 @@ export default function BookingSummary({ selectedPackages, onRemovePackage }: Bo
                         </div>
                       )}
                       <div className="border-t pt-1 flex justify-between font-semibold">
-                        <span>Tổng phòng này:</span>
+                        <span>Tổng giá phòng này:</span>
                         <span className="text-[#002346]">{formatPrice(pkg.pricing.packageTotal)}</span>
                       </div>
                     </div>
@@ -271,19 +271,21 @@ export default function BookingSummary({ selectedPackages, onRemovePackage }: Bo
           </div>
         </div>
 
+
+            {/* Tạm thời bỏ qua thanh toán */}
         {/* Deposit Info */}
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+        {/* <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
           <p className="text-sm font-semibold text-yellow-800">💰 Tiền cọc cần thanh toán:</p>
           <p className="text-lg font-bold text-[#002346]">{formatPrice(deposit)}</p>
           <p className="text-xs text-gray-600 mt-1">(30% tổng giá trị đơn hàng)</p>
-        </div>
+        </div> */}
 
         {/* Book Button - Updated to navigate to booking page */}
         <Button
           onClick={handleBookNow}
           className="w-full bg-[#eac271] hover:bg-[#d9b05f] text-[#002346] font-bold py-3 text-lg"
         >
-          ĐẶT PHÒNG NGAY
+          ĐẶT NGAY
         </Button>
 
         <p className="text-xs text-gray-500 text-center">
