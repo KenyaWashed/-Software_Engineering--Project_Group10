@@ -1,17 +1,52 @@
 "use client"
 import { Button } from "@/components/ui/button"
-import { Users } from "lucide-react"
+import { Users, LogOut } from "lucide-react"
 import Link from "next/link"
+import { useEffect, useState } from "react"
 
 export default function Header() {
+  const [user, setUser] = useState<any>(null)
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const userStr = localStorage.getItem("user")
+      if (userStr) setUser(JSON.parse(userStr))
+      else setUser(null)
+    }
+  }, [])
+
+  const handleLogout = () => {
+    localStorage.removeItem("user")
+    setUser(null)
+    window.location.reload()
+  }
+
   return (
     <header className="bg-[#eac271] px-4 py-3">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         <nav className="hidden md:flex items-center space-x-8 text-sm font-medium text-[#002346]">
-          <Link href="/dang-nhap" className="flex items-center space-x-1 hover:text-[#002346]/80">
-            <Users className="w-4 h-4" />
-            <span>ĐĂNG NHẬP</span>
-          </Link>
+          {user ? (
+            <>
+              
+              <button
+                onClick={handleLogout}
+                className="ml-4 flex items-center space-x-1 text-xs text-[#002346] hover:underline focus:outline-none bg-transparent border-0 shadow-none"
+                style={{ fontWeight: 500 }}
+              >
+                <LogOut className="w-4 h-4" />
+                <span>Đăng xuất</span>
+              </button>
+              <span className="flex items-center space-x-1 font-semibold">
+                <Users className="w-4 h-4" />
+                <span>{user.fullName || user.username}</span>
+              </span>
+            </>
+          ) : (
+            <Link href="/dang-nhap" className="flex items-center space-x-1 hover:text-[#002346]/80">
+              <Users className="w-4 h-4" />
+              <span>ĐĂNG NHẬP</span>
+            </Link>
+          )}
           <Link href="/phong" className="hover:text-[#002346]/80">
             PHÒNG
           </Link>

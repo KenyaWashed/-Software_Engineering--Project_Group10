@@ -224,7 +224,6 @@ function BookingPageContent() {
     setCurrentStep("review")
   }
 
-  // thanh toán
   const handleProceedPayment = () => {
     // Here you would integrate with payment gateway
     console.log("Proceeding to payment with:", {

@@ -12,6 +12,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Label } from "@/components/ui/label"
 import { Eye, EyeOff, Lock, Mail } from "lucide-react"
 import BackButton from "@/components/back-button"
+import { reusers } from "@/lib/mock-database"
 
 export default function LoginPage() {
   const router = useRouter()
@@ -32,21 +33,21 @@ export default function LoginPage() {
       return
     }
 
-    // Simulate login process
     setIsLoading(true)
 
     try {
-      // Here you would normally call your authentication API
-      await new Promise((resolve) => setTimeout(resolve, 1500))
-
-      // For demo purposes, we'll just log the data
-      console.log({
-        email,
-        password,
-        rememberMe,
-      })
-
-      // Redirect to home page after successful login
+      // Kiểm tra đăng nhập với mock database
+      const user = reusers.find(
+        (u) => u.email.toLowerCase() === email.toLowerCase() && u.password === password
+      )
+      await new Promise((resolve) => setTimeout(resolve, 800))
+      if (!user) {
+        setError("Email hoặc mật khẩu không đúng")
+        setIsLoading(false)
+        return
+      }
+      // Đăng nhập thành công
+      localStorage.setItem('user', JSON.stringify(user))
       router.push("/")
     } catch (err) {
       setError("Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.")

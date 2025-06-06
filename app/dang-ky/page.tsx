@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label"
 import { Eye, EyeOff, Lock, Mail, User, Phone } from "lucide-react"
 import Link from "next/link"
 import BackButton from "@/components/back-button"
+import { users } from "@/lib/mock-database"
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -27,6 +28,7 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
+  const [success, setSuccess] = useState("")
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -36,6 +38,7 @@ export default function RegisterPage() {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
+    setSuccess("")
 
     // Validate form
     if (!formData.fullName || !formData.email || !formData.phone || !formData.password || !formData.confirmPassword) {
@@ -53,21 +56,39 @@ export default function RegisterPage() {
       return
     }
 
-    // Simulate registration process
     setIsLoading(true)
 
     try {
-      // Here you would normally call your registration API
-      await new Promise((resolve) => setTimeout(resolve, 1500))
-
-      // For demo purposes, we'll just log the data
-      console.log({
-        ...formData,
-        agreeTerms,
+      // Kiểm tra trùng email hoặc phone trong mock database
+      const emailExists = users.some(u => u.email.toLowerCase() === formData.email.toLowerCase())
+      const phoneExists = users.some(u => u.phone === formData.phone)
+      await new Promise((resolve) => setTimeout(resolve, 800))
+      if (emailExists) {
+        setError("Email đã được sử dụng")
+        setIsLoading(false)
+        return
+      }
+      if (phoneExists) {
+        setError("Số điện thoại đã được sử dụng")
+        setIsLoading(false)
+        return
+      }
+      // Thêm user mới vào mock database (chỉ trên RAM, reload sẽ mất)
+      users.push({
+        id: users.length + 1,
+        username: formData.email.split("@")[0],
+        password: formData.password,
+        fullName: formData.fullName,
+        email: formData.email,
+        phone: formData.phone,
+        role: "user"
       })
-
-      // Redirect to login page after successful registration
-      router.push("/dang-nhap")
+      console.log("User list after register:", users)
+      setSuccess("Đăng ký thành công! Đang chuyển sang trang đăng nhập...")
+      setTimeout(() => {
+        router.push("/dang-nhap")
+      }, 1500)
+      return
     } catch (err) {
       setError("Đăng ký thất bại. Vui lòng thử lại sau.")
     } finally {
@@ -97,6 +118,7 @@ export default function RegisterPage() {
           <CardContent className="pt-6">
             <form onSubmit={handleRegister} className="space-y-4">
               {error && <div className="bg-red-50 text-red-600 p-3 rounded-md text-sm">{error}</div>}
+              {success && <div className="bg-green-50 text-green-700 p-3 rounded-md text-sm">{success}</div>}
 
               <div className="space-y-2">
                 <Label htmlFor="fullName">Họ và tên</Label>
