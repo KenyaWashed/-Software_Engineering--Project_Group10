@@ -14,7 +14,13 @@ const roomsData = [
   {
     id: 1,
     name: "Deluxe Ocean View",
-    image: "/placeholder.svg?height=300&width=400",
+    image: "/images/phongloai1/1.jpg",
+    images: [
+      "/images/phongloai1/1.jpg",
+      "/images/phongloai1/2.jpg",
+      "/images/phongloai1/3.jpg",
+      "/images/phongloai1/4.jpg"
+    ],
     area: "38m²",
     view: "Hướng vườn",
     maxGuests: 2,
@@ -44,7 +50,13 @@ const roomsData = [
   {
     id: 2,
     name: "Executive Suite",
-    image: "/placeholder.svg?height=300&width=400",
+    image: "/images/phongloai1/2.jpg",
+    images: [
+      "/images/phongloai1/2.jpg",
+      "/images/phongloai1/3.jpg",
+      "/images/phongloai1/4.jpeg",
+      "/images/phongloai1/1.jpg"
+    ],
     area: "65m²",
     view: "Hướng thành phố",
     maxGuests: 4,
@@ -74,7 +86,14 @@ const roomsData = [
   {
     id: 3,
     name: "Presidential Suite",
-    image: "/placeholder.svg?height=300&width=400",
+    image: "/images/phongloai1/4.jpeg",
+    images: [
+      "/images/phongloai1/4.jpeg",
+      "/images/phongloai1/5.jpeg",
+      "/images/phongloai1/1.jpg",
+      "/images/phongloai1/3.jpg",
+      "/images/phongloai1/2.jpg"
+    ],
     area: "120m²",
     view: "Hướng biển và thành phố",
     maxGuests: 6,
@@ -267,20 +286,22 @@ function BookingPageContent() {
         {/* Step Content */}
         {currentStep === "select" && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Room Package Info */}
+            {/* Show only the selected room/package info and images */}
             <div className="lg:col-span-2 space-y-6">
-              {roomsData.map((room) => (
+              {selectedPackagesArray[0] ? (
                 <RoomPackageInfo
-                  key={room.id}
-                  room={room}
+                  room={roomsData.find(room => room.packages.some(pkg => pkg.id === selectedPackagesArray[0].packageId)) as any}
                   selectedPackages={selectedPackages}
                   onPackageSelect={handlePackageSelect}
                   bookingData={bookingData}
+                  selectedPackageId={selectedPackagesArray[0].packageId}
                 />
-              ))}
+              ) : (
+                <div className="bg-yellow-50 border border-yellow-200 rounded p-6 text-center text-yellow-800">
+                  Không có phòng nào được chọn. Vui lòng quay lại để chọn phòng trước khi tiếp tục.
+                </div>
+              )}
             </div>
-
-            {/* Enhanced Booking Summary */}
             <div className="lg:col-span-1">
               <EnhancedBookingSummary
                 selectedPackages={selectedPackagesArray}
