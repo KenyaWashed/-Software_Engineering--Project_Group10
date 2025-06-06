@@ -145,7 +145,7 @@ const roomsData = [
         benefits: ["Free cancellation"],
         originalPrice: 7200000,
         discountPrice: 6480000,
-        available: false,
+        available: true,
       },
     ],
   },
@@ -201,15 +201,12 @@ function RoomsPageContent() {
       packageName: packageData.name,
       basePrice: packageData.discountPrice,
     }
-
-    setSelectedPackages((prev) => {
-      const filtered = prev.filter((item) => item.roomId !== roomId)
-      return [...filtered, newSelection]
-    })
+    // Only allow one room/package selection at a time
+    setSelectedPackages([newSelection])
   }, [])
 
   const handleRemovePackage = useCallback((roomId: number) => {
-    setSelectedPackages((prev) => prev.filter((item) => item.roomId !== roomId))
+    setSelectedPackages([])
   }, [])
 
   const handleBookingDataChange = useCallback((data: BookingData) => {
@@ -245,7 +242,7 @@ function RoomsPageContent() {
                   key={room.id}
                   room={room}
                   onSelectPackage={handleSelectPackage}
-                  selectedPackage={selectedPackages.find((item) => item.roomId === room.id)}
+                  selectedPackage={selectedPackages[0]}
                   bookingData={bookingData}
                 />
               ))}
