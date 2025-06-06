@@ -54,7 +54,6 @@ export default function RoomCard({ room, onSelectPackage, selectedPackage, booki
     { adults: bookingData.adults, children: bookingData.children },
   ])
 
-  // Reset state when bookingData changes
   useEffect(() => {
     setRoomQuantity(1)
     setGuestDistribution([{ adults: bookingData.adults, children: bookingData.children }])
@@ -71,8 +70,8 @@ export default function RoomCard({ room, onSelectPackage, selectedPackage, booki
   const updateGuestDistribution = (newQuantity: number) => {
     if (newQuantity > guestDistribution.length) {
       // Add new rooms with 0 guests
-      const newDistribution = []
-      for (let i = 0; i < newQuantity; i++) {
+      const newDistribution = [...guestDistribution]
+      for (let i = guestDistribution.length; i < newQuantity; i++) {
         newDistribution.push({ adults: 0, children: 0 })
       }
       setGuestDistribution(newDistribution)
@@ -80,13 +79,6 @@ export default function RoomCard({ room, onSelectPackage, selectedPackage, booki
       // Remove rooms
       setGuestDistribution(guestDistribution.slice(0, newQuantity))
     }
-  }
-
-  // Handle room quantity change
-  const handleRoomQuantityChange = (change: number) => {
-    const newQuantity = Math.max(1, roomQuantity + change)
-    setRoomQuantity(newQuantity)
-    updateGuestDistribution(newQuantity)
   }
 
   // Update guest count for a specific room
@@ -232,117 +224,8 @@ export default function RoomCard({ room, onSelectPackage, selectedPackage, booki
           <div>
             <h4 className="font-semibold text-[#002346] mb-4">Gói dịch vụ:</h4>
 
-            {/* Room Quantity Selector */}
-            <div className="mb-4 p-4 bg-gray-50 rounded-lg">
-              <div className="flex justify-between items-center mb-3">
-                <h5 className="font-semibold text-[#002346]">Số lượng phòng:</h5>
-                <div className="flex items-center space-x-3">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleRoomQuantityChange(-1)}
-                    className="h-8 w-8 p-0 rounded-full"
-                    disabled={roomQuantity <= 1}
-                  >
-                    <Minus className="h-3 w-3" />
-                  </Button>
-                  <span className="text-lg font-semibold min-w-[30px] text-center">{roomQuantity}</span>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleRoomQuantityChange(1)}
-                    className="h-8 w-8 p-0 rounded-full"
-                  >
-                    <Plus className="h-3 w-3" />
-                  </Button>
-                </div>
-              </div>
+            
 
-              {roomQuantity > 1 && (
-                <div className="space-y-3">
-                  <h6 className="font-medium text-sm text-[#002346]">Phân bổ khách:</h6>
-                  {guestDistribution.map((roomGuests, index) => {
-                    const validation = validateRoomGuestCounts[index]
-                    return (
-                      <div
-                        key={index}
-                        className={`p-3 rounded-lg border ${!validation.valid ? "border-red-300 bg-red-50" : "bg-white"}`}
-                      >
-                        <div className="flex justify-between items-center mb-2">
-                          <span className="font-medium text-sm">Phòng {index + 1}:</span>
-                          <span
-                            className={`text-xs ${!validation.valid ? "text-red-600 font-medium" : "text-gray-500"}`}
-                          >
-                            {roomGuests.adults + roomGuests.children}/{room.maxGuests} khách
-                            {validation.message && ` - ${validation.message}`}
-                          </span>
-                        </div>
-                        <div className="grid grid-cols-2 gap-3">
-                          <div>
-                            <div className="text-xs mb-1">Người lớn:</div>
-                            <div className="flex items-center justify-between bg-gray-50 rounded-md px-2">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => updateGuestCount(index, "adults", -1)}
-                                className="h-6 w-6 p-0"
-                                disabled={roomGuests.adults <= 0}
-                              >
-                                <Minus className="h-3 w-3" />
-                              </Button>
-                              <span className="text-sm font-medium">{roomGuests.adults}</span>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => updateGuestCount(index, "adults", 1)}
-                                className="h-6 w-6 p-0"
-                                disabled={roomGuests.adults + roomGuests.children >= room.maxGuests} 
-                              >
-                                <Plus className="h-3 w-3" />
-                              </Button>
-                            </div>
-                          </div>
-                          <div>
-                            <div className="text-xs mb-1">Trẻ em:</div>
-                            <div className="flex items-center justify-between bg-gray-50 rounded-md px-2">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => updateGuestCount(index, "children", -1)}
-                                className="h-6 w-6 p-0"
-                                disabled={roomGuests.children <= 0}
-                              >
-                                <Minus className="h-3 w-3" />
-                              </Button>
-                              <span className="text-sm font-medium">{roomGuests.children}</span>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => updateGuestCount(index, "children", 1)}
-                                className="h-6 w-6 p-0"
-                                disabled={roomGuests.adults + roomGuests.children >= room.maxGuests}
-                              >
-                                <Plus className="h-3 w-3" />
-                              </Button>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    )
-                  })}
-
-                  {!isGuestCountValid && (
-                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mt-2">
-                      <p className="text-xs text-yellow-700">
-                        <strong>Lưu ý:</strong> Số khách phân bổ cho từng phòng không khớp với số khách đã chọn.
-                        (Phân bổ: {guestDistribution.reduce((sum, r) => sum + r.adults, 0)} người lớn,{" "}
-                        {guestDistribution.reduce((sum, r) => sum + r.children, 0)} trẻ em. Đã chọn: {bookingData.adults} người lớn, {bookingData.children} trẻ em)
-                      </p>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
 
             <div className="space-y-4">
               {room.packages.map((pkg) => {
@@ -421,8 +304,7 @@ export default function RoomCard({ room, onSelectPackage, selectedPackage, booki
                                 : "bg-[#eac271] text-[#002346] hover:bg-[#d9b05f]"
                             }`}
                             disabled={
-                              
-                              (roomQuantity >= 1 && !isGuestCountValid) ||
+                              (roomQuantity > 1 && !isGuestCountValid) ||
                               (roomQuantity > 1 && validateRoomGuestCounts.some((v) => !v.valid))
                             }
                           >
