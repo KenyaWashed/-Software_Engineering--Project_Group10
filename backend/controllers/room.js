@@ -12,10 +12,12 @@ const getAllRooms = async (req, res) => {
     const availableRoomTypes = await RoomModel.getAvailableRoomTypes(checkin_date, checkout_date);
     const rooms = await RoomModel.getTypeAndPackageAvailable(checkin_date, checkout_date);
     const package = await RoomModel.getPackage();
+    const packageOffers = await RoomModel.getPackageOffers();
     res.json({
-      availableRoomTypes,
       rooms,
-      package
+      availableRoomTypes,
+      package,
+      packageOffers
     });
   } catch (error) {
     console.error('Error in getAllRooms:', error);

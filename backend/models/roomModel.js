@@ -84,7 +84,22 @@ async function getPackage() {
     const request = pool.request();
 
     
-    const result = await request.query(`SELECT * FROM Room_package_offers;`);
+    const result = await request.query(`SELECT * FROM Room_packages;`);
+
+    return result.recordset;
+  } catch (error) {
+    console.error('DB Error:', error);
+    throw error;
+  }
+}
+
+async function getPackageOffers() {
+  try {
+    const pool = await poolPromise;
+    const request = pool.request();
+
+    
+    const result = await request.query(`SELECT * FROM Room_packages;`);
 
     return result.recordset;
   } catch (error) {
@@ -98,5 +113,6 @@ module.exports = {
   getAvailableRooms,
   getAvailableRoomTypes,
   getTypeAndPackageAvailable,
-  getPackage
+  getPackage,
+  getPackageOffers
 };
