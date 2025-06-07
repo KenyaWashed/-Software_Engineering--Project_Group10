@@ -22,6 +22,10 @@ app.use(express.urlencoded({ extended: true }));
 const roomRoutes = require("./routers/room");
 app.use("/room", roomRoutes);
 
+
+const calculationRoutes = require("./routers/calculation"); 
+app.use("/calculation", calculationRoutes);
+
 const bookingRoutes = require("./routers/booking");
 app.use("/booking", bookingRoutes);
 

@@ -10,8 +10,22 @@ fetch('http://localhost:4000/room', {
   })
 });
 
+### POST/calculation
+fetch('http://localhost:4000/calculation', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+  "room_type_id": 1,
+  "room_package_id": 2,
+  "n_domestic_guests": 2,
+  "n_foreign_guests": 1,
+  "total_days": 3
+})
+});
 
-### POST /booking/create
+### POST /booking/create (chưa xong)
 - Mô tả: Gọi để tiến hành đặt phòng
 - Body: JSON chứa thông tin đặt phòng
 - Trả về: Thông báo kết quả thành công hoặc thất bại kèm theo lỗi (nếu có)
