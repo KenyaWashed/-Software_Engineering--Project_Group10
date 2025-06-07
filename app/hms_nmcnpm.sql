@@ -1,4 +1,9 @@
-﻿-- Tạo cơ sở dữ liệu
+﻿--ALTER DATABASE hms SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+--use master
+--go
+--DROP DATABASE hms;
+
+-- Tạo cơ sở dữ liệu
 CREATE DATABASE hms;
 GO
 
@@ -71,21 +76,10 @@ CREATE TABLE users (
     user_email VARCHAR(100) not null,
     phone_number CHAR(10) not null,
     user_password VARCHAR(100),
-    user_role NVARCHAR(20) check (user_role in (N'Khách', N'Lễ tân', N'Chủ khách sạn')),
+    user_role NVARCHAR(20) check (user_role in ('guest', 'receptionist', 'admin')),
 	constraint UQ_User_Email_Phone unique(user_email, phone_number)
 );
 
--- Bảng Reservation
-CREATE TABLE Reservations (
-    reservation_id INT PRIMARY KEY IDENTITY(1,1),
-    total_local_guests INT check (total_local_guests >= 0), -- check <= maximum_guests
-	total_foreign_guests int check (total_foreign_guests >= 0),
-    reservation_date DATETIME, -- check <= getdate()
-    check_in_date DATETIME,-- check (check_in_date >= reservation_date),
-    check_out_date datetime check (check_out_date >= check_in_date),
-    reservation_status NVARCHAR(20) check (reservation_status in (N'Đã đặt', N'Chờ thanh toán', N'Đã hủy', N'Đã thanh toán')),
-    room_id INT FOREIGN KEY REFERENCES Rooms(room_id)
-);
 
 -- Bảng Reservation_detail (nhiều khách cho 1 đơn đặt phòng)
 CREATE TABLE Reservation_detail (
@@ -94,6 +88,17 @@ CREATE TABLE Reservation_detail (
     guest_email varchar(100) not null,
 	guest_phone_number char(10),
 	primary key(reservation_id, guest_phone_number)
+);
+-- Bảng Reservation
+CREATE TABLE Reservations (
+    reservation_id INT PRIMARY KEY IDENTITY(1,1),
+    total_local_guests INT check (total_local_guests >= 0), -- check <= maximum_guests
+	total_foreign_guests int check (total_foreign_guests >= 0),
+    reservation_date DATETIME, -- check <= getdate()
+    check_in_date DATETIME,-- check (check_in_date >= reservation_date),
+    check_out_date datetime, -- check (check_out_date >= check_in_date),
+    reservation_status NVARCHAR(20), -- check (reservation_status in (N'Đã đặt', N'Chờ thanh toán', N'Đã hủy', N'Đã thanh toán')),
+    room_id INT FOREIGN KEY REFERENCES Rooms(room_id)
 );
 
 -- Bảng Invoice
@@ -136,12 +141,12 @@ CREATE TABLE Transaction_history (
     user_id INT FOREIGN KEY REFERENCES Users(user_id)
 );
 
-alter table room add constraint fk_room_room_type foreign key (room_type_id) references room_type(room_type_id);
-alter table room add constraint fk_room_room_package foreign key (room_package_id) references room_package(room_package_id);
-alter table room_type_photos add constraint fk_room_type_photos foreign key (room_type_id) references room_type(room_type_id);
-alter table room_type_amenities add constraint fk_room_type_amenities foreign key (room_type_id) references room_type(room_type_id);
-alter table room_package add constraint fk_room_package_room_type foreign key (room_type_id) references room_type(room_type_id);
-alter table room_package_offers add constraint fk_room_package_offers foreign key (room_package_id) references room_package(room_package_id);
+alter table Rooms add constraint fk_room_room_type foreign key (room_type_id) references room_types(room_type_id);
+alter table Rooms add constraint fk_room_room_package foreign key (room_package_id) references room_packages(room_package_id);
+alter table room_type_photos add constraint fk_room_type_photos foreign key (room_type_id) references room_types(room_type_id);
+alter table room_type_amenities add constraint fk_room_type_amenities foreign key (room_type_id) references room_types(room_type_id);
+alter table room_packages add constraint fk_room_package_room_type foreign key (room_type_id) references room_types(room_type_id);
+alter table room_package_offers add constraint fk_room_package_offers foreign key (room_package_id) references room_packages(room_package_id);
 
 INSERT INTO room_types (
 	room_type_name, max_guests, room_type_beds, room_type_bathrooms,
@@ -217,6 +222,6 @@ insert into policy (policy_name, policy_short_name, policy_value, policy_notes) 
 INSERT INTO users (user_name, full_name, user_email, phone_number, user_password, user_role)
 VALUES 
     ('admin', 'Quản trị viên', 'admin@royalhotel.com', '0900000001', 'admin123', 'admin'),
-    ('user1', 'Nguyễn Văn A', 'user1@gmail.com', '0900000002', 'user123', 'user');
+    ('user1', 'Nguyễn Văn A', 'user1@gmail.com', '0900000002', 'user123', 'guest');
 
 ----------
