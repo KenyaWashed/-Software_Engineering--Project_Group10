@@ -9,11 +9,12 @@ exports.checkSession = (req, res, next) => {
     } else {
         res.status(401).json({ loggedIn: false, error: 'Bạn chưa đăng nhập' });
     }
+    //next();
 };
 
 // Middleware kiểm tra quyền (dùng cho chủ khách sạn)
 exports.checkHotelOwner = (req, res, next) => {
-  if (req.session && req.session.user?.user_role !== 'Chủ khách sạn') {
+  if (req.session && req.session.user?.user_role !== 'admin') {
     return res.status(403).send('Bạn không có quyền truy cập!');
   }
   next();
@@ -21,7 +22,7 @@ exports.checkHotelOwner = (req, res, next) => {
 
 // Middleware kiểm tra quyền (dùng cho lễ tân)
 exports.checkReceptionist = (req, res, next) => {
-  if (req.session && req.session.user?.user_role !== 'Lễ tân') {
+  if (req.session && req.session.user?.user_role !== 'receptionist') {
     return res.status(403).send('Bạn không có quyền truy cập!');
   }
   next();

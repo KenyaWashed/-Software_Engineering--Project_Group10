@@ -1,10 +1,8 @@
 // Quy trình đăng nhập:
-// 1. Nhận thông tin đăng nhập từ client (cmnd, mật khẩu)
-// 2. Kiểm tra tính hợp lệ của thông tin (cmnd phải là số, mật khẩu phải có ít nhất 6 ký tự và chứa ít nhất một số).
-// 3. Kiểm tra xem người dùng đã tồn tại trong cơ sở dữ liệu chưa
-// 4. Nếu chưa tồn tại, gợi ý người dùng chuyển hướng sang chức năng đăng ký.
-// 5. Nếu đã tồn tại, kiểm tra sự khớp của cmnd và mật khẩu.
-
+// 1. Nhận thông tin đăng nhập từ client (email, mật khẩu)
+// 2. Kiểm tra tính hợp lệ của email hoặc sdt (email phải có định dạng hợp lệ, sdt phải là số và dài 10 ký tự).
+// 3. Kiểm tra sự khớp của email và mật khẩu: Kiểm tra tồn tại và kiểm tra đúng mật khẩu.
+// 4. Nếu đăng nhập thành công, lưu thông tin người dùng vào session và chuyển sang trang chính.
 
 const express = require('express');
 const userModels = require('../models/user');
@@ -12,11 +10,18 @@ const session = require('express-session');
 const { check, validationResult } = require('express-validator');
 
 exports.userLoginValidator = [ 
-    check('cmnd')
-        .matches(/^\d+$/)
-        .withMessage('cmnd must contain only numbers')
-        .isLength(12)
-        .withMessage('cmnd must be exactly 12 digits long'),
+    check('user_email')
+        .isLength({ min: 4, max: 32 })
+        .withMessage('Email must be between 4 to 32 characters')
+        .matches(/.+@.+\..+/)
+        .withMessage('Email must contain @ and a valid domain')
+        .custom((value) => {
+            const atCount = (value.match(/@/g) || []).length;
+            if (atCount > 1) {
+                throw new Error('Email must not contain more than one @ symbol');
+            }
+            return true;
+        }),
     check('user_password', 'Password is required').notEmpty(),
     check('user_password')
         .isLength({ min: 6 })
@@ -26,38 +31,31 @@ exports.userLoginValidator = [
 ];
 
 exports.login = async (req, res) => {
+    const { user_email, user_password, remember } = req.body;
+
+    // 1. Kiểm tra tính hợp lệ của email và mật khẩu
     const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(422).json({ errors: errors.array() });
-        }
-        
-    const { cmnd, user_password } = req.body;
-
-    try {
-        const isUserExists = await userModels.isUserExists(cmnd);
-        if (!isUserExists) {
-            return res.status(404).json({
-                error: 'Người dùng không tồn tại',
-                shouldRedirect: true,
-                redirectTo: '/signup' 
-            });
-        }
-
-        const isAuthenticated = await userModels.authenticateUser(cmnd, user_password);
-        if (!isAuthenticated) {
-            return res.status(401).json({ error: '❌ Mật khẩu không đúng' });
-        }
-
-        // ✅ Lưu thông tin người dùng vào session
-        req.session.user = {
-            cmnd: cmnd,
-            user_role: await userModels.getUserRoleByCMND(cmnd), // Lấy role từ cơ sở dữ liệu
-        };
-
-        return res.status(200).json({ message: '✅ Đăng nhập thành công', redirectTo: '/home' });
-
-    } catch (err) {
-        console.error('❌ Lỗi đăng nhập:', err);
-        return res.status(500).json({ error: '❌ Lỗi máy chủ. Vui lòng thử lại sau.' });
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
     }
+
+    // 3. Kiểm tra mật khẩu
+    const isAuthenticated = await userModels.authenticateUserByEmail(user_email, user_password);
+    if (!isAuthenticated) {
+        return res.status(401).json({ error: '❌ Mật khẩu không đúng' });
+    }
+
+    // 4. Lưu thông tin người dùng vào session
+    req.session.user = {
+        email: user_email,
+        role: await userModels.getUserRoleByEmail(user_email),
+    };
+
+    if (remember) {
+        req.session.cookie.maxAge = 3 * 24 * 60 * 60 * 1000; // 3 ngày
+    } else {
+        req.session.cookie.expires = false; // session sẽ hết khi đóng trình duyệt
+    }
+
+    return res.status(200).json({ message: '✅ Đăng nhập thành công', redirectTo: '/home' });
 };

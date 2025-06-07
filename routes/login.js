@@ -7,14 +7,13 @@ const logout = require("../controllers/logout");
 const sessionController = require('../controllers/session');
 
 router.post('/login', login.userLoginValidator, login.login);
-router.post("/signup", signup.userCMNDValidator, signup.signup);
-router.post("/signup/check-cmnd", signup.userSignupValidator, signup.checkCMNDOnly);
+router.post("/signup", signup.userSignupValidator, signup.signup);
 router.get("/logout", logout.logout);
 // Route: kiểm tra session hiện tại
 router.get('/check-session', sessionController.checkSession);
 
 // Route cần quyền Chủ khách sạn
-router.get('/owner-only', sessionController.checkHotelOwner, (req, res) => {
+router.get('/admin-only', sessionController.checkHotelOwner, (req, res) => {
   res.status(200).send('✅ Chào mừng Chủ khách sạn!');
 });
 
