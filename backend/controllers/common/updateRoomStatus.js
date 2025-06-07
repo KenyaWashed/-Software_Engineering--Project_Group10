@@ -8,11 +8,11 @@ async function updateAllRoomStatus() {
 
     // Cập nhật trạng thái phòng: nếu đang có khách ở thì 'Đang sử dụng', còn lại không làm gì
     await pool.request().query(`
-      UPDATE Room
-      SET room_status = N'Đang sử dụng'
+      UPDATE Rooms
+      SET room_status = N'Đã đặt'
       WHERE EXISTS (
         SELECT 1 FROM Reservation r
-        WHERE r.room_id = Room.room_id
+        WHERE r.room_id = Rooms.room_id
           AND r.check_in_date < GETDATE()
           AND DATEADD(day, r.total_days, r.check_in_date) > GETDATE()
       )

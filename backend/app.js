@@ -4,7 +4,7 @@ const path = require("path");
 port = 4000;
 
 // Kich hoạt cron job để cập nhật trạng thái phòng tự động
-require('./controllers/roomScheduler'); // Kích hoạt cron job
+//require('./controllers/roomScheduler'); // Kích hoạt cron job
 
 // Đường dẫn đến thư mục ảnh
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -17,8 +17,6 @@ require('./config/db');
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Cho phép Express phục vụ file tĩnh từ thư mục frontend
-app.use(express.static(path.join(__dirname, '../frontend')));
 
 // Routes
 const roomRoutes = require("./routers/room");
@@ -28,9 +26,9 @@ const bookingRoutes = require("./routers/booking");
 app.use("/booking", bookingRoutes);
 
 
-// homepage
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, "..", "frontend", "home.html"));
-});
+// // homepage
+// app.get('/', (req, res) => {
+//     res.sendFile(path.join(__dirname, "..", "frontend", "home.html"));
+// });
 
 app.listen(port, () => console.log("Server running... http://localhost:" + port));

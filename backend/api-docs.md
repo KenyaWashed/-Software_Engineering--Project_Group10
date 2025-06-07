@@ -1,15 +1,14 @@
-### GET /room
-- Mô tả: Xem danh sách tất cả phòng
-- Bộ lọc (bỏ qua để xem tất cả phòng):
-  - status: trạng thái phòng (Trống, Đang sử dụng, Đang dọn)
-  - priceMin: giá thấp nhất
-  - priceMax: giá cao nhất
-- Lưu ý: Các điều kiện lọc không bắt buộc, nhưng nếu dùng thì phải theo đúng thứ tự: status → priceMin → priceMax
-- Trả về: JSON danh sách các phòng
-- Ví dụ:\
-  http://localhost:3000/room\
-  http://localhost:3000/room?status=Trống&priceMin=170000&priceMax=200000
-  
+### POST /room
+fetch('http://localhost:4000/room', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    checkin_date: '2025-06-10',
+    checkout_date: '2025-06-15'
+  })
+});
 
 
 ### POST /booking/create

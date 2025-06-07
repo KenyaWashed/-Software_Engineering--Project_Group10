@@ -4,6 +4,6 @@ const router = express.Router();
 const { getAllRooms } = require("../controllers/room");
 
 // Đường dẫn nên là '/' để khi gọi '/room' sẽ chạy controller này
-router.get('/', getAllRooms);
+router.post('/', getAllRooms);
 
 module.exports = router;

@@ -1,48 +1,102 @@
 const { poolPromise } = require('../config/db');
+const sql = require('mssql');
 
 
-async function getAllRooms(filters = {}) {
+async function getAvailableRooms(checkin_date, checkout_date) {
   try {
     const pool = await poolPromise;
-    let query = "SELECT * FROM Room WHERE 1=1";
     const request = pool.request();
 
-    // Nếu có status thì thêm điều kiện AND
-    if (filters.status) {
-      query += " AND room_status = @status";
-      request.input('status', filters.status);
-    }
+    request.input('check_in_date', sql.DateTime, checkin_date);
+    request.input('check_out_date', sql.DateTime, checkout_date);
+    
+    const result = await request.query(`
+      SELECT r.room_id, r.room_type_id
+      FROM dbo.checkAvailableRoom(@check_in_date, @check_out_date) AS available
+      JOIN Rooms r ON r.room_id = available.room_id
+    `);
 
-    // Nếu có priceMin thì thêm điều kiện
-    if (filters.priceMin) {
-      query += " AND room_price >= @priceMin";
-      request.input('priceMin', filters.priceMin);
-    }
-
-    // Nếu có priceMax thì thêm điều kiện
-    if (filters.priceMax) {
-      query += " AND room_price <= @priceMax";
-      request.input('priceMax', filters.priceMax);
-    }
-
-    const result = await request.query(query);
-    const rooms = result.recordset;
-
-    const baseUrl = 'http://localhost:3000'; 
-    const imageDir = '/uploads/rooms/';
-
-    const updatedRooms = rooms.map(room => {
-      return {
-        ...room,
-        room_photo: `${baseUrl}${imageDir}${room.room_photo}`
-      };
-    });
-
-    return updatedRooms;
-
+    return result.recordset;
   } catch (error) {
+    console.error('DB Error:', error);
     throw error;
   }
 }
 
-module.exports = { getAllRooms };
+async function getAvailableRoomTypes(checkin_date, checkout_date) {
+  try {
+    const availableRooms = await getAvailableRooms(checkin_date, checkout_date);
+
+    if (!availableRooms || availableRooms.length === 0) return [];
+
+    const roomTypeIds = [...new Set(availableRooms.map(room => room.room_type_id))];
+
+    if (roomTypeIds.length === 0) return [];
+
+    const pool = await poolPromise;
+    const request = pool.request();
+
+    // Đưa từng id vào query bằng @param để tránh lỗi SQL injection
+    const conditions = roomTypeIds.map((id, index) => {
+      const paramName = `id${index}`;
+      request.input(paramName, sql.Int, id);
+      return `@${paramName}`;
+    });
+
+    const query = `
+      SELECT * FROM Room_types
+      WHERE room_type_id IN (${conditions.join(',')})
+    `;
+
+    const result = await request.query(query);
+    return result.recordset;
+
+  } catch (error) {
+    console.error('Lỗi lấy danh sách loại phòng:', error);
+    throw error;
+  }
+}
+
+async function getTypeAndPackageAvailable(checkin_date, checkout_date) {
+  try {
+    const pool = await poolPromise;
+    const request = pool.request();
+
+    request.input('check_in_date', sql.DateTime, checkin_date);
+    request.input('check_out_date', sql.DateTime, checkout_date);
+    
+    const result = await request.query(`
+      SELECT DISTINCT r.room_type_id, r.room_package_id
+      FROM dbo.checkAvailableRoom(@check_in_date, @check_out_date) AS available
+      JOIN Rooms r ON r.room_id = available.room_id
+    `);
+
+    return result.recordset;
+  } catch (error) {
+    console.error('DB Error:', error);
+    throw error;
+  }
+}
+
+async function getPackage() {
+  try {
+    const pool = await poolPromise;
+    const request = pool.request();
+
+    
+    const result = await request.query(`SELECT * FROM Room_package_offers;`);
+
+    return result.recordset;
+  } catch (error) {
+    console.error('DB Error:', error);
+    throw error;
+  }
+}
+
+
+module.exports = {
+  getAvailableRooms,
+  getAvailableRoomTypes,
+  getTypeAndPackageAvailable,
+  getPackage
+};
