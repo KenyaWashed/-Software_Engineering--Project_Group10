@@ -220,7 +220,7 @@ export default function BookingWidget({ onBookingChange, initialData }: BookingW
 
           {/* Adults */}
           <div className="space-y-2">
-            <label className="text-sm font-medium block">NGƯỜI LỚN</label>
+            <label className="text-sm font-medium block text-center w-full">NỘI ĐỊA</label>
             <div className="flex items-center justify-between bg-white text-black h-12 px-3 rounded-full">
               <Button
                 variant="ghost"
@@ -245,7 +245,7 @@ export default function BookingWidget({ onBookingChange, initialData }: BookingW
 
           {/* Children */}
           <div className="space-y-2">
-            <label className="text-sm font-medium block">TRẺ EM</label>
+            <label className="text-sm font-medium block text-center w-full">NƯỚC NGOÀI</label>
             <div className="flex items-center justify-between bg-white text-black h-12 px-3 rounded-full">
               <Button
                 variant="ghost"
@@ -298,7 +298,7 @@ export default function BookingWidget({ onBookingChange, initialData }: BookingW
                   {nights} đêm • {adults + children} khách
                 </div>
                 <div className="text-xs opacity-90">
-                  {adults} người lớn{children > 0 && `, ${children} trẻ em`}
+                  {adults} nội địa{children > 0 && `, ${children} nước ngoài`}
                 </div>
                 <div className="text-xs opacity-75">
                   Từ {formatDate(checkInDate)} 12:30 → {formatDate(checkOutDate)} 12:00

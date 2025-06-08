@@ -12,7 +12,6 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Label } from "@/components/ui/label"
 import { Eye, EyeOff, Lock, Mail } from "lucide-react"
 import BackButton from "@/components/back-button"
-import { reusers } from "@/lib/mock-database"
 
 export default function LoginPage() {
   const router = useRouter()
@@ -36,18 +35,23 @@ export default function LoginPage() {
     setIsLoading(true)
 
     try {
-      // Kiểm tra đăng nhập với mock database
-      const user = reusers.find(
-        (u) => u.email.toLowerCase() === email.toLowerCase() && u.password === password
-      )
+      // Gửi thông tin đăng nhập lên API
+      console.log('Đăng nhập với:', { email, password });
+      const res = await fetch('/api/login-user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      })
+      const result = await res.json()
+      console.log('Kết quả trả về:', result)
       await new Promise((resolve) => setTimeout(resolve, 800))
-      if (!user) {
-        setError("Email hoặc mật khẩu không đúng")
+      if (!res.ok) {
+        setError(result.error || "Email hoặc mật khẩu không đúng")
         setIsLoading(false)
         return
       }
       // Đăng nhập thành công
-      localStorage.setItem('user', JSON.stringify(user))
+      localStorage.setItem('user', JSON.stringify(result.user))
       router.push("/")
     } catch (err) {
       setError("Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.")

@@ -9,21 +9,21 @@ import EnhancedBookingSummary from "@/components/enhanced-booking-summary"
 import GuestDetailsForm from "@/components/guest-details-form"
 import ReviewPayment from "@/components/review-payment"
 
-// Sample room data (same as rooms page)
+// Sample room data
 const roomsData = [
   {
     id: 1,
     name: "Deluxe Ocean View",
-    image: "/images/phongloai1/1.jpg",
     images: [
-      "/images/phongloai1/1.jpg",
+      "/khachsan/khonggian1.png",
       "/images/phongloai1/2.jpg",
       "/images/phongloai1/3.jpg",
-      "/images/phongloai1/4.jpg"
+      "/images/phongloai1/4.jpeg",
+      "/images/phongloai1/5.jpeg",
     ],
-    area: "38m²",
-    view: "Hướng vườn",
-    maxGuests: 2,
+    area: "45m²",
+    view: "Hướng biển",
+    maxGuests: 3,
     beds: 1,
     bathrooms: 1,
     description: "Phòng sang trọng với view biển tuyệt đẹp, nội thất cao cấp và đầy đủ tiện nghi hiện đại.",
@@ -33,29 +33,29 @@ const roomsData = [
         id: 1,
         name: "Special Offer - Royal Privilege Package",
         benefits: ["Free cancellation", "Pay today"],
-        originalPrice: 3200000,
-        discountPrice: 2522880,
+        originalPrice: 250000,
+        discountPrice: 150000,
         available: true,
       },
       {
         id: 2,
         name: "Standard Package",
         benefits: ["Free cancellation"],
-        originalPrice: 2800000,
-        discountPrice: 2520000,
-        available: true,
+        originalPrice: 250000,
+        discountPrice: 150000,
+        available: false,
       },
     ],
   },
   {
     id: 2,
     name: "Executive Suite",
-    image: "/images/phongloai1/2.jpg",
     images: [
       "/images/phongloai1/2.jpg",
+      "/images/phongloai1/1.jpg",
       "/images/phongloai1/3.jpg",
       "/images/phongloai1/4.jpeg",
-      "/images/phongloai1/1.jpg"
+      "/images/phongloai1/5.jpeg",
     ],
     area: "65m²",
     view: "Hướng thành phố",
@@ -77,8 +77,8 @@ const roomsData = [
         id: 3,
         name: "Executive Privilege Package",
         benefits: ["Free cancellation", "Pay today", "Complimentary breakfast"],
-        originalPrice: 4500000,
-        discountPrice: 3850000,
+        originalPrice: 250000,
+        discountPrice: 170000,
         available: true,
       },
     ],
@@ -86,13 +86,12 @@ const roomsData = [
   {
     id: 3,
     name: "Presidential Suite",
-    image: "/images/phongloai1/4.jpeg",
-    images: [
+       images: [
+      "/images/phongloai1/3.jpg",
+      "/images/phongloai1/2.jpg",
+      "/images/phongloai1/1.jpg",
       "/images/phongloai1/4.jpeg",
       "/images/phongloai1/5.jpeg",
-      "/images/phongloai1/1.jpg",
-      "/images/phongloai1/3.jpg",
-      "/images/phongloai1/2.jpg"
     ],
     area: "120m²",
     view: "Hướng biển và thành phố",
@@ -115,17 +114,17 @@ const roomsData = [
         id: 4,
         name: "Presidential Experience Package",
         benefits: ["Free cancellation", "Pay today", "Complimentary breakfast", "Airport transfer"],
-        originalPrice: 8000000,
-        discountPrice: 6500000,
+        originalPrice: 300000,
+        discountPrice: 200000,
         available: true,
       },
       {
         id: 5,
         name: "Luxury Package",
         benefits: ["Free cancellation"],
-        originalPrice: 7200000,
-        discountPrice: 6480000,
-        available: false,
+        originalPrice: 300000,
+        discountPrice: 200000,
+        available: true,
       },
     ],
   },
@@ -231,7 +230,7 @@ function BookingPageContent() {
       selectedPackages: getSelectedPackagesArray(),
       guestData,
     })
-    alert("Chuyển đến trang thanh toán...")
+    // alert("Chuyển đến trang thanh toán...")
   }
 
   const selectedPackagesArray = getSelectedPackagesArray()
@@ -278,7 +277,7 @@ function BookingPageContent() {
               >
                 3
               </div>
-              <span className="ml-2 font-medium">x</span>
+               <span className="ml-2 font-medium">Xác nhận Đặt Phòng</span>
             </div>
           </div>
         </div>

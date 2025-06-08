@@ -38,24 +38,24 @@ export default function BookingSummary({ selectedPackages, onRemovePackage }: Bo
     return `${day}/${month}/${year}`
   }
 
-  // Calculate pricing for each package based on saved variables
+  // Calculate pricing for each package based on new hotel policy
   const calculatePackagePrice = (basePrice: number) => {
     const { adults, children, nights } = bookingData
-
-    // Hotel pricing policy
-    const adultTotalPrice = basePrice * adults * nights
-    const childTotalPrice = basePrice * children * 0.5 * nights // 50% for children
-    const packageTotal = adultTotalPrice + childTotalPrice
-
+    const totalGuests = adults + children
+    let price = basePrice * nights // Giá cho 2 khách đầu tiên
+    let extraCharge = 0
+    if (totalGuests > 2) {
+      extraCharge = basePrice * 0.25 * (totalGuests - 2) * nights
+      price += extraCharge
+    }
+    if (children > 0) {
+      price *= 1.5
+    }
     return {
-      adultTotalPrice,
-      childTotalPrice,
-      packageTotal,
-      breakdown: {
-        adultPricePerNight: basePrice * adults,
-        childPricePerNight: basePrice * children * 0.5,
-        totalPricePerNight: basePrice * adults + basePrice * children * 0.5,
-      },
+      baseTotal: basePrice * nights,
+      extraCharge,
+      hasForeign: children > 0,
+      packageTotal: price,
     }
   }
 
@@ -182,8 +182,8 @@ export default function BookingSummary({ selectedPackages, onRemovePackage }: Bo
               <p className="font-semibold text-gray-700">Số khách:</p>
               <p className="text-[#002346]">{bookingData.adults + bookingData.children} người</p>
               <p className="text-xs text-gray-600">
-                {bookingData.adults} người lớn
-                {bookingData.children > 0 && `, ${bookingData.children} trẻ em`}
+                {bookingData.adults} nội địa
+                {bookingData.children > 0 && `, ${bookingData.children} nước`}
               </p>
             </div>
           </div>
@@ -194,12 +194,14 @@ export default function BookingSummary({ selectedPackages, onRemovePackage }: Bo
           <h4 className="font-semibold text-sm text-blue-800 mb-2">Chính sách tính giá:</h4>
           <ul className="text-xs text-blue-700 space-y-1">
             <li>
-              • Người lớn: Giá đầy đủ × {bookingData.adults} người × {bookingData.nights} đêm
+              • Đơn giá phòng cho 2 khách: Giá phòng × {bookingData.nights} đêm
             </li>
             <li>
-              • Trẻ em (6-12 tuổi): 50% giá người lớn × {bookingData.children} trẻ × {bookingData.nights} đêm
+              • Khách thứ 3 phụ thu thêm 25%: Giá phòng × 25% × {bookingData.nights} đêm
             </li>
-            <li>• Trẻ em dưới 6 tuổi: Miễn phí</li>
+            <li>
+              • Khách Nước ngoài ( chỉ cần có 1 trong phòng ): Tổng giá × 1.5
+            </li>
           </ul>
         </div>
 
@@ -219,18 +221,19 @@ export default function BookingSummary({ selectedPackages, onRemovePackage }: Bo
                     {/* Detailed Price Breakdown for each room */}
                     <div className="bg-gray-50 p-2 rounded text-xs space-y-1">
                       <div className="flex justify-between">
-                        <span>
-                          Người lớn ({bookingData.adults} × {formatPrice(pkg.basePrice)} × {bookingData.nights} đêm):
-                        </span>
-                        <span className="font-medium">{formatPrice(pkg.pricing.adultTotalPrice)}</span>
+                        <span>Giá cơ bản cho 2 khách:</span>
+                        <span className="font-medium">{formatPrice(pkg.pricing.baseTotal)}</span>
                       </div>
-                      {bookingData.children > 0 && (
+                      {(bookingData.adults + bookingData.children) > 2 && (
                         <div className="flex justify-between">
-                          <span>
-                            Trẻ em ({bookingData.children} × {formatPrice(pkg.basePrice * 0.5)} × {bookingData.nights}{" "}
-                            đêm):
-                          </span>
-                          <span className="font-medium">{formatPrice(pkg.pricing.childTotalPrice)}</span>
+                          <span>Phụ thu khách thứ 3 trở đi (25%/khách):</span>
+                          <span className="font-medium">{formatPrice(pkg.pricing.extraCharge)}</span>
+                        </div>
+                      )}
+                      {pkg.pricing.hasForeign && (
+                        <div className="flex justify-between">
+                          <span>Hệ số nước ngoài (1.5x):</span>
+                          <span className="font-medium">x 1.5</span>
                         </div>
                       )}
                       <div className="border-t pt-1 flex justify-between font-semibold">

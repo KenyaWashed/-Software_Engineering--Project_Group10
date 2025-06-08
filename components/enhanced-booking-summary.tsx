@@ -43,12 +43,20 @@ export default function EnhancedBookingSummary({
     return `${day}/${month}/${year}`
   }
 
-  // Calculate pricing
+  // Calculate pricing theo chính sách mới
   const calculatePackagePrice = (basePrice: number, quantity: number) => {
     const { adults, children, nights } = bookingData
-    const adultPrice = basePrice * adults * nights
-    const childPrice = basePrice * children * 0.5 * nights
-    return (adultPrice + childPrice) * quantity
+    const totalGuests = adults + children
+    let price = basePrice * nights // Giá cho 2 khách đầu tiên
+    let extraCharge = 0
+    if (totalGuests > 2) {
+      extraCharge = basePrice * 0.25 * (totalGuests - 2) * nights
+      price += extraCharge
+    }
+    if (children > 0) {
+      price *= 1.5
+    }
+    return price * quantity
   }
 
   const packagePrices = selectedPackages.map((pkg) => ({
@@ -57,7 +65,7 @@ export default function EnhancedBookingSummary({
   }))
 
   const subtotal = packagePrices.reduce((sum, pkg) => sum + pkg.totalPrice, 0)
-  const serviceCharge = subtotal * 0.05 // 5% service charge
+  const serviceCharge = subtotal * 0.02 // 5% service charge
   const vat = subtotal * 0.08 // 8% VAT
   const total = subtotal + serviceCharge + vat
   const deposit = total * 0.5 // 50% deposit
@@ -149,16 +157,12 @@ export default function EnhancedBookingSummary({
         <div className="border-t pt-4">
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
-              <span>Tổng phụ:</span>
+              <span>Tổng tiền phòng:</span>
               <span className="font-medium">{formatPrice(subtotal)}</span>
             </div>
             <div className="flex justify-between">
-              <span>Phí dịch vụ (5%):</span>
-              <span className="font-medium">{formatPrice(serviceCharge)}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>VAT (8%):</span>
-              <span className="font-medium">{formatPrice(vat)}</span>
+              <span>Thuế và phí dịch vụ (10%):</span>
+              <span className="font-medium">{formatPrice(vat + serviceCharge)}</span>
             </div>
             <div className="flex justify-between font-bold text-lg border-t pt-2 text-[#002346]">
               <span>Tổng cộng:</span>
@@ -179,7 +183,7 @@ export default function EnhancedBookingSummary({
           </div>
         </div>
 
-        {/* Deposit Info */}
+        {/* Deposit Info
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
           <div className="flex items-center mb-2">
             <CreditCard className="w-4 h-4 mr-2 text-yellow-600" />
@@ -187,7 +191,7 @@ export default function EnhancedBookingSummary({
           </div>
           <p className="text-lg font-bold text-[#002346]">{formatPrice(deposit)}</p>
           <p className="text-xs text-gray-600 mt-1">(50% tổng giá trị đơn hàng)</p>
-        </div>
+        </div> */}
 
         {/* Continue Button */}
         <Button

@@ -1,0 +1,56 @@
+[
+  {
+    "id": 1,
+    "username": "admin",
+    "password": "admin123",
+    "fullName": "Quản trị viên",
+    "email": "admin@royalhotel.com",
+    "phone": "0900000001",
+    "role": "admin"
+  },
+  {
+    "id": 2,
+    "username": "user1",
+    "password": "user123",
+    "fullName": "Nguyễn Văn A",
+    "email": "user1@gmail.com",
+    "phone": "0900000002",
+    "role": "user"
+  },
+  {
+    "username": "test1",
+    "password": "123",
+    "fullName": "test1",
+    "email": "test1@gmail.com",
+    "phone": "12",
+    "role": "user",
+    "id": 3
+  },
+  {
+    "username": "test2",
+    "password": "123",
+    "fullName": "test2",
+    "email": "test2@gmail.com",
+    "phone": "123",
+    "role": "user",
+    "id": 4
+  },
+  {
+    "username": "test3",
+    "password": "123",
+    "fullName": "test3",
+    "email": "test3@gmail.com",
+    "phone": "1232",
+    "role": "user",
+    "id": 5
+  },
+  {
+    "username": "duongduchuy",
+    "password": "123123",
+    "fullName": "Dương Đức Huy",
+    "email": "duongduchuy@gmail.com",
+    "phone": "0967722306",
+    "role": "user",
+    "id": 6
+  }
+]

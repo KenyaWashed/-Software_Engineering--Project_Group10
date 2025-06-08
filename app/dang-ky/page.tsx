@@ -13,7 +13,6 @@ import { Label } from "@/components/ui/label"
 import { Eye, EyeOff, Lock, Mail, User, Phone } from "lucide-react"
 import Link from "next/link"
 import BackButton from "@/components/back-button"
-import { users } from "@/lib/mock-database"
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -59,31 +58,26 @@ export default function RegisterPage() {
     setIsLoading(true)
 
     try {
-      // Kiểm tra trùng email hoặc phone trong mock database
-      const emailExists = users.some(u => u.email.toLowerCase() === formData.email.toLowerCase())
-      const phoneExists = users.some(u => u.phone === formData.phone)
-      await new Promise((resolve) => setTimeout(resolve, 800))
-      if (emailExists) {
-        setError("Email đã được sử dụng")
-        setIsLoading(false)
-        return
-      }
-      if (phoneExists) {
-        setError("Số điện thoại đã được sử dụng")
-        setIsLoading(false)
-        return
-      }
-      // Thêm user mới vào mock database (chỉ trên RAM, reload sẽ mất)
-      users.push({
-        id: users.length + 1,
-        username: formData.email.split("@")[0],
-        password: formData.password,
-        fullName: formData.fullName,
-        email: formData.email,
-        phone: formData.phone,
-        role: "user"
+      // Gửi dữ liệu đăng ký lên API server để lưu vào users.json
+      const res = await fetch('/api/register-user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: formData.email.split("@")[0],
+          password: formData.password,
+          fullName: formData.fullName,
+          email: formData.email,
+          phone: formData.phone,
+          role: "user"
+        })
       })
-      console.log("User list after register:", users)
+      const result = await res.json()
+      await new Promise((resolve) => setTimeout(resolve, 800))
+      if (!res.ok) {
+        setError(result.error || "Đăng ký thất bại. Vui lòng thử lại sau.")
+        setIsLoading(false)
+        return
+      }
       setSuccess("Đăng ký thành công! Đang chuyển sang trang đăng nhập...")
       setTimeout(() => {
         router.push("/dang-nhap")

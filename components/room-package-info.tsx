@@ -56,10 +56,22 @@ export default function RoomPackageInfo({
   }
 
   const calculatePackagePrice = (basePrice: number) => {
-    const { adults, children, nights } = bookingData
-    const adultPrice = basePrice * adults * nights
-    const childPrice = basePrice * children * 0.5 * nights
-    return adultPrice + childPrice
+    const { adults, children, nights } = bookingData;
+    let totalGuests = adults + children;
+    let price = basePrice * nights; // Giá cho 2 khách đầu tiên
+
+    // Phụ thu khách thứ 3 trở đi (tính trên tổng số khách)
+    if (totalGuests > 2) {
+      const extraGuests = totalGuests - 2;
+      price += basePrice * 0.25 * extraGuests * nights;
+    }
+
+    // Nếu có ít nhất 1 khách nước ngoài (children > 0), nhân hệ số 1.5
+    if (children > 0) {
+      price *= 1.5;
+    }
+    // print price
+    return price;
   }
 
   // Gallery state
@@ -187,8 +199,8 @@ export default function RoomPackageInfo({
                       <span className="text-xl font-bold text-[#002346]">{formatPrice(totalPrice)}</span>
                     </div>
                     <p className="text-xs text-gray-500">
-                      Cho {bookingData.nights} đêm, {bookingData.adults} người lớn
-                      {bookingData.children > 0 && `, ${bookingData.children} trẻ em`}
+                      Cho {bookingData.nights} đêm, {bookingData.adults} nội địa
+                      {bookingData.children > 0 && `, ${bookingData.children} nước ngoài`}
                     </p>
                   </div>
                 </div>
