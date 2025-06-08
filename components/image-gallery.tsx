@@ -8,19 +8,19 @@ export default function ImageGallery() {
   const galleryImages = [
     {
       id: 1,
-      src: "/placeholder.svg?height=300&width=400",
+      src: "hinhanh/sanhcho.png?height=300&width=400",
       alt: "Royal Hotel Lobby",
       title: "Sảnh khách sạn sang trọng",
     },
     {
       id: 2,
-      src: "/placeholder.svg?height=300&width=400",
+      src: "hinhanh/phongviewbien.png?height=300&width=400",
       alt: "Deluxe Room",
       title: "Phòng Deluxe",
     },
     {
       id: 3,
-      src: "/placeholder.svg?height=300&width=400",
+      src: "khachsan/hoboi.jpg?height=300&width=400",
       alt: "Swimming Pool",
       title: "Hồ bơi ngoài trời",
     },

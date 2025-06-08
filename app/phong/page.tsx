@@ -37,7 +37,7 @@ const roomsData = [
     id: 1,
     name: "Deluxe Ocean View",
     images: [
-      "/images/phongloai1/1.jpg",
+      "/khachsan/khonggian1.png",
       "/images/phongloai1/2.jpg",
       "/images/phongloai1/3.jpg",
       "/images/phongloai1/4.jpeg",
@@ -73,8 +73,8 @@ const roomsData = [
     id: 2,
     name: "Executive Suite",
     images: [
-      "/images/phongloai1/1.jpg",
       "/images/phongloai1/2.jpg",
+      "/images/phongloai1/1.jpg",
       "/images/phongloai1/3.jpg",
       "/images/phongloai1/4.jpeg",
       "/images/phongloai1/5.jpeg",
@@ -108,11 +108,12 @@ const roomsData = [
   {
     id: 3,
     name: "Presidential Suite",
-    images: [
-      "/images/room3-1.jpg",
-      "/images/room3-2.jpg",
-      "/images/room3-3.jpg",
-      "/placeholder.svg?height=300&width=400",
+       images: [
+      "/images/phongloai1/3.jpg",
+      "/images/phongloai1/2.jpg",
+      "/images/phongloai1/1.jpg",
+      "/images/phongloai1/4.jpeg",
+      "/images/phongloai1/5.jpeg",
     ],
     area: "120m²",
     view: "Hướng biển và thành phố",
