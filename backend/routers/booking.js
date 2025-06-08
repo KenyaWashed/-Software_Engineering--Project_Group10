@@ -9,6 +9,6 @@ const FakeAuth = (req, res, next) => {
   next();
 };
 
-router.post('/create', FakeAuth, createBooking);
+router.post('/', createBooking);
 
 module.exports = router;

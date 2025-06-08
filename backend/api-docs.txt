@@ -1,0 +1,51 @@
+### POST /room
+fetch('http://localhost:4000/room', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    checkin_date: '2025-06-10',
+    checkout_date: '2025-06-15'
+  })
+});
+
+### POST/calculation
+fetch('http://localhost:4000/calculation', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+  "room_type_id": 1,
+  "room_package_id": 2,
+  "n_domestic_guests": 2,
+  "n_foreign_guests": 1,
+  "total_days": 3
+})
+});
+
+### POST /booking/create (chưa xong)
+fetch("http://localhost:4000/booking", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    full_name: "Nguyen a",
+    email: "a@gmail.com",
+    phone: "0912345678",
+    arrival_time: "14:00",
+    special_requests: "Không hút thuốc",
+    room_id: 1,
+    room_package_id: 2,
+    n_domestic_guests: 2,
+    n_foreign_guests: 1,
+    check_in_date: "2025-06-10T12:00:00Z",
+    check_out_date: "2025-06-12T12:00:00Z"
+  })
+})
+  .then(response => response.json())
+  .then(data => console.log("Kết quả:", data))
+  .catch(error => console.error("Lỗi:", error));
+
