@@ -389,7 +389,11 @@ export default function RoomCard({ room, onSelectPackage, selectedPackage, booki
                         ) : (
                           <div className="text-center">
                             <p className="text-sm text-red-600 font-semibold mb-2">Sold out</p>
-                            <Button variant="outline" size="sm" className="text-xs">
+                            <Button variant="outline" size="sm" className="text-xs" onClick={() => {
+                              if (typeof window !== 'undefined') {
+                                window.scrollTo({ top: 0, behavior: 'smooth' });
+                              }
+                            }}>
                               Find Available Day
                             </Button>
                           </div>

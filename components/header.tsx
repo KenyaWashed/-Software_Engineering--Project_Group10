@@ -27,7 +27,7 @@ export default function Header() {
         <nav className="hidden md:flex items-center space-x-8 text-sm font-medium text-[#002346]">
           {user ? (
             <>
-              
+
               <button
                 onClick={handleLogout}
                 className="ml-4 flex items-center space-x-1 text-xs text-[#002346] hover:underline focus:outline-none bg-transparent border-0 shadow-none"
@@ -71,6 +71,13 @@ export default function Header() {
           <Link href="#" className="hover:text-[#002346]/80">
             ƯU ĐÃI
           </Link>
+          {user && (
+            <Link href="/historyBooking">
+              <Button variant="outline" className="border-[#002346] text-[#002346] mr-2 hover:bg-[#eac271]/60">
+                Lịch sử đặt phòng
+              </Button>
+            </Link>
+          )}
           <Link href="/phong">
             <Button className="bg-[#002346] text-white hover:bg-[#002346]/90 px-6">ĐẶT NGAY</Button>
           </Link>

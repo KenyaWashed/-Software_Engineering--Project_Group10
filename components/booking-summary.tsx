@@ -183,7 +183,7 @@ export default function BookingSummary({ selectedPackages, onRemovePackage }: Bo
               <p className="text-[#002346]">{bookingData.adults + bookingData.children} người</p>
               <p className="text-xs text-gray-600">
                 {bookingData.adults} nội địa
-                {bookingData.children > 0 && `, ${bookingData.children} nước`}
+                {bookingData.children > 0 && `, ${bookingData.children} nước ngoài`}
               </p>
             </div>
           </div>

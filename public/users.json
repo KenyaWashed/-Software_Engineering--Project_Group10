@@ -52,5 +52,14 @@
     "phone": "0967722306",
     "role": "user",
     "id": 6
+  },
+  {
+    "username": "test",
+    "password": "123123",
+    "fullName": "Dương Đức Huy",
+    "email": "test@gmail.com",
+    "phone": "0967722368",
+    "role": "user",
+    "id": 7
   }
 ]
