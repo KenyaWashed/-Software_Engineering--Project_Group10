@@ -14,7 +14,7 @@ const getAllRooms = async (req, res) => {
     const package = await RoomModel.getPackage();
     const packageOffers = await RoomModel.getPackageOffers();
     res.json({
-      rooms,
+      availableRooms,
       availableRoomTypes,
       package,
       packageOffers
