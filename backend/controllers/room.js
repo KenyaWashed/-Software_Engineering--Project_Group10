@@ -10,7 +10,7 @@ const getAllRooms = async (req, res) => {
   
   try {
     const availableRoomTypes = await RoomModel.getAvailableRoomTypes(checkin_date, checkout_date);
-    const rooms = await RoomModel.getTypeAndPackageAvailable(checkin_date, checkout_date);
+    const availableRooms = await RoomModel.getTypeAndPackageAvailable(checkin_date, checkout_date);
     const package = await RoomModel.getPackage();
     const packageOffers = await RoomModel.getPackageOffers();
     res.json({
