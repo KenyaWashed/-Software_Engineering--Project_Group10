@@ -98,8 +98,7 @@ async function getPackageOffers() {
     const pool = await poolPromise;
     const request = pool.request();
 
-    
-    const result = await request.query(`SELECT * FROM Room_packages;`);
+    const result = await request.query(`SELECT * FROM room_package_offers;`);
 
     return result.recordset;
   } catch (error) {
