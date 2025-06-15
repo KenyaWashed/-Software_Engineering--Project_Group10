@@ -230,7 +230,7 @@ function BookingPageContent() {
       selectedPackages: getSelectedPackagesArray(),
       guestData,
     })
-    // alert("Chuyển đến trang thanh toán...")
+     alert("Chuyển đến trang thanh toán...")
   }
 
   const selectedPackagesArray = getSelectedPackagesArray()
@@ -290,8 +290,6 @@ function BookingPageContent() {
               {selectedPackagesArray[0] ? (
                 <RoomPackageInfo
                   room={roomsData.find(room => room.packages.some(pkg => pkg.id === selectedPackagesArray[0].packageId)) as any}
-                  selectedPackages={selectedPackages}
-                  onPackageSelect={handlePackageSelect}
                   bookingData={bookingData}
                   selectedPackageId={selectedPackagesArray[0].packageId}
                 />
@@ -332,7 +330,31 @@ function BookingPageContent() {
         {currentStep === "review" && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2">
-              <ReviewPayment onProceedPayment={handleProceedPayment} />
+              <ReviewPayment 
+                onProceedPayment={handleProceedPayment}
+                depositAmount={(() => {
+                  // Tính lại đúng số tiền cọc như EnhancedBookingSummary
+                  const packagePrices = selectedPackagesArray.map(pkg => {
+                    const { adults, children, nights } = bookingData;
+                    const totalGuests = adults + children;
+                    let price = pkg.basePrice * nights;
+                    let extraCharge = 0;
+                    if (totalGuests > 2) {
+                      extraCharge = pkg.basePrice * 0.25 * (totalGuests - 2) * nights;
+                      price += extraCharge;
+                    }
+                    if (children > 0) {
+                      price *= 1.5;
+                    }
+                    return price * pkg.quantity;
+                  });
+                  const subtotal = packagePrices.reduce((sum, p) => sum + p, 0);
+                  const serviceCharge = subtotal * 0.02;
+                  const vat = subtotal * 0.08;
+                  const total = subtotal + serviceCharge + vat;
+                  return Math.round(total * 0.5);
+                })()}
+              />
             </div>
             <div className="lg:col-span-1">
               <EnhancedBookingSummary

@@ -2,6 +2,7 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Calendar, Users, Moon, Receipt, CreditCard } from "lucide-react"
+import { calculateBookingTotals } from "@/components/utils/pricing"
 
 interface SelectedPackage {
   packageId: number
@@ -43,32 +44,23 @@ export default function EnhancedBookingSummary({
     return `${day}/${month}/${year}`
   }
 
-  // Calculate pricing theo chính sách mới
-  const calculatePackagePrice = (basePrice: number, quantity: number) => {
-    const { adults, children, nights } = bookingData
-    const totalGuests = adults + children
-    let price = basePrice * nights // Giá cho 2 khách đầu tiên
-    let extraCharge = 0
-    if (totalGuests > 2) {
-      extraCharge = basePrice * 0.25 * (totalGuests - 2) * nights
-      price += extraCharge
-    }
-    if (children > 0) {
-      price *= 1.5
-    }
-    return price * quantity
-  }
+  // Sử dụng utils để tính toán tổng tiền, thuế/phí, deposit
+  const totals = calculateBookingTotals({
+    selectedPackages: selectedPackages.map((pkg) => ({ basePrice: pkg.basePrice, quantity: pkg.quantity })),
+    bookingData: {
+      nights: bookingData.nights,
+      adults: bookingData.adults,
+      children: bookingData.children,
+    },
+    taxRate: 0.1, // 10% thuế/phí dịch vụ
+    depositRate: 0.5, // 50% tiền cọc
+  })
 
-  const packagePrices = selectedPackages.map((pkg) => ({
+  // Lấy lại packagePrices đã tính chi tiết từ utils
+  const packagePrices = selectedPackages.map((pkg, idx) => ({
     ...pkg,
-    totalPrice: calculatePackagePrice(pkg.basePrice, pkg.quantity),
+    pricing: totals.packagePrices[idx],
   }))
-
-  const subtotal = packagePrices.reduce((sum, pkg) => sum + pkg.totalPrice, 0)
-  const serviceCharge = subtotal * 0.02 // 5% service charge
-  const vat = subtotal * 0.08 // 8% VAT
-  const total = subtotal + serviceCharge + vat
-  const deposit = total * 0.5 // 50% deposit
 
   const totalRooms = selectedPackages.reduce((sum, pkg) => sum + pkg.quantity, 0)
   const totalGuests = bookingData.adults + bookingData.children
@@ -145,7 +137,7 @@ export default function EnhancedBookingSummary({
                     <h5 className="font-semibold text-sm text-[#002346]">{pkg.roomName}</h5>
                     <p className="text-xs text-gray-600 mb-1">{pkg.packageName}</p>
                     <p className="text-xs text-gray-500">Số lượng: {pkg.quantity} phòng</p>
-                    <p className="font-semibold text-[#002346] mt-1">{formatPrice(pkg.totalPrice)}</p>
+                    <p className="font-semibold text-[#002346] mt-1">{formatPrice(pkg.pricing.packageTotal)}</p>
                   </div>
                 </div>
               </div>
@@ -158,22 +150,22 @@ export default function EnhancedBookingSummary({
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
               <span>Tổng tiền phòng:</span>
-              <span className="font-medium">{formatPrice(subtotal)}</span>
+              <span className="font-medium">{formatPrice(totals.subtotal)}</span>
             </div>
             <div className="flex justify-between">
               <span>Thuế và phí dịch vụ (10%):</span>
-              <span className="font-medium">{formatPrice(vat + serviceCharge)}</span>
+              <span className="font-medium">{formatPrice(totals.taxAndFees)}</span>
             </div>
             <div className="flex justify-between font-bold text-lg border-t pt-2 text-[#002346]">
               <span>Tổng cộng:</span>
-              <span>{formatPrice(total)}</span>
+              <span>{formatPrice(totals.total)}</span>
             </div>
           </div>
         </div>
 
         {/* Summary Info */}
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-          <p className="text-sm font-semibold text-blue-800">📋 Tổng tiền: {formatPrice(total)}</p>
+          <p className="text-sm font-semibold text-blue-800">📋 Tổng tiền: {formatPrice(totals.total)}</p>
           <p className="text-xs text-blue-700 mt-1">
             ({totalRooms} phòng, {totalGuests} khách, {bookingData.nights} đêm)
           </p>
@@ -183,15 +175,15 @@ export default function EnhancedBookingSummary({
           </div>
         </div>
 
-        {/* Deposit Info
+        {/* Deposit Info */}
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
           <div className="flex items-center mb-2">
             <CreditCard className="w-4 h-4 mr-2 text-yellow-600" />
             <p className="text-sm font-semibold text-yellow-800">Số tiền đặt cọc:</p>
           </div>
-          <p className="text-lg font-bold text-[#002346]">{formatPrice(deposit)}</p>
+          <p className="text-lg font-bold text-[#002346]">{formatPrice(totals.deposit)}</p>
           <p className="text-xs text-gray-600 mt-1">(50% tổng giá trị đơn hàng)</p>
-        </div> */}
+        </div>
 
         {/* Continue Button */}
         <Button

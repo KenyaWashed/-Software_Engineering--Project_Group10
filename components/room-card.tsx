@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Users, Bed, Bath, Wifi, Tv, Coffee, Car, Calculator, Minus, Plus } from "lucide-react"
+import { calculatePackagePrice } from "@/components/utils/pricing"
 
 interface Package {
   id: number
@@ -91,35 +92,19 @@ export default function RoomCard({ room, onSelectPackage, selectedPackage, booki
     return totalAdults === bookingData.adults && totalChildren === bookingData.children
   }, [guestDistribution, bookingData.adults, bookingData.children])
 
-  // Hotel pricing calculation using new logic
-  const calculateTotalPrice = useMemo(() => {
-    return (basePrice: number) => {
-      const { nights } = bookingData;
-      // Tổng số khách
-      const totalGuests = guestDistribution.reduce((sum, room) => sum + room.adults + room.children, 0);
-      // Giá cơ bản cho 2 khách đầu tiên
-      let baseTotal = basePrice * nights;
-      // Phụ thu khách thứ 3 trở đi (nếu có)
-      let extraCharge = 0;
-      if (totalGuests > 2) {
-        extraCharge = basePrice * 0.25 * (totalGuests - 2) * nights;
-      }
-      // Tổng giá trước khi nhân hệ số nước ngoài
-      let total = baseTotal + extraCharge;
-      // Nếu có ít nhất 1 khách nước ngoài (children > 0), nhân hệ số 1.5
-      const hasForeign = guestDistribution.some(room => room.children > 0);
-      if (hasForeign) {
-        total *= 1.5;
-      }
-      return {
-        baseTotal,
-        extraCharge,
-        hasForeign,
-        totalPrice: total,
-        totalPricePerNight: total / nights,
-      };
-    };
-  }, [bookingData, guestDistribution])
+  // Hotel pricing calculation using shared utils
+  const getPricing = (basePrice: number) => {
+    // Tổng số khách
+    const totalGuests = guestDistribution.reduce((sum, room) => sum + room.adults + room.children, 0);
+    // Sử dụng utils cho logic chuẩn
+    return calculatePackagePrice({
+      basePrice,
+      nights: bookingData.nights,
+      adults: totalGuests - guestDistribution.reduce((sum, room) => sum + room.children, 0),
+      children: guestDistribution.reduce((sum, room) => sum + room.children, 0),
+      quantity: 1,
+    });
+  };
 
   const getAmenityIcon = (amenity: string) => {
     if (amenity.includes("Wi-Fi")) return <Wifi className="w-4 h-4" />
@@ -297,8 +282,8 @@ export default function RoomCard({ room, onSelectPackage, selectedPackage, booki
             <h4 className="font-semibold text-[#002346] mb-4">Gói dịch vụ:</h4>
             <div className="space-y-4">
               {room.packages.map((pkg) => {
-                const pricing = calculateTotalPrice(pkg.discountPrice)
-                const originalPricing = calculateTotalPrice(pkg.originalPrice)
+                const pricing = getPricing(pkg.discountPrice)
+                const originalPricing = getPricing(pkg.originalPrice)
 
                 return (
                   <div
@@ -320,7 +305,7 @@ export default function RoomCard({ room, onSelectPackage, selectedPackage, booki
                       </div>
                     </div>
 
-                    {/* Detailed Pricing Breakdown using saved variables */}
+                    {/* Detailed Pricing Breakdown using shared utils */}
                     <div className="bg-gray-50 p-3 rounded-lg mb-3 text-sm">
                       <div className="flex items-center mb-2">
                         <Calculator className="w-4 h-4 mr-2 text-[#002346]" />
@@ -329,15 +314,15 @@ export default function RoomCard({ room, onSelectPackage, selectedPackage, booki
                       <div className="space-y-1">
                         <div className="flex justify-between">
                           <span>Giá cơ bản cho 2 khách:</span>
-                          <span className="font-medium">{formatPrice(pkg.discountPrice * bookingData.nights)}</span>
+                          <span className="font-medium">{formatPrice(pricing.baseTotal)}</span>
                         </div>
-                        {(bookingData.adults + bookingData.children) > 2 && (
+                        {pricing.extraCharge > 0 && (
                           <div className="flex justify-between">
                             <span>Phụ thu khách thứ 3 trở đi (25%/khách):</span>
-                            <span className="font-medium">{formatPrice(pkg.discountPrice * 0.25 * (bookingData.adults + bookingData.children - 2) * bookingData.nights)}</span>
+                            <span className="font-medium">{formatPrice(pricing.extraCharge)}</span>
                           </div>
                         )}
-                        {bookingData.children > 0 && (
+                        {pricing.hasForeign && (
                           <div className="flex justify-between">
                             <span>Hệ số nước ngoài (1.5x):</span>
                             <span className="font-medium">x 1.5</span>
@@ -346,7 +331,7 @@ export default function RoomCard({ room, onSelectPackage, selectedPackage, booki
                         <div className="border-t pt-1 font-semibold">
                           <div className="flex justify-between">
                             <span>Tổng cộng:</span>
-                            <span className="text-[#002346]">{formatPrice(pricing.totalPrice)}</span>
+                            <span className="text-[#002346]">{formatPrice(pricing.packageTotal)}</span>
                           </div>
                         </div>
                       </div>
@@ -356,9 +341,9 @@ export default function RoomCard({ room, onSelectPackage, selectedPackage, booki
                       <div>
                         <div className="flex items-center space-x-2 mb-1">
                           <span className="text-sm text-gray-500 line-through">
-                            {formatPrice(originalPricing.totalPrice)}
+                            {formatPrice(originalPricing.packageTotal)}
                           </span>
-                          <span className="text-lg font-bold text-[#002346]">{formatPrice(pricing.totalPrice)}</span>
+                          <span className="text-lg font-bold text-[#002346]">{formatPrice(pricing.packageTotal)}</span>
                         </div>
                         <p className="text-xs text-gray-500">
                           Cho {bookingData.nights} đêm, {bookingData.adults} nội địa

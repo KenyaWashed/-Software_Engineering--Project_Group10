@@ -169,8 +169,6 @@ export default function BookingHistoryPage() {
                 </div>
                 <RoomPackageInfo
                   room={booking.room}
-                  selectedPackages={{ [booking.packageId]: 1 }}
-                  onPackageSelect={() => {}}
                   bookingData={{
                     adults: booking.adults,
                     children: booking.children,

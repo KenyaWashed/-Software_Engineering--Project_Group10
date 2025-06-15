@@ -1,9 +1,9 @@
 "use client"
-import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Users, Bed, Bath, Maximize, Eye, Minus, Plus } from "lucide-react"
 import { useState } from "react"
+import { calculatePackagePrice } from "@/components/utils/pricing"
 
 interface Package {
   id: number
@@ -31,8 +31,6 @@ interface Room {
 
 interface RoomPackageInfoProps {
   room: Room
-  selectedPackages: { [packageId: number]: number } // packageId -> quantity
-  onPackageSelect: (packageId: number, quantity: number) => void
   bookingData: {
     adults: number
     children: number
@@ -43,8 +41,6 @@ interface RoomPackageInfoProps {
 
 export default function RoomPackageInfo({
   room,
-  selectedPackages,
-  onPackageSelect,
   bookingData,
   selectedPackageId,
 }: RoomPackageInfoProps) {
@@ -53,25 +49,6 @@ export default function RoomPackageInfo({
       style: "currency",
       currency: "VND",
     }).format(price)
-  }
-
-  const calculatePackagePrice = (basePrice: number) => {
-    const { adults, children, nights } = bookingData;
-    let totalGuests = adults + children;
-    let price = basePrice * nights; // Giá cho 2 khách đầu tiên
-
-    // Phụ thu khách thứ 3 trở đi (tính trên tổng số khách)
-    if (totalGuests > 2) {
-      const extraGuests = totalGuests - 2;
-      price += basePrice * 0.25 * extraGuests * nights;
-    }
-
-    // Nếu có ít nhất 1 khách nước ngoài (children > 0), nhân hệ số 1.5
-    if (children > 0) {
-      price *= 1.5;
-    }
-    // print price
-    return price;
   }
 
   // Gallery state
@@ -173,9 +150,20 @@ export default function RoomPackageInfo({
           {room.packages
             .filter(pkg => !selectedPackageId || pkg.id === selectedPackageId)
             .map((pkg) => {
-              const totalPrice = calculatePackagePrice(pkg.discountPrice)
-              const originalTotalPrice = calculatePackagePrice(pkg.originalPrice)
-              const currentQuantity = selectedPackages[pkg.id] || 0
+              const pricing = calculatePackagePrice({
+                basePrice: pkg.discountPrice,
+                nights: bookingData.nights,
+                adults: bookingData.adults,
+                children: bookingData.children,
+                quantity: 1,
+              })
+              const originalPricing = calculatePackagePrice({
+                basePrice: pkg.originalPrice,
+                nights: bookingData.nights,
+                adults: bookingData.adults,
+                children: bookingData.children,
+                quantity: 1,
+              })
 
               return (
                 <div key={pkg.id} className="bg-white rounded-lg p-4 border border-gray-200">
@@ -195,8 +183,8 @@ export default function RoomPackageInfo({
                   {/* Pricing */}
                   <div className="mb-4">
                     <div className="flex items-center space-x-2 mb-1">
-                      <span className="text-sm text-gray-500 line-through">{formatPrice(originalTotalPrice)}</span>
-                      <span className="text-xl font-bold text-[#002346]">{formatPrice(totalPrice)}</span>
+                      <span className="text-sm text-gray-500 line-through">{formatPrice(originalPricing.packageTotal)}</span>
+                      <span className="text-xl font-bold text-[#002346]">{formatPrice(pricing.packageTotal)}</span>
                     </div>
                     <p className="text-xs text-gray-500">
                       Cho {bookingData.nights} đêm, {bookingData.adults} nội địa

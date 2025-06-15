@@ -3,25 +3,40 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
-import { AlertCircle, Shield, Clock } from "lucide-react"
+import { AlertCircle, Shield } from "lucide-react"
 
 interface ReviewPaymentProps {
   onProceedPayment: () => void
+  depositAmount: number // thêm prop số tiền cọc
 }
 
-export default function ReviewPayment({ onProceedPayment }: ReviewPaymentProps) {
+export default function ReviewPayment({depositAmount }: ReviewPaymentProps) {
   const [agreedToTerms, setAgreedToTerms] = useState(false)
   const [showTermsError, setShowTermsError] = useState(false)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
+  const [showQR, setShowQR] = useState(false);
+  const [qrUrl, setQRUrl] = useState("");
 
   const handleProceedPayment = () => {
     if (!agreedToTerms) {
       setShowTermsError(true)
       return
     }
-
     setShowTermsError(false)
-    onProceedPayment()
+    let email = '';
+    if (typeof window !== 'undefined') {
+      const userStr = localStorage.getItem('user');
+      if (userStr) {
+        try {
+          const user = JSON.parse(userStr);
+          email = user.email || '';
+        } catch {}
+      }
+    }
+    // Sử dụng prop depositAmount
+    const qrUrl = `https://apiqr.web2m.com/api/generate/ACB/41298627/DUONG%20DUC%20HUY?amount=${depositAmount}&memo=hotel%20${encodeURIComponent(email)}&is_mask=0&bg=3`;
+    setShowQR(true);
+    setQRUrl(qrUrl);
   }
 
   const handleTermsChange = (checked: boolean) => {
@@ -36,36 +51,21 @@ export default function ReviewPayment({ onProceedPayment }: ReviewPaymentProps) 
       <CardHeader>
         <CardTitle className="text-[#002346] flex items-center">
           <Shield className="w-5 h-5 mr-2" />
-          Review
+          Thanh toán tiền cọc
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Late Arrival Notice */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        {/* Thông báo tiền cọc */}
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
           <div className="flex items-start space-x-3">
-            <Clock className="w-5 h-5 text-blue-600 mt-0.5" />
+            <AlertCircle className="w-5 h-5 text-yellow-600 mt-0.5" />
             <div>
-              <h4 className="font-semibold text-blue-800 mb-1">Đến muộn?</h4>
-              <p className="text-sm text-blue-700">
-                Phòng sẽ được giữ cho bạn đến 23:59 ngày nhận phòng. Nếu đến muộn
-                hơn, vui lòng liên hệ trước với khách sạn.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Thông báo xác nhận đặt phòng */}
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
-          <div className="flex items-start space-x-3">
-            <AlertCircle className="w-5 h-5 text-green-600 mt-0.5" />
-            <div>
-              <h4 className="font-semibold text-green-800 mb-2">Xác nhận đặt phòng</h4>
-              <ul className="text-sm text-green-700 space-y-1">
-                <li>• Bạn chỉ cần xác nhận để hoàn tất đặt phòng</li>
-                <li>• Không cần thanh toán trước, thanh toán tại khách sạn khi nhận phòng</li>
-                <li>• Miễn phí hủy đặt phòng trước 24 giờ</li>
-                <li>• Giá đã bao gồm thuế và phí dịch vụ</li>
-                <li>• Mọi thắc mắc vui lòng liên hệ lễ tân khách sạn</li>
+              <h4 className="font-semibold text-yellow-800 mb-1">Bạn cần thanh toán tiền cọc để giữ phòng</h4>
+              <ul className="text-sm text-yellow-700 space-y-1">
+                <li>• Số tiền cọc: <span className="font-bold text-[#002346]">{depositAmount.toLocaleString('vi-VN')} VNĐ</span> (hoặc tuỳ theo chính sách phòng)</li>
+                <li>• Tiền cọc sẽ được trừ vào tổng hóa đơn khi nhận phòng</li>
+                <li>• Nếu hủy trước 24h, tiền cọc sẽ được hoàn lại</li>
+                <li>• Nếu không đến nhận phòng, tiền cọc sẽ không được hoàn lại</li>
               </ul>
             </div>
           </div>
@@ -94,19 +94,19 @@ export default function ReviewPayment({ onProceedPayment }: ReviewPaymentProps) 
           {showTermsError && <p className="text-sm text-red-500 ml-6">Bạn cần đồng ý với điều khoản để tiếp tục</p>}
         </div>
 
-        {/* Nút xác nhận đặt phòng */}
+        {/* Nút thanh toán tiền cọc */}
         <Button
-          onClick={() => setShowSuccessModal(true)}
+          onClick={handleProceedPayment}
           className="w-full bg-[#002346] hover:bg-[#002346]/90 text-white font-bold py-4 text-lg"
         >
-          Xác nhận đặt phòng
+          Thanh toán tiền cọc
         </Button>
-        {/* Modal xác nhận thành công */}
+        {/* Modal thanh toán thành công */}
         {showSuccessModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
             <div className="bg-white rounded-lg shadow-lg p-8 max-w-sm w-full text-center">
-              <h3 className="text-2xl font-bold text-green-700 mb-4">Đặt phòng thành công!</h3>
-              <p className="mb-6 text-gray-700">Cảm ơn bạn đã đặt phòng tại Royal Hotel. Chúng tôi sẽ liên hệ xác nhận trong thời gian sớm nhất.</p>
+              <h3 className="text-2xl font-bold text-green-700 mb-4">Thanh toán thành công!</h3>
+              <p className="mb-6 text-gray-700">Cảm ơn bạn đã thanh toán tiền cọc. Đơn đặt phòng của bạn đã được giữ chỗ thành công.</p>
               <Button onClick={() => {
                 setShowSuccessModal(false);
                 window.location.href = '/';
@@ -115,8 +115,19 @@ export default function ReviewPayment({ onProceedPayment }: ReviewPaymentProps) 
           </div>
         )}
 
+        {/* Modal QR Code */}
+        {showQR && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+            <div className="bg-white rounded-lg shadow-lg p-8 max-w-sm w-full text-center">
+              <h3 className="text-xl font-bold text-[#002346] mb-4">Quét mã QR để thanh toán tiền cọc</h3>
+              <img src={qrUrl} alt="QR Code Thanh Toán" width={200} height={230} style={{ borderRadius: 12, margin: '0 auto' }} />
+              <Button onClick={() => setShowQR(false)} className="mt-6 bg-[#002346] text-white w-full">Đóng</Button>
+            </div>
+          </div>
+        )}
+
         <p className="text-xs text-gray-500 text-center">
-          Bằng cách nhấn "Xác nhận đặt phòng", bạn xác nhận đã đọc và đồng ý với tất cả các điều khoản
+          Bằng cách nhấn "Thanh toán tiền cọc", bạn xác nhận đã đọc và đồng ý với tất cả các điều khoản
         </p>
       </CardContent>
     </Card>

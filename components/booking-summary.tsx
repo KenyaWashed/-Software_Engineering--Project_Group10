@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { X, Calendar, Users, Moon } from "lucide-react"
 import { BookingContext } from "@/app/phong/page"
+import { calculatePackagePrice, calculateBookingTotals } from "@/components/utils/pricing"
 
 interface SelectedPackage {
   roomId: number
@@ -38,41 +39,27 @@ export default function BookingSummary({ selectedPackages, onRemovePackage }: Bo
     return `${day}/${month}/${year}`
   }
 
-  // Calculate pricing for each package based on new hotel policy
-  const calculatePackagePrice = (basePrice: number) => {
-    const { adults, children, nights } = bookingData
-    const totalGuests = adults + children
-    let price = basePrice * nights // Giá cho 2 khách đầu tiên
-    let extraCharge = 0
-    if (totalGuests > 2) {
-      extraCharge = basePrice * 0.25 * (totalGuests - 2) * nights
-      price += extraCharge
-    }
-    if (children > 0) {
-      price *= 1.5
-    }
-    return {
-      baseTotal: basePrice * nights,
-      extraCharge,
-      hasForeign: children > 0,
-      packageTotal: price,
-    }
-  }
+  // Sử dụng utils để tính tổng tiền, thuế/phí, deposit
+  const totals = calculateBookingTotals({
+    selectedPackages: selectedPackages.map((pkg) => ({ basePrice: pkg.basePrice, quantity: 1 })),
+    bookingData: {
+      nights: bookingData.nights,
+      adults: bookingData.adults,
+      children: bookingData.children,
+    },
+    taxRate: 0.1,
+    depositRate: 0.5,
+  })
 
-  const packagePrices = selectedPackages.map((pkg) => ({
+  // Lấy lại packagePrices đã tính chi tiết từ utils
+  const packagePrices = selectedPackages.map((pkg, idx) => ({
     ...pkg,
-    pricing: calculatePackagePrice(pkg.basePrice),
+    pricing: totals.packagePrices[idx],
   }))
-
-  const subtotal = packagePrices.reduce((sum, pkg) => sum + pkg.pricing.packageTotal, 0)
-  const taxAndFees = subtotal * 0.1 // 10% tax and service fees
-  const total = subtotal + taxAndFees
-  const deposit = total * 0.3 // 30% deposit
 
   // Function to create booking URL with all data
   const createBookingURL = () => {
     const params = new URLSearchParams()
-
     if (bookingData.checkIn) {
       params.set("checkIn", bookingData.checkIn.toISOString())
     }
@@ -82,14 +69,11 @@ export default function BookingSummary({ selectedPackages, onRemovePackage }: Bo
     params.set("adults", bookingData.adults.toString())
     params.set("children", bookingData.children.toString())
     params.set("nights", bookingData.nights.toString())
-
-    // Add selected packages to URL
     selectedPackages.forEach((pkg, index) => {
       params.set(`package_${index}_roomId`, pkg.roomId.toString())
       params.set(`package_${index}_packageId`, pkg.packageId.toString())
       params.set(`package_${index}_basePrice`, pkg.basePrice.toString())
     })
-
     return `/dat-phong?${params.toString()}`
   }
 
@@ -98,13 +82,10 @@ export default function BookingSummary({ selectedPackages, onRemovePackage }: Bo
       alert("Vui lòng chọn ít nhất một phòng để đặt!")
       return
     }
-
     if (!bookingData.checkIn || !bookingData.checkOut) {
       alert("Vui lòng chọn ngày nhận phòng và trả phòng!")
       return
     }
-
-    // Kiểm tra ngày trả phòng phải sau ngày nhận phòng
     if (
       bookingData.checkIn &&
       bookingData.checkOut &&
@@ -113,16 +94,14 @@ export default function BookingSummary({ selectedPackages, onRemovePackage }: Bo
       alert("Ngày trả phòng phải sau ngày nhận phòng!")
       return
     }
-
     const bookingURL = createBookingURL()
     console.log("Navigating to booking page with URL:", bookingURL)
     console.log("Booking data:", {
       bookingData,
       selectedPackages,
-      total: formatPrice(total),
-      deposit: formatPrice(deposit),
+      total: formatPrice(totals.total),
+      deposit: formatPrice(totals.deposit),
     })
-
     router.push(bookingURL)
   }
 
@@ -224,7 +203,7 @@ export default function BookingSummary({ selectedPackages, onRemovePackage }: Bo
                         <span>Giá cơ bản cho 2 khách:</span>
                         <span className="font-medium">{formatPrice(pkg.pricing.baseTotal)}</span>
                       </div>
-                      {(bookingData.adults + bookingData.children) > 2 && (
+                      {bookingData.adults + bookingData.children > 2 && (
                         <div className="flex justify-between">
                           <span>Phụ thu khách thứ 3 trở đi (25%/khách):</span>
                           <span className="font-medium">{formatPrice(pkg.pricing.extraCharge)}</span>
@@ -261,27 +240,18 @@ export default function BookingSummary({ selectedPackages, onRemovePackage }: Bo
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
               <span>Tổng phụ ({bookingData.nights} đêm):</span>
-              <span className="font-medium">{formatPrice(subtotal)}</span>
+              <span className="font-medium">{formatPrice(totals.subtotal)}</span>
             </div>
             <div className="flex justify-between">
               <span>Thuế và phí dịch vụ (10%):</span>
-              <span className="font-medium">{formatPrice(taxAndFees)}</span>
+              <span className="font-medium">{formatPrice(totals.taxAndFees)}</span>
             </div>
             <div className="flex justify-between font-bold text-lg border-t pt-2 text-[#002346]">
               <span>Tổng cộng:</span>
-              <span>{formatPrice(total)}</span>
+              <span>{formatPrice(totals.total)}</span>
             </div>
           </div>
         </div>
-
-
-            {/* Tạm thời bỏ qua thanh toán */}
-        {/* Deposit Info */}
-        {/* <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-          <p className="text-sm font-semibold text-yellow-800">💰 Tiền cọc cần thanh toán:</p>
-          <p className="text-lg font-bold text-[#002346]">{formatPrice(deposit)}</p>
-          <p className="text-xs text-gray-600 mt-1">(30% tổng giá trị đơn hàng)</p>
-        </div> */}
 
         {/* Book Button - Updated to navigate to booking page */}
         <Button
