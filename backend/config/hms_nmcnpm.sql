@@ -167,17 +167,25 @@ VALUES
 
  INSERT INTO room_type_photos (room_type_id, room_type_photo)
 VALUES
-(1, 'room_a1.jpg'),
-(1, 'room_a2.jpg'),
-(1, 'room_a3.jpg'),
+(1, '/khachsan/khonggian1.png'),
+(1, '/images/phongloai1/2.jpg'),
+(1, '/images/phongloai1/3.jpg'),
+(1, '/images/phongloai1/4.jpeg'),
+(1, '/images/phongloai1/5.jpeg'),
 
-(2, 'room_b1.jpg'),
-(2, 'room_b2.jpg'),
-(2, 'room_b3.jpg'),
+-- Thêm ảnh mới cho room_type_id = 2
+(2, '/khachsan/khonggian1.png'),
+(2, '/images/phongloai1/2.jpg'),
+(2, '/images/phongloai1/3.jpg'),
+(2, '/images/phongloai1/4.jpeg'),
+(2, '/images/phongloai1/5.jpeg'),
 
-(3, 'room_c1.jpg'),
-(3, 'room_c2.jpg'),
-(3, 'room_c3.jpg');
+-- Thêm ảnh mới cho room_type_id = 3
+(3, '/khachsan/khonggian1.png'),
+(3, '/images/phongloai1/2.jpg'),
+(3, '/images/phongloai1/3.jpg'),
+(3, '/images/phongloai1/4.jpeg'),
+(3, '/images/phongloai1/5.jpeg');
 
 INSERT INTO room_type_amenities (room_type_id, room_type_amenity)
 VALUES
@@ -210,9 +218,12 @@ INSERT INTO room_packages (
 	list_price, sale_price, room_package_status
 )
 VALUES
-(1, N'Special Offer - Royal Privilege Package', N'Gói ưu đãi đặc biệt với nhiều quyền lợi.', 3200000, 2522880, 1),
-(1, N'Standard Package', N'Gói tiêu chuẩn với giá tốt.', 2800000, 2520000, 1),
-(2, N'Executive Privilege Package', N'Gói đặc quyền cho Executive Suite.', 4500000, 3850000, 1);
+(1, N'Special Offer - Royal Privilege Package', N'Gói ưu đãi đặc biệt với nhiều quyền lợi.', 200000, 150000, 1),
+(1, N'Standard Package', N'Gói tiêu chuẩn với giá tốt.', 200000, 150000, 1),
+(2, N'Executive Privilege Package', N'Gói đặc quyền cho Executive Suite.', 250000, 170000, 1),
+(3, N'Presidential Experience Package', N'Gói ưu đãi cao cấp', 300000, 200000, 1),
+(3, N'Luxury Package', N'Gói cao cấp nhất', 300000, 200000, 1);
+
 
 INSERT INTO room_package_offers (room_package_id, room_package_offer)
 VALUES
@@ -226,8 +237,16 @@ VALUES
 -- Package ID 3
 (3, N'Free cancellation'),
 (3, N'Pay today'),
-(3, N'Complimentary breakfast');
+(3, N'Complimentary breakfast'),
 
+-- Package ID 4
+(4, N'Free cancellation'),
+(4, N'Pay today'),
+(4, N'Complimentary breakfast'),
+(4, N'Airport transfer'),
+
+-- Package ID 5
+(5, N'Free cancellation');
 -------------------------------------------------------------------------------------
 
 insert into policy (policy_name, policy_short_name, policy_value, policy_notes) values (N'Phụ thu khách thứ 3 trở đi', 'KH3', 0.25, null);
@@ -251,21 +270,22 @@ VALUES
 ('104', 1, 2, N'Đã đặt', NULL),
 
 -- Loại 2 (room_type_id = 2)
-('201', 2, 1, N'Trống', NULL),
-('202', 2, 1, N'Đã đặt', NULL),
-('203', 2, 2, N'Trống', NULL),
-('204', 2, 2, N'Đã đặt', NULL),
+('201', 2, 3, N'Trống', NULL),
+('202', 2, 3, N'Đã đặt', NULL),
+('203', 2, 3, N'Trống', NULL),
+('204', 2, 3, N'Đã đặt', NULL),
 
 -- Loại 3 (room_type_id = 3)
-('301', 3, 1, N'Trống', NULL),
-('302', 3, 1, N'Đã đặt', NULL),
-('303', 3, 2, N'Trống', NULL),
-('304', 3, 2, N'Đã đặt', NULL);
+('301', 3, 4, N'Trống', NULL),
+('302', 3, 4, N'Đã đặt', NULL),
+('303', 3, 5, N'Trống', NULL),
+('304', 3, 5, N'Đã đặt', NULL);
 
 
 
 
 GO
+
 CREATE FUNCTION dbo.checkAvailableRoom (
     @check_in_date DATETIME,
     @check_out_date DATETIME
@@ -274,7 +294,7 @@ RETURNS TABLE
 AS
 RETURN
 (
-    SELECT *
+    SELECT room_number, room_type_id, room_package_id
     FROM Rooms
     WHERE room_id NOT IN (
         SELECT room_id
