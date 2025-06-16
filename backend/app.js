@@ -1,6 +1,7 @@
 const express = require("express");
 const app = express();
 const path = require("path");
+const cors = require('cors');
 port = 4000;
 
 // Đường dẫn đến thư mục ảnh
