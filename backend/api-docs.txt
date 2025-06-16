@@ -1,5 +1,5 @@
-### POST /room
-fetch('http://localhost:4000/room', {
+### POST /room/available
+fetch('http://localhost:4000/room/available', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json'
@@ -8,6 +8,14 @@ fetch('http://localhost:4000/room', {
     checkin_date: '2025-06-10',
     checkout_date: '2025-06-15'
   })
+});
+
+### GET /room/available
+fetch('http://localhost:4000/room/all', {
+  method: 'GET',
+  headers: {
+    'Content-Type': 'application/json'
+  }
 });
 
 ### POST/calculation
