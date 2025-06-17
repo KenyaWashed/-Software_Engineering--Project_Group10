@@ -89,4 +89,39 @@ const createBooking = async (bookingData) => {
   }
 };
 
-module.exports = { createBooking };
+
+
+async function getBookingHistoryByEmail(email) {
+  try {
+    const pool = await poolPromise;
+    const result = await pool.request()
+      .input('email', sql.VarChar(100), email)
+      .query(`
+        SELECT 
+          r.reservation_id AS reservationId,
+          rm.room_number AS roomRumber,
+          rd.guest_email AS userEmail,
+          rm.room_type_id AS roomTypeId,
+          rm.room_package_id AS packageId,
+          r.check_in_date AS checkIn,
+          r.check_out_date AS checkOut,
+          r.total_local_guests AS totalLocalGuests,
+          r.total_foreign_guests AS totalForeignGuests,
+          DATEDIFF(DAY, r.check_in_date, r.check_out_date) AS nights
+        FROM Reservations r
+        JOIN Rooms rm ON r.room_id = rm.room_id
+        JOIN Reservation_detail rd ON r.reservation_id = rd.reservation_id
+        WHERE rd.guest_email = @email
+        ORDER BY r.check_in_date DESC
+      `);
+
+    return result.recordset;
+  } catch (error) {
+    throw error;
+  }
+}
+
+module.exports = { 
+  createBooking, 
+  getBookingHistoryByEmail
+};

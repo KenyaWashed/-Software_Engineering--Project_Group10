@@ -30,7 +30,6 @@ const createBooking = async (req, res) => {
       phone,
       arrival_time,
       special_requests,
-      //room_id,
       room_package_id,
       n_domestic_guests,
       n_foreign_guests,
@@ -49,4 +48,25 @@ const createBooking = async (req, res) => {
   }
 };
 
-module.exports = { createBooking };
+
+
+const getBookingHistory = async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ error: "Thiếu email" });
+  }
+
+  try {
+    const data = await BookingModel.getBookingHistoryByEmail(email);
+    res.status(200).json(data);
+  } catch (err) {
+    console.error('Lỗi truy vấn lịch sử đặt phòng:', err);
+    res.status(500).json({ error: 'Lỗi máy chủ' });
+  }
+};
+
+module.exports = { 
+  createBooking,
+  getBookingHistory
+};

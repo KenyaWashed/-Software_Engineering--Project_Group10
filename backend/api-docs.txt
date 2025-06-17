@@ -1,4 +1,4 @@
-### POST /room/available
+### Trả về các package_id trống
 fetch('http://localhost:4000/room/available', {
   method: 'POST',
   headers: {
@@ -10,7 +10,7 @@ fetch('http://localhost:4000/room/available', {
   })
 });
 
-### GET /room/available
+### Lấy dữ liệu phòng cho hiển thị
 fetch('http://localhost:4000/room/all', {
   method: 'GET',
   headers: {
@@ -18,7 +18,7 @@ fetch('http://localhost:4000/room/all', {
   }
 });
 
-### POST/calculation
+### tính toán tiền phòng
 fetch('http://localhost:4000/calculation', {
   method: 'POST',
   headers: {
@@ -33,7 +33,7 @@ fetch('http://localhost:4000/calculation', {
 })
 });
 
-### POST /booking/create (chưa xong)
+### Đăt phòng
 fetch("http://localhost:4000/booking", {
   method: "POST",
   headers: {
@@ -56,3 +56,12 @@ fetch("http://localhost:4000/booking", {
   .then(data => console.log("Kết quả:", data))
   .catch(error => console.error("Lỗi:", error));
 
+
+### Xem lịch sử đặt phòng
+fetch('http://localhost:4000/booking/history', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ email: 'guest@example.com' })
+})
+  .then(res => res.json())
+  .then(data => console.log('Booking history:', data));
