@@ -14,18 +14,7 @@ const { check, validationResult } = require('express-validator');
 
 exports.userSignupValidator = [
     check('user_name', 'Name is required').notEmpty(),
-    check('user_email')
-        .isLength({ min: 4, max: 32 })
-        .withMessage('Email must be between 4 to 32 characters')
-        .matches(/.+@.+\..+/)
-        .withMessage('Email must contain @ and a valid domain')
-        .custom((value) => {
-            const atCount = (value.match(/@/g) || []).length;
-            if (atCount > 1) {
-                throw new Error('Email must not contain more than one @ symbol');
-            }
-            return true;
-        }),
+    check('user_email').isEmail().withMessage('Email không hợp lệ'),
     check('phone_number', 'Phone number is required').notEmpty(),
     check('phone_number')
         .matches(/^\d+$/)
@@ -47,10 +36,10 @@ exports.signup = async (req, res) => {
             return res.status(422).json({ errors: errors.array() });
         }
 
-    const { user_name, user_email, phone_number, user_password, user_repassword } = req.body;
+    const { user_name, user_email, phone_number, user_password } = req.body;
 
     // 3. Kiểm tra có tồn tại người dùng có email này chưa, chưa thì thôi
-    const existingUser = await userModels.getUserByEmail(user_email);
+    const existingUser = await userModels.getUserByEmail(user_email.toLowerCase());
     if (existingUser) {
         return res.status(400).json({ error: 'Người dùng đã có tài khoản với email này, vui lòng chọn email khác hoặc đăng nhập.' });
     }
@@ -61,21 +50,11 @@ exports.signup = async (req, res) => {
         return res.status(400).json({ error: 'Người dùng đã có tài khoản với số điện thoại này, vui lòng chọn số khác hoặc đăng nhập.' });
     }
 
-    if (user_password !== user_repassword) {
-        return res.status(400).json({ error: 'Mật khẩu và xác nhận mật khẩu không khớp.' });
-    }
-
     const result = await userModels.createUser(user_email, user_name, phone_number, user_password, 2); // 2 là guest
     if (result instanceof Error) {
         console.error('❌ Lỗi tạo user:', result);
-        return res.status(500).json({ error: 'Tạo người dùng thất bại' });
+        return res.status(500).json({ error: 'Tạo người dùng trong CSDL thất bại.' });
     }
     console.log('✅ Tạo người dùng mới thành công');
-    req.session.user = {
-        user_email: user_email,
-        phone_number: phone_number,
-        user_role: 2, // 2 là guest
-    };
-    console.log('✅ Đăng ký thành công và đã tạo phiên cho người dùng mới');
-    return res.status(200).json({ message: 'Đăng ký thành công', user: req.session.user });
+    return res.status(200).json({ message: 'Đăng ký thành công'});
 };

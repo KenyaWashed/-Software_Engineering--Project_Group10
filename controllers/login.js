@@ -10,18 +10,7 @@ const session = require('express-session');
 const { check, validationResult } = require('express-validator');
 
 exports.userLoginValidator = [ 
-    check('user_email')
-        .isLength({ min: 4, max: 32 })
-        .withMessage('Email must be between 4 to 32 characters')
-        .matches(/.+@.+\..+/)
-        .withMessage('Email must contain @ and a valid domain')
-        .custom((value) => {
-            const atCount = (value.match(/@/g) || []).length;
-            if (atCount > 1) {
-                throw new Error('Email must not contain more than one @ symbol');
-            }
-            return true;
-        }),
+    check('user_email').isEmail().withMessage('Email không hợp lệ.'),
     check('user_password', 'Password is required').notEmpty(),
     check('user_password')
         .isLength({ min: 6 })
@@ -31,7 +20,7 @@ exports.userLoginValidator = [
 ];
 
 exports.login = async (req, res) => {
-    const { user_email, user_password, remember } = req.body;
+    const { user_email, user_password, rememberMe } = req.body;
 
     // 1. Kiểm tra tính hợp lệ của email và mật khẩu
     const errors = validationResult(req);
@@ -51,11 +40,11 @@ exports.login = async (req, res) => {
         role: await userModels.getUserRoleByEmail(user_email),
     };
 
-    if (remember) {
+    if (rememberMe) {
         req.session.cookie.maxAge = 3 * 24 * 60 * 60 * 1000; // 3 ngày
     } else {
         req.session.cookie.expires = false; // session sẽ hết khi đóng trình duyệt
     }
 
-    return res.status(200).json({ message: '✅ Đăng nhập thành công', redirectTo: '/home' });
+    return res.status(200).json({ message: '✅ Đăng nhập thành công', user: req.session.user, redirectTo: '/home' });
 };
