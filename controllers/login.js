@@ -20,7 +20,11 @@ exports.userLoginValidator = [
 ];
 
 exports.login = async (req, res) => {
-    const { user_email, user_password, rememberMe } = req.body;
+    const { email, password } = req.body;
+
+    let user_email = email.toLowerCase();
+    let user_password = password;
+    //let rememberMe = req.body.rememberMe || false;
 
     // 1. Kiểm tra tính hợp lệ của email và mật khẩu
     const errors = validationResult(req);
@@ -40,11 +44,11 @@ exports.login = async (req, res) => {
         role: await userModels.getUserRoleByEmail(user_email),
     };
 
-    if (rememberMe) {
+/*     if (rememberMe) {
         req.session.cookie.maxAge = 3 * 24 * 60 * 60 * 1000; // 3 ngày
     } else {
         req.session.cookie.expires = false; // session sẽ hết khi đóng trình duyệt
-    }
+    } */
 
     return res.status(200).json({ message: '✅ Đăng nhập thành công', user: req.session.user, redirectTo: '/home' });
 };

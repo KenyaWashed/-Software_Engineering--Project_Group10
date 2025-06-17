@@ -6,8 +6,8 @@ const login = require("../controllers/login");
 const logout = require("../controllers/logout");
 const sessionController = require('../controllers/session');
 
-router.post('/api/login', login.userLoginValidator, login.login);
-router.post("/api/signup", signup.userSignupValidator, signup.signup);
+router.post('/api/login-user', login.userLoginValidator, login.login);
+router.post("/api/register-user", signup.userSignupValidator, signup.signup);
 router.get("/api/logout", logout.logout);
 // Route: kiểm tra session hiện tại
 router.get('/api/check-session', sessionController.checkSession);

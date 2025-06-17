@@ -36,7 +36,13 @@ exports.signup = async (req, res) => {
             return res.status(422).json({ errors: errors.array() });
         }
 
-    const { user_name, user_email, phone_number, user_password } = req.body;
+    const { username, password, fullName, email, phone, role } = req.body;
+
+    let user_name = username;
+    let full_name = fullName;
+    let user_email = email.toLowerCase();
+    let phone_number = phone;
+    let user_password = password;
 
     // 3. Kiểm tra có tồn tại người dùng có email này chưa, chưa thì thôi
     const existingUser = await userModels.getUserByEmail(user_email.toLowerCase());
@@ -50,7 +56,7 @@ exports.signup = async (req, res) => {
         return res.status(400).json({ error: 'Người dùng đã có tài khoản với số điện thoại này, vui lòng chọn số khác hoặc đăng nhập.' });
     }
 
-    const result = await userModels.createUser(user_email, user_name, phone_number, user_password, 2); // 2 là guest
+    const result = await userModels.createUser(user_name, full_name, user_email, phone_number, user_password, 2); // 2 là guest
     if (result instanceof Error) {
         console.error('❌ Lỗi tạo user:', result);
         return res.status(500).json({ error: 'Tạo người dùng trong CSDL thất bại.' });
