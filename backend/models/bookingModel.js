@@ -8,7 +8,6 @@ const createBooking = async (bookingData) => {
     phone,
     arrival_time,
     special_requests,
-    room_id,
     room_package_id,
     n_domestic_guests,
     n_foreign_guests,
@@ -23,15 +22,23 @@ const createBooking = async (bookingData) => {
     const checkRoom = await pool.request()
       .input('check_in_date', sql.DateTime, check_in_date)
       .input('check_out_date', sql.DateTime, check_out_date)
-      .input('room_id', sql.Int, room_id)
+      .input('room_package_id', sql.Int, room_package_id)
       .query(`
         SELECT * FROM dbo.checkAvailableRoom(@check_in_date, @check_out_date)
-        WHERE room_id = @room_id
+        WHERE room_package_id = @room_package_id
       `);
-
+    
     if (checkRoom.recordset.length === 0) {
       throw new Error('Phòng đã được đặt trong khoảng thời gian này');
     }
+      
+    room_number = checkRoom.recordset[0].room_number;
+    
+    const getRoomIdResult = await pool.request()
+      .input('room_number', sql.Char(3), room_number)
+      .query(`SELECT room_id FROM Rooms WHERE room_number = @room_number`);
+    room_id = getRoomIdResult.recordset[0].room_id;
+
 
     // Insert vào Reservations
     const insertReservation = await pool.request()
@@ -74,7 +81,7 @@ const createBooking = async (bookingData) => {
         )
       `);
 
-    return { reservation_id };
+    return { reservation_id, room_number };
 
   } catch (err) {
     console.error("Lỗi khi thêm vào DB:", err);

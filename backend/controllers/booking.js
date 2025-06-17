@@ -8,7 +8,6 @@ const createBooking = async (req, res) => {
       phone,
       arrival_time,
       special_requests,
-      room_id,
       room_package_id,
       n_domestic_guests,
       n_foreign_guests,
@@ -18,7 +17,7 @@ const createBooking = async (req, res) => {
 
     // Kiểm tra thiếu dữ liệu
     if (
-      !full_name || !email || !phone || !room_id || !room_package_id ||
+      !full_name || !email || !phone || !room_package_id ||
       n_domestic_guests == null || n_foreign_guests == null ||
       !check_in_date || !check_out_date
     ) {
@@ -31,7 +30,7 @@ const createBooking = async (req, res) => {
       phone,
       arrival_time,
       special_requests,
-      room_id,
+      //room_id,
       room_package_id,
       n_domestic_guests,
       n_foreign_guests,

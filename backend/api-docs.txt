@@ -45,7 +45,6 @@ fetch("http://localhost:4000/booking", {
     phone: "0912345678",
     arrival_time: "14:00",
     special_requests: "Không hút thuốc",
-    room_id: 1,
     room_package_id: 2,
     n_domestic_guests: 2,
     n_foreign_guests: 1,

@@ -24,8 +24,8 @@ app.use("/room", roomRoutes);
 const calculationRoutes = require("./routers/calculation"); 
 app.use("/calculation", calculationRoutes);
 
-// const bookingRoutes = require("./routers/booking");
-// app.use("/booking", bookingRoutes);
+const bookingRoutes = require("./routers/booking");
+app.use("/booking", bookingRoutes);
 
 
 app.listen(port, () => console.log("Server running... http://localhost:" + port));
