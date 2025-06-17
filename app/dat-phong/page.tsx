@@ -6,7 +6,7 @@ import Footer from "@/components/footer"
 import BackButton from "@/components/back-button"
 import RoomPackageInfo from "@/components/room-package-info"
 import EnhancedBookingSummary from "@/components/enhanced-booking-summary"
-import GuestDetailsForm from "@/components/guest-details-form"
+import GuestDetailsForm, { type GuestData } from "@/components/guest-details-form"
 import ReviewPayment from "@/components/review-payment"
 
 // Sample room data
@@ -132,33 +132,28 @@ const roomsData = [
 
 type BookingStep = "select" | "details" | "review"
 
+// Sửa SelectedPackage: bỏ quantity
 interface SelectedPackage {
   packageId: number
   roomName: string
   packageName: string
   basePrice: number
-  quantity: number
 }
 
 function BookingPageContent() {
   const searchParams = useSearchParams()
   const [currentStep, setCurrentStep] = useState<BookingStep>("select")
-  const [selectedPackages, setSelectedPackages] = useState<{ [packageId: number]: number }>(() => {
-    // Initialize selected packages from URL parameters
-    const packages: { [packageId: number]: number } = {}
+  // selectedPackages chỉ lưu packageId, không lưu quantity
+  const [selectedPackageId] = useState<number | null>(() => {
     let index = 0
-
     while (searchParams.get(`package_${index}_packageId`)) {
       const packageId = Number.parseInt(searchParams.get(`package_${index}_packageId`) || "0")
-      if (packageId) {
-        packages[packageId] = 1 // Default quantity of 1
-      }
+      if (packageId) return packageId
       index++
     }
-
-    return packages
+    return null
   })
-  const [guestData, setGuestData] = useState(null)
+  const [guestData, setGuestData] = useState<GuestData | null>(null)
 
   // Initialize booking data from URL parameters
   const [bookingData] = useState(() => {
@@ -180,38 +175,21 @@ function BookingPageContent() {
     return initialData
   })
 
-  const handlePackageSelect = (packageId: number, quantity: number) => {
-    setSelectedPackages((prev) => ({
-      ...prev,
-      [packageId]: quantity,
-    }))
-  }
-
-  const getSelectedPackagesArray = (): SelectedPackage[] => {
-    const packages: SelectedPackage[] = []
-
-    Object.entries(selectedPackages).forEach(([packageIdStr, quantity]) => {
-      if (quantity > 0) {
-        const packageId = Number.parseInt(packageIdStr)
-
-        // Find the package in rooms data
-        for (const room of roomsData) {
-          const pkg = room.packages.find((p) => p.id === packageId)
-          if (pkg) {
-            packages.push({
-              packageId,
-              roomName: room.name,
-              packageName: pkg.name,
-              basePrice: pkg.discountPrice,
-              quantity,
-            })
-            break
-          }
+  // Lấy package đã chọn (chỉ 1 package)
+  const getSelectedPackage = (): SelectedPackage | null => {
+    if (!selectedPackageId) return null
+    for (const room of roomsData) {
+      const pkg = room.packages.find((p) => p.id === selectedPackageId)
+      if (pkg) {
+        return {
+          packageId: pkg.id,
+          roomName: room.name,
+          packageName: pkg.name,
+          basePrice: pkg.discountPrice,
         }
       }
-    })
-
-    return packages
+    }
+    return null
   }
 
   const handleProceedToDetails = () => {
@@ -227,13 +205,13 @@ function BookingPageContent() {
     // Here you would integrate with payment gateway
     console.log("Proceeding to payment with:", {
       bookingData,
-      selectedPackages: getSelectedPackagesArray(),
+      selectedPackages: getSelectedPackage(),
       guestData,
     })
      alert("Chuyển đến trang thanh toán...")
   }
 
-  const selectedPackagesArray = getSelectedPackagesArray()
+  const selectedPackage = getSelectedPackage()
 
   return (
     <div className="min-h-screen bg-[#f9eed7]">
@@ -287,11 +265,11 @@ function BookingPageContent() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Show only the selected room/package info and images */}
             <div className="lg:col-span-2 space-y-6">
-              {selectedPackagesArray[0] ? (
+              {selectedPackage ? (
                 <RoomPackageInfo
-                  room={roomsData.find(room => room.packages.some(pkg => pkg.id === selectedPackagesArray[0].packageId)) as any}
+                  room={roomsData.find(room => room.packages.some(pkg => pkg.id === selectedPackage.packageId)) as any}
                   bookingData={bookingData}
-                  selectedPackageId={selectedPackagesArray[0].packageId}
+                  selectedPackageId={selectedPackage.packageId}
                 />
               ) : (
                 <div className="bg-yellow-50 border border-yellow-200 rounded p-6 text-center text-yellow-800">
@@ -301,7 +279,7 @@ function BookingPageContent() {
             </div>
             <div className="lg:col-span-1">
               <EnhancedBookingSummary
-                selectedPackages={selectedPackagesArray}
+                selectedPackages={selectedPackage ? [selectedPackage] : []}
                 bookingData={bookingData}
                 onProceedToDetails={handleProceedToDetails}
               />
@@ -319,7 +297,7 @@ function BookingPageContent() {
             </div>
             <div className="lg:col-span-1">
               <EnhancedBookingSummary
-                selectedPackages={selectedPackagesArray}
+                selectedPackages={selectedPackage ? [selectedPackage] : []}
                 bookingData={bookingData}
                 onProceedToDetails={() => {}}
               />
@@ -333,32 +311,29 @@ function BookingPageContent() {
               <ReviewPayment 
                 onProceedPayment={handleProceedPayment}
                 depositAmount={(() => {
-                  // Tính lại đúng số tiền cọc như EnhancedBookingSummary
-                  const packagePrices = selectedPackagesArray.map(pkg => {
-                    const { adults, children, nights } = bookingData;
-                    const totalGuests = adults + children;
-                    let price = pkg.basePrice * nights;
-                    let extraCharge = 0;
-                    if (totalGuests > 2) {
-                      extraCharge = pkg.basePrice * 0.25 * (totalGuests - 2) * nights;
-                      price += extraCharge;
-                    }
-                    if (children > 0) {
-                      price *= 1.5;
-                    }
-                    return price * pkg.quantity;
-                  });
-                  const subtotal = packagePrices.reduce((sum, p) => sum + p, 0);
-                  const serviceCharge = subtotal * 0.02;
-                  const vat = subtotal * 0.08;
-                  const total = subtotal + serviceCharge + vat;
-                  return Math.round(total * 0.5);
+                  if (!selectedPackage) return 0
+                  // Sử dụng utils để đồng bộ logic tính giá cọc
+                  const { calculatePackagePrice } = require("@/components/utils/pricing")
+                  const { adults, children, nights } = bookingData
+                  const pricing = calculatePackagePrice({
+                    basePrice: selectedPackage.basePrice,
+                    nights,
+                    adults,
+                    children,
+                  })
+                  // Áp dụng các mức phí dịch vụ, VAT nếu cần
+                  const subtotal = pricing.packageTotal
+                  const serviceCharge = subtotal * 0.02
+                  const vat = subtotal * 0.08
+                  const total = subtotal + serviceCharge + vat
+                  return Math.round(total * 0.5)
                 })()}
+                email={guestData?.email || ""}
               />
             </div>
             <div className="lg:col-span-1">
               <EnhancedBookingSummary
-                selectedPackages={selectedPackagesArray}
+                selectedPackages={selectedPackage ? [selectedPackage] : []}
                 bookingData={bookingData}
                 onProceedToDetails={() => {}}
               />

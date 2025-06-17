@@ -10,7 +10,7 @@ export function calculatePackagePrice({
   nights: number
   adults: number
   children: number
-  quantity?: number
+  quantity?: number // Số lượng phòng, mặc định là 1
 }) {
   const totalGuests = adults + children
   let price = basePrice * nights // Giá cho 2 khách đầu tiên

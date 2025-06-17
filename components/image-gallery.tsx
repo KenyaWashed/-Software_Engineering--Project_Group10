@@ -8,51 +8,21 @@ export default function ImageGallery() {
   const galleryImages = [
     {
       id: 1,
-      src: "hinhanh/sanhcho.png?height=300&width=400",
+      src: "images/hinhanh/sanhcho.png?height=300&width=400",
       alt: "Royal Hotel Lobby",
       title: "Sảnh khách sạn sang trọng",
     },
     {
       id: 2,
-      src: "hinhanh/phongviewbien.png?height=300&width=400",
+      src: "images/hinhanh/phongviewbien.png?height=300&width=400",
       alt: "Deluxe Room",
       title: "Phòng Deluxe",
     },
     {
       id: 3,
-      src: "khachsan/hoboi.jpg?height=300&width=400",
+      src: "images/khachsan/hoboi.jpg?height=300&width=400",
       alt: "Swimming Pool",
       title: "Hồ bơi ngoài trời",
-    },
-    {
-      id: 4,
-      src: "/placeholder.svg?height=300&width=400",
-      alt: "Restaurant",
-      title: "Nhà hàng cao cấp",
-    },
-    {
-      id: 5,
-      src: "/placeholder.svg?height=300&width=400",
-      alt: "Spa Center",
-      title: "Trung tâm Spa",
-    },
-    {
-      id: 6,
-      src: "/placeholder.svg?height=300&width=400",
-      alt: "Conference Room",
-      title: "Phòng hội nghị",
-    },
-    {
-      id: 7,
-      src: "/placeholder.svg?height=300&width=400",
-      alt: "Garden View",
-      title: "Khu vườn xanh mát",
-    },
-    {
-      id: 8,
-      src: "/placeholder.svg?height=300&width=400",
-      alt: "Gym Fitness",
-      title: "Phòng tập gym",
     },
   ]
 

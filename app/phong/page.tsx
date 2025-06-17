@@ -31,128 +31,44 @@ const BookingContext = createContext<{
   setBookingData: () => {},
 })
 
-// Sample room data
-const roomsData = [
-  {
-    id: 1,
-    name: "Deluxe Ocean View",
-    images: [
-      "/khachsan/khonggian1.png",
-      "/images/phongloai1/2.jpg",
-      "/images/phongloai1/3.jpg",
-      "/images/phongloai1/4.jpeg",
-      "/images/phongloai1/5.jpeg",
-    ],
-    area: "45m²",
-    view: "Hướng biển",
-    maxGuests: 3,
-    beds: 1,
-    bathrooms: 1,
-    description: "Phòng sang trọng với view biển tuyệt đẹp, nội thất cao cấp và đầy đủ tiện nghi hiện đại.",
-    amenities: ["Wi-Fi miễn phí", "TV 55 inch", "Bồn tắm", "Dịch vụ phòng 24/24", "Mini bar", "Máy pha cà phê"],
-    packages: [
-      {
-        id: 1,
-        name: "Special Offer - Royal Privilege Package",
-        benefits: ["Free cancellation", "Pay today"],
-        originalPrice: 250000,
-        discountPrice: 150000,
-        available: true,
-      },
-      {
-        id: 2,
-        name: "Standard Package",
-        benefits: ["Free cancellation"],
-        originalPrice: 250000,
-        discountPrice: 150000,
-        available: false,
-      },
-    ],
-  },
-  {
-    id: 2,
-    name: "Executive Suite",
-    images: [
-      "/images/phongloai1/2.jpg",
-      "/images/phongloai1/1.jpg",
-      "/images/phongloai1/3.jpg",
-      "/images/phongloai1/4.jpeg",
-      "/images/phongloai1/5.jpeg",
-    ],
-    area: "65m²",
-    view: "Hướng thành phố",
-    maxGuests: 4,
-    beds: 2,
-    bathrooms: 2,
-    description: "Suite cao cấp với không gian rộng rãi, phòng khách riêng biệt và tầm nhìn panorama thành phố.",
-    amenities: [
-      "Wi-Fi miễn phí",
-      "TV 65 inch",
-      "Jacuzzi",
-      "Dịch vụ phòng 24/24",
-      "Mini bar",
-      "Máy pha cà phê",
-      "Bàn làm việc",
-    ],
-    packages: [
-      {
-        id: 3,
-        name: "Executive Privilege Package",
-        benefits: ["Free cancellation", "Pay today", "Complimentary breakfast"],
-        originalPrice: 250000,
-        discountPrice: 170000,
-        available: true,
-      },
-    ],
-  },
-  {
-    id: 3,
-    name: "Presidential Suite",
-       images: [
-      "/images/phongloai1/3.jpg",
-      "/images/phongloai1/2.jpg",
-      "/images/phongloai1/1.jpg",
-      "/images/phongloai1/4.jpeg",
-      "/images/phongloai1/5.jpeg",
-    ],
-    area: "120m²",
-    view: "Hướng biển và thành phố",
-    maxGuests: 6,
-    beds: 3,
-    bathrooms: 3,
-    description: "Suite tổng thống với thiết kế xa hoa, phòng khách rộng lớn và tầm nhìn 360 độ tuyệt đẹp.",
-    amenities: [
-      "Wi-Fi miễn phí",
-      "TV 75 inch",
-      "Jacuzzi riêng",
-      "Dịch vụ phòng 24/24",
-      "Mini bar cao cấp",
-      "Máy pha cà phê",
-      "Phòng làm việc riêng",
-      "Ban công riêng",
-    ],
-    packages: [
-      {
-        id: 4,
-        name: "Presidential Experience Package",
-        benefits: ["Free cancellation", "Pay today", "Complimentary breakfast", "Airport transfer"],
-        originalPrice: 300000,
-        discountPrice: 200000,
-        available: true,
-      },
-      {
-        id: 5,
-        name: "Luxury Package",
-        benefits: ["Free cancellation"],
-        originalPrice: 300000,
-        discountPrice: 200000,
-        available: true,
-      },
-    ],
-  },
-]
+export interface RoomPackage {
+  id: number;
+  name: string;
+  benefits: string[];
+  originalPrice: number;
+  discountPrice: number;
+  available: boolean;
+}
+
+export interface RoomType {
+  id: number;
+  name: string;
+  images: string[];
+  area: string;
+  view: string;
+  maxGuests: number;
+  beds: number;
+  bathrooms: number;
+  description: string;
+  amenities: string[];
+  packages: RoomPackage[];
+}
 
 function RoomsPageContent() {
+
+  const [roomsData, setRoomsData] = useState<RoomType[]>([]);
+
+  // 1. Fetch dữ liệu phòng ban đầu
+  useEffect(() => {
+    fetch('http://localhost:4000/room/all', {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' }
+    })
+      .then(response => response.json())
+      .then(data => setRoomsData(data.roomType))
+      .catch(error => console.error('Error:', error));
+  }, []);
+
   const searchParams = useSearchParams()
   const [selectedPackages, setSelectedPackages] = useState<any[]>([])
 
@@ -193,6 +109,36 @@ function RoomsPageContent() {
       }
     }
   }, [bookingData.checkIn, bookingData.checkOut, bookingData.nights, searchParams])
+
+  // 2. Cập nhật trạng thái available khi ngày thay đổi và đã có dữ liệu phòng
+  useEffect(() => {
+    if (roomsData.length > 0 && bookingData.checkIn && bookingData.checkOut) {
+      fetch('http://localhost:4000/room/available', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          checkin_date: bookingData.checkIn.toISOString().slice(0, 10),
+          checkout_date: bookingData.checkOut.toISOString().slice(0, 10)
+        })
+      })
+        .then(response => response.json())
+        .then(data => {
+          const availableIds = new Set(data.availableRoom.map((item: any) => item.room_package_id));
+          setRoomsData(prevRooms =>
+            prevRooms.map(room => ({
+              ...room,
+              packages: room.packages.map(pkg => ({
+                ...pkg,
+                available: availableIds.has(pkg.id)
+              }))
+            }))
+          );
+        })
+        .catch(error => {
+          console.error('Lỗi:', error);
+        });
+    }
+  }, [roomsData.length, bookingData.checkIn, bookingData.checkOut]);
 
   const handleSelectPackage = useCallback((roomId: number, packageData: any) => {
     const newSelection = {

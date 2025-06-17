@@ -3,134 +3,75 @@ import { useEffect, useState } from "react"
 import Header from "@/components/header"
 import Footer from "@/components/footer"
 import RoomPackageInfo from "@/components/room-package-info"
+import type { RoomType } from "@/app/phong/page"
 
 interface Booking {
-  id: number
+  reservationId: number
   userEmail: string
-  room: any // Thông tin phòng (giống Room trong room-package-info)
+  roomTypeId: number
   packageId: number
+  roomRumber: string
   checkIn: string
   checkOut: string
-  adults: number
-  children: number
+  totalForeignGuests: number
+  totalLocalGuests: number
   nights: number
 }
 
 export default function BookingHistoryPage() {
-  const [user, setUser] = useState<any>(null)
   const [bookings, setBookings] = useState<Booking[]>([])
+  const [roomsData, setRoomsData] = useState<RoomType[]>([])
   const [loading, setLoading] = useState(true)
 
+  // Lấy dữ liệu lịch sử đặt phòng
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const userStr = localStorage.getItem("user")
-      if (userStr) setUser(JSON.parse(userStr))
-    }
+    fetch('http://localhost:4000/booking/history', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: 'mai@gmail.com' })
+    })
+      .then(res => res.json())
+      .then(data => setBookings(data))
+      .catch(err => console.error('Lỗi:', err));
   }, [])
 
+  // Lấy dữ liệu phòng từ page phong
   useEffect(() => {
-    if (user?.email) {
-      // Dữ liệu giả để test hiển thị
-      setBookings([
-        {
-          id: 1,
-          userEmail: user.email,
-          room: {
-            id: 1,
-            name: "Deluxe Ocean View",
-            image: "/khachsan/khonggian1.png",
-            images: [
-              "/khachsan/khonggian1.png",
-              "/images/phongloai1/2.jpg",
-              "/images/phongloai1/3.jpg",
-            ],
-            area: "45m²",
-            view: "Hướng biển",
-            maxGuests: 3,
-            beds: 1,
-            bathrooms: 1,
-            description:
-              "Phòng sang trọng với view biển tuyệt đẹp, nội thất cao cấp và đầy đủ tiện nghi hiện đại.",
-            amenities: [
-              "Wi-Fi miễn phí",
-              "TV 55 inch",
-              "Bồn tắm",
-              "Dịch vụ phòng 24/24",
-              "Mini bar",
-              "Máy pha cà phê",
-            ],
-            packages: [
-              {
-                id: 1,
-                name: "Special Offer - Royal Privilege Package",
-                benefits: ["Free cancellation", "Pay today"],
-                originalPrice: 250000,
-                discountPrice: 150000,
-                available: true,
-              },
-            ],
-          },
-          packageId: 1,
-          checkIn: "2025-06-20",
-          checkOut: "2025-06-22",
-          adults: 2,
-          children: 1,
-          nights: 2,
-        },
-        {
-          id: 2,
-          userEmail: user.email,
-          room: {
-            id: 2,
-            name: "Executive Suite",
-            image: "/khachsan/khonggian2.png",
-            images: [
-              "/khachsan/khonggian2.png",
-              "/images/phongloai2/1.jpg",
-              "/images/phongloai2/2.jpg",
-            ],
-            area: "65m²",
-            view: "Hướng thành phố",
-            maxGuests: 4,
-            beds: 2,
-            bathrooms: 1,
-            description:
-              "Suite cao cấp với không gian rộng rãi, phòng khách riêng biệt và tầm nhìn panorama thành phố.",
-            amenities: [
-              "Wi-Fi miễn phí",
-              "TV 65 inch",
-              "Jacuzzi",
-              "Dịch vụ phòng 24/24",
-              "Mini bar",
-              "Máy pha cà phê",
-              "Bàn làm việc",
-            ],
-            packages: [
-              {
-                id: 2,
-                name: "Executive Privilege Package",
-                benefits: ["Free cancellation", "Pay today", "Complimentary breakfast"],
-                originalPrice: 250000,
-                discountPrice: 150000,
-                available: true,
-              },
-            ],
-          },
-          packageId: 2,
-          checkIn: "2025-07-01",
-          checkOut: "2025-07-05",
-          adults: 3,
-          children: 1,
-          nights: 4,
-        },
-      ])
-      setLoading(false)
-      // ...bỏ fetch API thật để test
-      return
-    } else {
-      setLoading(false)
+    fetch('http://localhost:4000/room/all', {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' }
+    })
+      .then(response => response.json())
+      .then(data => setRoomsData(data.roomType))
+      .catch(error => console.error('Error:', error))
+      .finally(() => setLoading(false));
+  }, [])
+
+  if (loading) {
+    return <div className="text-center py-10">Đang tải dữ liệu...</div>
+  }
+
+ // Thêm hàm xử lý hủy phòng
+async function handleCancelBooking(reservationId: number) {
+  if (window.confirm('Bạn có chắc chắn muốn hủy phòng này?')) {
+    try {
+      const res = await fetch('http://localhost:4000/booking/cancel', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reservation_id: reservationId })
+      });
+      if (res.ok) {
+        setBookings(prev => prev.filter(b => b.reservationId !== reservationId));
+        alert('Đã hủy phòng thành công!');
+      } else {
+        alert('Hủy phòng thất bại!');
+      }
+    } catch (err) {
+      alert('Hủy phòng thất bại!');
+      console.error('Lỗi:', err);
     }
-  }, [user])
+  }
+}
 
   return (
     <div className="min-h-screen bg-[#f9eed7]">
@@ -139,54 +80,45 @@ export default function BookingHistoryPage() {
         <h1 className="text-2xl font-bold text-[#002346] mb-6">
           Lịch sử đặt phòng
         </h1>
-        {loading ? (
-          <div>Đang tải...</div>
-        ) : bookings.length === 0 ? (
+        {bookings.length === 0 ? (
           <div>Bạn chưa có lịch sử đặt phòng nào.</div>
         ) : (
           <div className="space-y-8">
-            {bookings.map((booking) => (
-              <div
-                key={booking.id}
-                className="bg-white rounded-lg shadow p-4"
-              >
-                <div className="mb-2 flex flex-wrap gap-4 text-sm text-gray-700">
-                  <div>
-                    <strong>Check-in:</strong> {booking.checkIn}
+            {bookings.map((booking) => {
+              const room = roomsData.find(r => r.id === booking.roomTypeId);
+              const canCancel = new Date(booking.checkIn) > new Date();
+              return (
+                <div
+                  key={booking.reservationId}
+                  className="border rounded-lg p-4 mb-6 bg-white shadow"
+                >
+                  {/* Sử dụng RoomPackageInfo để show chi tiết phòng/gói */}
+                  {room && (
+                    <RoomPackageInfo
+                      room={room}
+                      bookingData={{
+                        adults: booking.totalLocalGuests,
+                        children: booking.totalForeignGuests,
+                        nights: booking.nights,
+                      }}
+                      selectedPackageId={booking.packageId}
+                    />
+                  )}
+                  <div className="flex flex-col md:flex-row md:items-center md:justify-between mt-2">
+                    <div className="text-sm text-gray-500">Mã đặt: #{booking.reservationId}</div>
+                    <div className="text-xs text-gray-400">Phòng số: {booking.roomRumber} | Email: {booking.userEmail}</div>
                   </div>
-                  <div>
-                    <strong>Check-out:</strong> {booking.checkOut}
-                  </div>
-                  <div>
-                    <strong>Số đêm:</strong> {booking.nights}
-                  </div>
-                  <div>
-                    <strong>Nội địa:</strong> {booking.adults}
-                  </div>
-                  <div>
-                    <strong>Nước ngoài:</strong> {booking.children}
-                  </div>
+                  {canCancel && (
+                    <button
+                      className="mt-3 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-sm font-semibold"
+                      onClick={() => handleCancelBooking(booking.reservationId)}
+                    >
+                      Hủy phòng
+                    </button>
+                  )}
                 </div>
-                <RoomPackageInfo
-                  room={booking.room}
-                  bookingData={{
-                    adults: booking.adults,
-                    children: booking.children,
-                    nights: booking.nights,
-                  }}
-                  selectedPackageId={booking.packageId}
-                />
-                {/* Nút hủy phòng nếu check-in > ngày hiện tại */}
-                {new Date(booking.checkIn) > new Date() && (
-                  <button
-                    className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 font-semibold"
-                    onClick={() => alert('Bạn đã yêu cầu hủy phòng! (Demo)')}
-                  >
-                    Hủy phòng
-                  </button>
-                )}
-              </div>
-            ))}
+              )
+            })}
           </div>
         )}
       </div>

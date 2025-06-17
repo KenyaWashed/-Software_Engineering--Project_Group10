@@ -128,7 +128,8 @@ export default function RoomCard({ room, onSelectPackage, selectedPackage, booki
             <div className="h-64 rounded-lg overflow-hidden mb-4 relative group cursor-pointer" onClick={() => setShowModal(true)}>
               {room.images && room.images.length > 0 ? (
                 <Image
-                  src={room.images[currentImage]}
+                // đường dẫn: "/images/typeRoom" + room.id + "/room.images[currentImage]"
+                  src={"/images/typeRoom" + room.id + "/" + "1" + ".jpg"}
                   alt={room.name}
                   width={400}
                   height={256}

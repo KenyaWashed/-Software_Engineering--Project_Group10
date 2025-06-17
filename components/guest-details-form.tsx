@@ -21,7 +21,7 @@ interface GuestDetailsFormProps {
   }
 }
 
-interface GuestData {
+export type GuestData = {
   firstName: string
   lastName: string
   email: string
@@ -43,6 +43,9 @@ export default function GuestDetailsForm({ onContinue, isLoggedIn = false, userD
   })
 
   const [errors, setErrors] = useState<Partial<GuestData>>({})
+
+  // Nếu đã đăng nhập, không cho chỉnh sửa các trường thông tin cá nhân
+  const isUserFieldDisabled = isLoggedIn;
 
   const handleInputChange = (field: keyof GuestData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
@@ -134,7 +137,7 @@ export default function GuestDetailsForm({ onContinue, isLoggedIn = false, userD
                   className={`pl-10 ${errors.firstName ? "border-red-500" : ""}`}
                   value={formData.firstName}
                   onChange={(e) => handleInputChange("firstName", e.target.value)}
-                  disabled={isLoggedIn}
+                  disabled={isUserFieldDisabled}
                 />
               </div>
               {errors.firstName && <p className="text-sm text-red-500">{errors.firstName}</p>}
@@ -152,7 +155,7 @@ export default function GuestDetailsForm({ onContinue, isLoggedIn = false, userD
                   className={`pl-10 ${errors.lastName ? "border-red-500" : ""}`}
                   value={formData.lastName}
                   onChange={(e) => handleInputChange("lastName", e.target.value)}
-                  disabled={isLoggedIn}
+                  disabled={isUserFieldDisabled}
                 />
               </div>
               {errors.lastName && <p className="text-sm text-red-500">{errors.lastName}</p>}
@@ -173,7 +176,7 @@ export default function GuestDetailsForm({ onContinue, isLoggedIn = false, userD
                 className={`pl-10 ${errors.email ? "border-red-500" : ""}`}
                 value={formData.email}
                 onChange={(e) => handleInputChange("email", e.target.value)}
-                disabled={isLoggedIn}
+                disabled={isUserFieldDisabled}
               />
             </div>
             {errors.email && <p className="text-sm text-red-500">{errors.email}</p>}
@@ -192,7 +195,7 @@ export default function GuestDetailsForm({ onContinue, isLoggedIn = false, userD
                 className={`pl-10 ${errors.confirmEmail ? "border-red-500" : ""}`}
                 value={formData.confirmEmail}
                 onChange={(e) => handleInputChange("confirmEmail", e.target.value)}
-                disabled={isLoggedIn}
+                disabled={isUserFieldDisabled}
               />
             </div>
             {errors.confirmEmail && <p className="text-sm text-red-500">{errors.confirmEmail}</p>}
@@ -211,7 +214,7 @@ export default function GuestDetailsForm({ onContinue, isLoggedIn = false, userD
                 className={`pl-10 ${errors.phone ? "border-red-500" : ""}`}
                 value={formData.phone}
                 onChange={(e) => handleInputChange("phone", e.target.value)}
-                disabled={isLoggedIn}
+                disabled={isUserFieldDisabled}
               />
             </div>
             {errors.phone && <p className="text-sm text-red-500">{errors.phone}</p>}

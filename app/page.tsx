@@ -14,7 +14,7 @@ export default function HomePage() {
       <section className="relative h-[60vh] bg-[#f9eed7] flex items-center justify-center overflow-hidden">
         {/* Background Image */}
         <img
-          src="khachsan/homepage.jpg"
+          src="images/khachsan/homepage.jpg"
           alt="Royal Hotel Hero"
           className="absolute inset-0 w-full h-full object-cover z-0"
         />
@@ -49,7 +49,7 @@ export default function HomePage() {
           </div>
           <div className="h-64 lg:h-auto">
             <img
-              src="khachsan/khonggian1.png"
+              src="images/khachsan/khonggian1.png"
               alt="Phòng nghỉ Royal Hotel"
               className="w-full h-full object-cover rounded-lg"
             />
@@ -66,7 +66,7 @@ export default function HomePage() {
             <div className="text-center">
               <div className="h-48 mb-4 rounded-lg overflow-hidden">
                 <img
-                  src="khachsan/amthuc.png"
+                  src="images/khachsan/amthuc.png"
                   alt="Nhà hàng & Ẩm thực"
                   className="w-full h-full object-cover"
                 />
@@ -82,7 +82,7 @@ export default function HomePage() {
             <div className="text-center">
               <div className="h-48 mb-4 rounded-lg overflow-hidden">
                 <img
-                   src="khachsan/hoboi.jpg"
+                   src="images/khachsan/hoboi.jpg"
                   alt="Hồ bơi vô cực"
                   className="w-full h-full object-cover"
                 />
@@ -98,7 +98,7 @@ export default function HomePage() {
             <div className="text-center">
               <div className="h-48 mb-4 rounded-lg overflow-hidden">
                 <img
-                   src="khachsan/spa.jpg"
+                   src="images/khachsan/spa.jpg"
                   alt="Spa & Chăm sóc sức khỏe"
                   className="w-full h-full object-cover"
                 />
@@ -128,7 +128,7 @@ export default function HomePage() {
           </div>
           <div className="h-64 lg:h-auto">
             <img
-              src="khachsan/khonggian2.jpg"
+              src="images/khachsan/khonggian2.jpg"
               alt="Không gian nghỉ dưỡng Royal Hotel"
               className="w-full h-full object-cover rounded-lg"
             />

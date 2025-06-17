@@ -1,7 +1,7 @@
 "use client"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Users, Bed, Bath, Maximize, Eye, Minus, Plus } from "lucide-react"
+import { Users, Bed, Bath, Maximize, Eye } from "lucide-react"
 import { useState } from "react"
 import { calculatePackagePrice } from "@/components/utils/pricing"
 
@@ -17,8 +17,7 @@ interface Package {
 interface Room {
   id: number
   name: string
-  image: string
-  images?: string[] // Thêm trường images
+  images?: string[] // Chỉ dùng images, bỏ image
   area: string
   view: string
   maxGuests: number
@@ -53,7 +52,7 @@ export default function RoomPackageInfo({
 
   // Gallery state
   const [galleryIndex, setGalleryIndex] = useState(0)
-  const images = room.images && room.images.length > 0 ? room.images : [room.image]
+  const images = room.images && room.images.length > 0 ? room.images : ["/placeholder.svg"]
 
   const handlePrev = () => setGalleryIndex((prev) => (prev - 1 + images.length) % images.length)
   const handleNext = () => setGalleryIndex((prev) => (prev + 1) % images.length)

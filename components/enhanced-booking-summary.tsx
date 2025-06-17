@@ -4,12 +4,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Calendar, Users, Moon, Receipt, CreditCard } from "lucide-react"
 import { calculateBookingTotals } from "@/components/utils/pricing"
 
+// Bỏ quantity khỏi SelectedPackage
 interface SelectedPackage {
   packageId: number
   roomName: string
   packageName: string
   basePrice: number
-  quantity: number
 }
 
 interface EnhancedBookingSummaryProps {
@@ -46,7 +46,7 @@ export default function EnhancedBookingSummary({
 
   // Sử dụng utils để tính toán tổng tiền, thuế/phí, deposit
   const totals = calculateBookingTotals({
-    selectedPackages: selectedPackages.map((pkg) => ({ basePrice: pkg.basePrice, quantity: pkg.quantity })),
+    selectedPackages: selectedPackages.map((pkg) => ({ basePrice: pkg.basePrice })),
     bookingData: {
       nights: bookingData.nights,
       adults: bookingData.adults,
@@ -62,7 +62,6 @@ export default function EnhancedBookingSummary({
     pricing: totals.packagePrices[idx],
   }))
 
-  const totalRooms = selectedPackages.reduce((sum, pkg) => sum + pkg.quantity, 0)
   const totalGuests = bookingData.adults + bookingData.children
 
   if (selectedPackages.length === 0) {
@@ -120,7 +119,7 @@ export default function EnhancedBookingSummary({
             <div>
               <p className="font-semibold text-gray-700">Tổng quan:</p>
               <p className="text-[#002346]">
-                {totalRooms} phòng, {totalGuests} khách
+                1 phòng, {totalGuests} khách
               </p>
             </div>
           </div>
@@ -136,7 +135,6 @@ export default function EnhancedBookingSummary({
                   <div className="flex-1">
                     <h5 className="font-semibold text-sm text-[#002346]">{pkg.roomName}</h5>
                     <p className="text-xs text-gray-600 mb-1">{pkg.packageName}</p>
-                    <p className="text-xs text-gray-500">Số lượng: {pkg.quantity} phòng</p>
                     <p className="font-semibold text-[#002346] mt-1">{formatPrice(pkg.pricing.packageTotal)}</p>
                   </div>
                 </div>
@@ -167,7 +165,7 @@ export default function EnhancedBookingSummary({
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
           <p className="text-sm font-semibold text-blue-800">📋 Tổng tiền: {formatPrice(totals.total)}</p>
           <p className="text-xs text-blue-700 mt-1">
-            ({totalRooms} phòng, {totalGuests} khách, {bookingData.nights} đêm)
+            (1 phòng, {totalGuests} khách, {bookingData.nights} đêm)
           </p>
           <div className="mt-2 text-xs text-blue-600">
             <p>✅ Free cancellation</p>
