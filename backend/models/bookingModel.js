@@ -121,7 +121,39 @@ async function getBookingHistoryByEmail(email) {
   }
 }
 
+
+
+async function cancelBooking(reservation_id) {
+  try {
+    const pool = await poolPromise;
+
+    // Kiểm tra reservation_id có tồn tại không
+    const check = await pool.request()
+      .input('reservation_id', sql.Int, reservation_id)
+      .query(`SELECT 1 FROM Reservations WHERE reservation_id = @reservation_id`);
+
+    if (check.recordset.length === 0) {
+      return { success: false };
+    }
+
+    // Xóa ở bảng con trước
+    await pool.request()
+      .input('reservation_id', sql.Int, reservation_id)
+      .query(`DELETE FROM Reservation_detail WHERE reservation_id = @reservation_id`);
+
+    // Xoá bảng chính
+    await pool.request()
+      .input('reservation_id', sql.Int, reservation_id)
+      .query(`DELETE FROM Reservations WHERE reservation_id = @reservation_id`);
+
+    return { success: true };
+  } catch (err) {
+    throw err;
+  }
+}
+
 module.exports = { 
   createBooking, 
-  getBookingHistoryByEmail
+  getBookingHistoryByEmail,
+  cancelBooking
 };

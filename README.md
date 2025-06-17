@@ -6,6 +6,7 @@ npm install express
 npm install mssql
 npm install express-validator
 npm install node-cron
+npm install cors
 
 
 

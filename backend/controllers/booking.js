@@ -66,7 +66,31 @@ const getBookingHistory = async (req, res) => {
   }
 };
 
+
+const cancelBooking = async (req, res) => {
+  //console.log('>>> req.body:', req.body);
+  const { reservation_id } = req.body;
+
+  if (!reservation_id) {
+    return res.status(400).json({ error: 'Thiếu reservation_id' });
+  }
+
+  try {
+    const result = await BookingModel.cancelBooking(reservation_id);
+
+    if (result.success) {
+      return res.status(200).json({ message: 'Huỷ đặt phòng thành công' });
+    } else {
+      return res.status(404).json({ error: 'Không tìm thấy reservation_id' });
+    }
+  } catch (error) {
+    console.error('Lỗi huỷ phòng:', error);
+    return res.status(500).json({ error: 'Lỗi máy chủ' });
+  }
+};
+
 module.exports = { 
   createBooking,
-  getBookingHistory
+  getBookingHistory,
+  cancelBooking
 };
