@@ -280,10 +280,6 @@ VALUES
 ('302', 3, 4, N'Đã đặt', NULL),
 ('303', 3, 5, N'Trống', NULL),
 ('304', 3, 5, N'Đã đặt', NULL);
-
-
-
-
 GO
 
 CREATE FUNCTION dbo.checkAvailableRoom (
