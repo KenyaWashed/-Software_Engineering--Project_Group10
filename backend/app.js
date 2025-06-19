@@ -2,14 +2,25 @@ const express = require("express");
 const app = express();
 const path = require("path");
 const cors = require('cors');
+const session = require('express-session');
 port = 4000;
+
+// Cấu hình session middleware
+app.use(session({
+  secret: 'royal-hotel', // Khóa bí mật để mã hóa session
+  resave: false,             // Không lưu lại session nếu không có thay đổi
+  saveUninitialized: true,   // Lưu session mới dù chưa có dữ liệu
+  cookie: { 
+    secure: false,           // Nếu dùng HTTPS thì đặt thành true
+  }
+}));
 
 // Đường dẫn đến thư mục ảnh
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 
 // Kết nối DB
-require('./config/db');
+//require('./config/db');
 
 // Parser
 app.use(express.json());

@@ -6,7 +6,7 @@ const config = {
   password: '123456',
   server: '127.0.0.1',
   port: 1433,
-database: 'hms',
+  database: 'hms',
   options: {
     encrypt: false,
     trustServerCertificate: true
