@@ -10,9 +10,9 @@ const session = require('express-session');
 const { check, validationResult } = require('express-validator');
 
 exports.userLoginValidator = [ 
-    check('user_email').isEmail().withMessage('Email không hợp lệ.'),
-    check('user_password', 'Password is required').notEmpty(),
-    check('user_password')
+    check('email').isEmail().withMessage('Email không hợp lệ.'),
+    check('password', 'Password is required').notEmpty(),
+    check('password')
         .isLength({ min: 6 })
         .withMessage('Password must contain at least 6 characters')
         .matches(/\d/)

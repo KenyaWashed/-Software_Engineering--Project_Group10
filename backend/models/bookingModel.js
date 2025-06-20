@@ -1,7 +1,7 @@
 const { poolPromise } = require('../config/db');
 const sql = require('mssql');
 
-
+// Thêm một hóa đơn vào db gọi bởi createBooking
 async function createInvoiceSimplified({
   reservation_id,
   room_id,
@@ -82,7 +82,7 @@ async function createInvoiceSimplified({
   }
 }
 
-
+// Tạo một đơn đặt phòng mới
 const createBooking = async (bookingData) => {
   const {
     full_name,
@@ -182,7 +182,7 @@ const createBooking = async (bookingData) => {
 };
 
 
-
+// Lấy lịch sử đặt phòng của người dùng theo email
 async function getBookingHistoryByEmail(email) {
   try {
     const pool = await poolPromise;
@@ -214,7 +214,7 @@ async function getBookingHistoryByEmail(email) {
 }
 
 
-
+// Hủy đặt phòng
 async function cancelBooking(reservation_id) {
   try {
     const pool = await poolPromise;

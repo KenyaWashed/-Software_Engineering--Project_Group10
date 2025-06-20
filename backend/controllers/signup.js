@@ -13,16 +13,16 @@ const e = require('express');
 const { check, validationResult } = require('express-validator');
 
 exports.userSignupValidator = [
-    check('user_name', 'Name is required').notEmpty(),
-    check('user_email').isEmail().withMessage('Email không hợp lệ'),
-    check('phone_number', 'Phone number is required').notEmpty(),
-    check('phone_number')
+    check('fullName', 'Name is required').notEmpty(),
+    check('email').isEmail().withMessage('Email không hợp lệ'),
+    check('phone', 'Phone number is required').notEmpty(),
+    check('phone')
         .matches(/^\d+$/)
         .withMessage('Phone number must contain only numbers')
         .isLength(10)
         .withMessage('Phone number must be exactly 10 digits long'),
-    check('user_password', 'Password is required').notEmpty(),
-    check('user_password')
+    check('password', 'Password is required').notEmpty(),
+    check('password')
         .isLength({ min: 6 })
         .withMessage('Password must contain at least 6 characters')
         .matches(/\d/)

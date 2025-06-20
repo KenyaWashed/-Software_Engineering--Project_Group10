@@ -66,9 +66,43 @@ fetch('http://localhost:4000/booking/history', {
   .then(res => res.json())
   .then(data => console.log('Booking history:', data));
   
+  
 ### Hủy phòng đã đặt
 await fetch('http://localhost:4000/booking/cancel', {
   method: 'DELETE',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({ reservation_id: 123 })
 });
+
+### Lấy chính sách phụ thu
+fetch('http://localhost:4000/policy/get', {
+  method: 'GET',
+  headers: { 'Content-Type': 'application/json' }
+})
+  .then(res => res.json())
+  .then(data => console.log('Danh sách chính sách:', data));
+
+
+
+
+========================= NTD =========================
+
+
+### đăng ký user mới
+fetch('http://localhost:4000/api/register-user', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    username: 'huydeptrai111',
+    password: 'Abc123@@',
+    fullName: 'Nguyễn Văn Đại',
+    email: 'hvo6471@gmail.com',
+    phone: '0987654321',
+    role: 'guest'
+  })
+})
+  .then(res => res.json())
+  .then(data => console.log('Kết quả đăng ký:', data));
+  
+  
+  

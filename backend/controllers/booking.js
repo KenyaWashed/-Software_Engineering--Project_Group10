@@ -1,5 +1,6 @@
 const BookingModel = require('../models/bookingModel');
 
+// Tạo một đơn đặt phòng trên hệ thống và một hóa đơn tương ứng
 const createBooking = async (req, res) => {
   try {
     const {
@@ -49,7 +50,7 @@ const createBooking = async (req, res) => {
 };
 
 
-
+// Lây lịch sử đặt phòng của người dùng theo email
 const getBookingHistory = async (req, res) => {
   const { email } = req.body;
 
@@ -66,9 +67,8 @@ const getBookingHistory = async (req, res) => {
   }
 };
 
-
+// Hủy một đơn đặt phòng theo reservation_id
 const cancelBooking = async (req, res) => {
-  //console.log('>>> req.body:', req.body);
   const { reservation_id } = req.body;
 
   if (!reservation_id) {

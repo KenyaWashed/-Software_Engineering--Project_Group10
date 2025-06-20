@@ -28,15 +28,27 @@ app.use(express.urlencoded({ extended: true }));
 
 
 // Routes
+
+// Đăng nhập, đăng ký, đăng xuất
+// Kiểm tra session, lấy quyền chủ khách sạn, lễ tân
+const loginRoutes = require("./routers/login");
+app.use("/", loginRoutes);
+
+// Lấy dữ liệu phòng để hiển thị, lấy danh sách phòng trống
 const roomRoutes = require("./routers/room");
 app.use("/room", roomRoutes);
 
-
+// tính tiền
 const calculationRoutes = require("./routers/calculation"); 
 app.use("/calculation", calculationRoutes);
 
+// Đặt phòng, hủy phòng, xem lịch sử đặt phòng
 const bookingRoutes = require("./routers/booking");
 app.use("/booking", bookingRoutes);
+
+// Lấy chính sách phụ thu
+const policyRoutes = require("./routers/policy");
+app.use("/policy", policyRoutes);
 
 
 app.listen(port, () => console.log("Server running... http://localhost:" + port));
