@@ -1,28 +1,25 @@
-"use client"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { ArrowLeft } from "lucide-react"
+import { useRouter } from "next/navigation";
 
 interface BackButtonProps {
-  className?: string
-  variant?: "default" | "outline" | "ghost"
+  to?: string; // đường dẫn muốn quay về, nếu có
+  className?: string;
 }
 
-export default function BackButton({ className = "", variant = "outline" }: BackButtonProps) {
-  const router = useRouter()
+export default function BackButton({ to, className }: BackButtonProps) {
+  const router = useRouter();
 
   const handleBack = () => {
-    if (window.history.length > 1) {
-      router.back()
+    if (to) {
+      router.push(to);
     } else {
-      router.push("/")
+      router.back();
     }
-  }
+  };
 
   return (
-    <Button onClick={handleBack} variant={variant} className={`flex items-center space-x-2 ${className}`}>
-      <ArrowLeft className="h-4 w-4" />
-      <span>Quay lại</span>
-    </Button>
-  )
+    <button onClick={handleBack} className={className}>
+      {/* icon và text */}
+      Quay lại
+    </button>
+  );
 }

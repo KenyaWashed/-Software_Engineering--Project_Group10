@@ -82,18 +82,6 @@ export default function BookingSummary({ selectedPackages, onRemovePackage }: Bo
       alert("Vui lòng chọn ít nhất một phòng để đặt!")
       return
     }
-    if (!bookingData.checkIn || !bookingData.checkOut) {
-      alert("Vui lòng chọn ngày nhận phòng và trả phòng!")
-      return
-    }
-    if (
-      bookingData.checkIn &&
-      bookingData.checkOut &&
-      bookingData.checkOut <= bookingData.checkIn
-    ) {
-      alert("Ngày trả phòng phải sau ngày nhận phòng!")
-      return
-    }
     const bookingURL = createBookingURL()
     console.log("Navigating to booking page with URL:", bookingURL)
     console.log("Booking data:", {

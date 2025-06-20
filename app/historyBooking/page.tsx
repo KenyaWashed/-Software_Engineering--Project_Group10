@@ -3,7 +3,7 @@ import { useEffect, useState } from "react"
 import Header from "@/components/header"
 import Footer from "@/components/footer"
 import RoomPackageInfo from "@/components/room-package-info"
-import type { RoomType } from "@/app/phong/page"
+import { useRoomsDataOnce } from "@/hooks/useRoomsDataStore"
 
 interface Booking {
   reservationId: number
@@ -20,7 +20,8 @@ interface Booking {
 
 export default function BookingHistoryPage() {
   const [bookings, setBookings] = useState<Booking[]>([])
-  const [roomsData, setRoomsData] = useState<RoomType[]>([])
+  // Lấy dữ liệu phòng từ zustand store
+  const { roomsData, loading: roomsLoading, error: roomsError } = useRoomsDataOnce();
   const [loading, setLoading] = useState(true)
 
   // Lấy dữ liệu lịch sử đặt phòng
@@ -28,27 +29,20 @@ export default function BookingHistoryPage() {
     fetch('http://localhost:4000/booking/history', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: 'mai@gmail.com' })
+      body: JSON.stringify({ email: 'test1@gmail.com' })
     })
       .then(res => res.json())
       .then(data => setBookings(data))
-      .catch(err => console.error('Lỗi:', err));
-  }, [])
-
-  // Lấy dữ liệu phòng từ page phong
-  useEffect(() => {
-    fetch('http://localhost:4000/room/all', {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' }
-    })
-      .then(response => response.json())
-      .then(data => setRoomsData(data.roomType))
-      .catch(error => console.error('Error:', error))
+      .catch(err => console.error('Lỗi:', err))
       .finally(() => setLoading(false));
   }, [])
 
-  if (loading) {
+  // Loading state khi roomsData hoặc bookings đang fetch
+  if (loading || roomsLoading) {
     return <div className="text-center py-10">Đang tải dữ liệu...</div>
+  }
+  if (roomsError) {
+    return <div className="text-center py-10 text-red-600">Lỗi tải dữ liệu phòng: {roomsError}</div>
   }
 
  // Thêm hàm xử lý hủy phòng

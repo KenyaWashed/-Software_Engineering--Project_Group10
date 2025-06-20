@@ -110,6 +110,19 @@ export default function BookingWidget({ onBookingChange, initialData }: BookingW
 
   // Function to handle booking submission and navigation
   const handleBookingSubmit = () => {
+    if (adults == 0 &&  children == 0) {
+      alert("Vui lòng chọn ít nhất 1 khách!")
+      return
+    }
+
+    if (!checkInDate || !checkOutDate) {
+      alert("Vui lòng chọn ngày nhận phòng và trả phòng!")
+      return
+    }
+    if (checkOutDate <= checkInDate) {
+      alert("Ngày trả phòng phải sau ngày nhận phòng!")
+      return
+    }
     const bookingData = {
       checkIn: checkInDate,
       checkOut: checkOutDate,
@@ -225,7 +238,7 @@ export default function BookingWidget({ onBookingChange, initialData }: BookingW
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => setAdults(Math.max(1, adults - 1))}
+                onClick={() => setAdults(Math.max(0, adults - 1))}
                 className="h-6 w-6 p-0 text-black hover:bg-gray-100 rounded-full"
               >
                 <Minus className="h-3 w-3" />

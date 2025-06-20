@@ -7,6 +7,7 @@ import BookingWidget from "@/components/booking-widget"
 import RoomCard from "@/components/room-card"
 import BookingSummary from "@/components/booking-summary"
 import BackButton from "@/components/back-button"
+import { useRoomsDataOnce, useRoomsDataStore } from "@/hooks/useRoomsDataStore"
 
 // Booking Context
 interface BookingData {
@@ -31,44 +32,10 @@ const BookingContext = createContext<{
   setBookingData: () => {},
 })
 
-export interface RoomPackage {
-  id: number;
-  name: string;
-  benefits: string[];
-  originalPrice: number;
-  discountPrice: number;
-  available: boolean;
-}
-
-export interface RoomType {
-  id: number;
-  name: string;
-  images: string[];
-  area: string;
-  view: string;
-  maxGuests: number;
-  beds: number;
-  bathrooms: number;
-  description: string;
-  amenities: string[];
-  packages: RoomPackage[];
-}
-
 function RoomsPageContent() {
-
-  const [roomsData, setRoomsData] = useState<RoomType[]>([]);
-
-  // 1. Fetch dữ liệu phòng ban đầu
-  useEffect(() => {
-    fetch('http://localhost:4000/room/all', {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' }
-    })
-      .then(response => response.json())
-      .then(data => setRoomsData(data.roomType))
-      .catch(error => console.error('Error:', error));
-  }, []);
-
+  // Lấy roomsData từ zustand store
+  const { roomsData, loading, error } = useRoomsDataOnce();
+  const setRoomsData = useRoomsDataStore(state => state.setRoomsData);
   const searchParams = useSearchParams()
   const [selectedPackages, setSelectedPackages] = useState<any[]>([])
 
@@ -124,8 +91,8 @@ function RoomsPageContent() {
         .then(response => response.json())
         .then(data => {
           const availableIds = new Set(data.availableRoom.map((item: any) => item.room_package_id));
-          setRoomsData(prevRooms =>
-            prevRooms.map(room => ({
+          setRoomsData(
+            roomsData.map(room => ({
               ...room,
               packages: room.packages.map(pkg => ({
                 ...pkg,
@@ -138,7 +105,7 @@ function RoomsPageContent() {
           console.error('Lỗi:', error);
         });
     }
-  }, [roomsData.length, bookingData.checkIn, bookingData.checkOut]);
+  }, [roomsData, bookingData.checkIn, bookingData.checkOut, setRoomsData]);
 
   const handleSelectPackage = useCallback((roomId: number, packageData: any) => {
     const newSelection = {
@@ -162,13 +129,34 @@ function RoomsPageContent() {
     setSelectedPackages([]) // Reset các lựa chọn gói/phòng khi thay đổi dữ liệu booking
   }, [])
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#f9eed7] flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#002346] mx-auto mb-4"></div>
+          <p className="text-[#002346]">Đang tải thông tin phòng...</p>
+        </div>
+      </div>
+    )
+  }
+  if (error) {
+    return (
+      <div className="min-h-screen bg-[#f9eed7] flex items-center justify-center">
+        <div className="text-center text-red-600">Lỗi tải dữ liệu phòng: {error}</div>
+      </div>
+    )
+  }
+
   return (
     <BookingContext.Provider value={{ bookingData, setBookingData: handleBookingDataChange }}>
       <div className="min-h-screen bg-[#f9eed7]">
         <Header />
 
         <div className="max-w-7xl mx-auto px-4 py-4">
-          <BackButton className="border-[#002346] text-[#002346] hover:bg-[#002346] hover:text-white" />
+           <BackButton
+            to=""
+            className="border-[#002346] text-[#002346] hover:bg-[#002346] hover:text-white"
+          />
         </div>
 
         <main className="max-w-7xl mx-auto px-4 py-8">

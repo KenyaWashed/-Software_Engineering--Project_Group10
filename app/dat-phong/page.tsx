@@ -8,127 +8,7 @@ import RoomPackageInfo from "@/components/room-package-info"
 import EnhancedBookingSummary from "@/components/enhanced-booking-summary"
 import GuestDetailsForm, { type GuestData } from "@/components/guest-details-form"
 import ReviewPayment from "@/components/review-payment"
-
-// Sample room data
-const roomsData = [
-  {
-    id: 1,
-    name: "Deluxe Ocean View",
-    images: [
-      "/khachsan/khonggian1.png",
-      "/images/phongloai1/2.jpg",
-      "/images/phongloai1/3.jpg",
-      "/images/phongloai1/4.jpeg",
-      "/images/phongloai1/5.jpeg",
-    ],
-    area: "45m²",
-    view: "Hướng biển",
-    maxGuests: 3,
-    beds: 1,
-    bathrooms: 1,
-    description: "Phòng sang trọng với view biển tuyệt đẹp, nội thất cao cấp và đầy đủ tiện nghi hiện đại.",
-    amenities: ["Wi-Fi miễn phí", "TV 55 inch", "Bồn tắm", "Dịch vụ phòng 24/24", "Mini bar", "Máy pha cà phê"],
-    packages: [
-      {
-        id: 1,
-        name: "Special Offer - Royal Privilege Package",
-        benefits: ["Free cancellation", "Pay today"],
-        originalPrice: 250000,
-        discountPrice: 150000,
-        available: true,
-      },
-      {
-        id: 2,
-        name: "Standard Package",
-        benefits: ["Free cancellation"],
-        originalPrice: 250000,
-        discountPrice: 150000,
-        available: false,
-      },
-    ],
-  },
-  {
-    id: 2,
-    name: "Executive Suite",
-    images: [
-      "/images/phongloai1/2.jpg",
-      "/images/phongloai1/1.jpg",
-      "/images/phongloai1/3.jpg",
-      "/images/phongloai1/4.jpeg",
-      "/images/phongloai1/5.jpeg",
-    ],
-    area: "65m²",
-    view: "Hướng thành phố",
-    maxGuests: 4,
-    beds: 2,
-    bathrooms: 2,
-    description: "Suite cao cấp với không gian rộng rãi, phòng khách riêng biệt và tầm nhìn panorama thành phố.",
-    amenities: [
-      "Wi-Fi miễn phí",
-      "TV 65 inch",
-      "Jacuzzi",
-      "Dịch vụ phòng 24/24",
-      "Mini bar",
-      "Máy pha cà phê",
-      "Bàn làm việc",
-    ],
-    packages: [
-      {
-        id: 3,
-        name: "Executive Privilege Package",
-        benefits: ["Free cancellation", "Pay today", "Complimentary breakfast"],
-        originalPrice: 250000,
-        discountPrice: 170000,
-        available: true,
-      },
-    ],
-  },
-  {
-    id: 3,
-    name: "Presidential Suite",
-       images: [
-      "/images/phongloai1/3.jpg",
-      "/images/phongloai1/2.jpg",
-      "/images/phongloai1/1.jpg",
-      "/images/phongloai1/4.jpeg",
-      "/images/phongloai1/5.jpeg",
-    ],
-    area: "120m²",
-    view: "Hướng biển và thành phố",
-    maxGuests: 6,
-    beds: 3,
-    bathrooms: 3,
-    description: "Suite tổng thống với thiết kế xa hoa, phòng khách rộng lớn và tầm nhìn 360 độ tuyệt đẹp.",
-    amenities: [
-      "Wi-Fi miễn phí",
-      "TV 75 inch",
-      "Jacuzzi riêng",
-      "Dịch vụ phòng 24/24",
-      "Mini bar cao cấp",
-      "Máy pha cà phê",
-      "Phòng làm việc riêng",
-      "Ban công riêng",
-    ],
-    packages: [
-      {
-        id: 4,
-        name: "Presidential Experience Package",
-        benefits: ["Free cancellation", "Pay today", "Complimentary breakfast", "Airport transfer"],
-        originalPrice: 300000,
-        discountPrice: 200000,
-        available: true,
-      },
-      {
-        id: 5,
-        name: "Luxury Package",
-        benefits: ["Free cancellation"],
-        originalPrice: 300000,
-        discountPrice: 200000,
-        available: true,
-      },
-    ],
-  },
-]
+import { useRoomsDataOnce } from "@/hooks/useRoomsDataStore"
 
 type BookingStep = "select" | "details" | "review"
 
@@ -143,6 +23,8 @@ interface SelectedPackage {
 function BookingPageContent() {
   const searchParams = useSearchParams()
   const [currentStep, setCurrentStep] = useState<BookingStep>("select")
+  // Lấy roomsData từ store zustand
+  const { roomsData, loading: roomsLoading, error: roomsError } = useRoomsDataOnce();
   // selectedPackages chỉ lưu packageId, không lưu quantity
   const [selectedPackageId] = useState<number | null>(() => {
     let index = 0
@@ -179,7 +61,7 @@ function BookingPageContent() {
   const getSelectedPackage = (): SelectedPackage | null => {
     if (!selectedPackageId) return null
     for (const room of roomsData) {
-      const pkg = room.packages.find((p) => p.id === selectedPackageId)
+      const pkg = room.packages.find((p: any) => p.id === selectedPackageId)
       if (pkg) {
         return {
           packageId: pkg.id,
@@ -201,26 +83,69 @@ function BookingPageContent() {
     setCurrentStep("review")
   }
 
-  const handleProceedPayment = () => {
-    // Here you would integrate with payment gateway
-    console.log("Proceeding to payment with:", {
-      bookingData,
-      selectedPackages: getSelectedPackage(),
-      guestData,
-    })
-     alert("Chuyển đến trang thanh toán...")
+  const handleProceedPayment = async () => {
+    if (!selectedPackage || !guestData) {
+      alert("Vui lòng nhập đầy đủ thông tin và chọn gói phòng!");
+      return;
+    }
+    try {
+      const res = await fetch("http://localhost:4000/booking", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          full_name: guestData.lastName + " " + guestData.firstName,
+          email: guestData.email,
+          phone: guestData.phone,
+          arrival_time: guestData.arrivalTime || "",
+          special_requests: guestData.specialRequests || "",
+          room_package_id: selectedPackage.packageId,
+          n_domestic_guests: bookingData.adults,
+          n_foreign_guests: bookingData.children,
+          check_in_date: bookingData.checkIn ? bookingData.checkIn.toISOString() : "",
+          check_out_date: bookingData.checkOut ? bookingData.checkOut.toISOString() : ""
+        })
+      });
+      if (res.ok) {
+        alert("Đặt phòng thành công!");
+        window.location.href = "/phong";
+      } else {
+        const data = await res.json(  );
+        alert("Đặt phòng thất bại! " + (data.message || ""));
+      }
+    } catch (error) {
+      alert("Có lỗi xảy ra khi đặt phòng!");
+      console.error("Lỗi:", error);
+    }
   }
 
   const selectedPackage = getSelectedPackage()
+  
+  if (roomsLoading) {
+    return (
+      <div className="min-h-screen bg-[#f9eed7] flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#002346] mx-auto mb-4"></div>
+          <p className="text-[#002346]">Đang tải thông tin phòng...</p>
+        </div>
+      </div>
+    )
+  }
+  if (roomsError) {
+    return (
+      <div className="min-h-screen bg-[#f9eed7] flex items-center justify-center">
+        <div className="text-center text-red-600">Lỗi tải dữ liệu phòng: {roomsError}</div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-[#f9eed7]">
       <Header />
-
       <div className="max-w-7xl mx-auto px-4 py-4">
         <BackButton className="border-[#002346] text-[#002346] hover:bg-[#002346] hover:text-white" />
       </div>
-
       <main className="max-w-7xl mx-auto px-4 py-8">
         {/* Page Title */}
         <div className="text-center mb-8">
@@ -267,7 +192,7 @@ function BookingPageContent() {
             <div className="lg:col-span-2 space-y-6">
               {selectedPackage ? (
                 <RoomPackageInfo
-                  room={roomsData.find(room => room.packages.some(pkg => pkg.id === selectedPackage.packageId)) as any}
+                  room={roomsData.find((room: any) => room.packages.some((pkg: any) => pkg.id === selectedPackage.packageId)) as any}
                   bookingData={bookingData}
                   selectedPackageId={selectedPackage.packageId}
                 />
