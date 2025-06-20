@@ -32,11 +32,11 @@ exports.userSignupValidator = [
 exports.signup = async (req, res) => {
     // 1. Kiểm tra tính hợp lệ của các trường
     const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(422).json({ errors: errors.array() });
-        }
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+    }
 
-    const { username, password, fullName, email, phone, role } = req.body;
+    const { username, password, fullName, email, phone } = req.body;
 
     let user_name = username;
     let full_name = fullName;
