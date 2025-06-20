@@ -141,6 +141,14 @@ CREATE TABLE Transaction_history (
     user_id INT FOREIGN KEY REFERENCES Users(user_id)
 );
 
+create table user_login_history (
+    login_id INT PRIMARY KEY IDENTITY(1,1),
+    user_id INT FOREIGN KEY REFERENCES Users(user_id),
+    login_datetime DATETIME DEFAULT GETDATE(),
+    logout_datetime DATETIME NULL, -- NULL nếu chưa đăng xuất
+    ip_address VARCHAR(50)
+);
+
 alter table Rooms add constraint fk_room_room_type foreign key (room_type_id) references room_types(room_type_id);
 alter table Rooms add constraint fk_room_room_package foreign key (room_package_id) references room_packages(room_package_id);
 alter table room_type_photos add constraint fk_room_type_photos foreign key (room_type_id) references room_types(room_type_id);

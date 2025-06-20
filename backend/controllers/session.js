@@ -27,3 +27,11 @@ exports.checkReceptionist = (req, res, next) => {
   }
   next();
 };
+
+// Lấy thông tin người dùng hiện tại từ session
+exports.getCurrentUser = (req, res) => {
+  if (req.session.user) {
+    return res.json({ user: req.session.user });
+  }
+  res.status(401).json({ error: 'Chưa đăng nhập' });
+}

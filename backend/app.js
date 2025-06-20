@@ -31,7 +31,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Đăng nhập, đăng ký, đăng xuất
 // Kiểm tra session, lấy quyền chủ khách sạn, lễ tân
-const loginRoutes = require("./routers/login");
+const loginRoutes = require("./routers/login-signup");
 app.use("/", loginRoutes);
 
 // Lấy dữ liệu phòng để hiển thị, lấy danh sách phòng trống

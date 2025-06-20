@@ -109,6 +109,7 @@ fetch('http://localhost:4000/api/register-user', {
 fetch('http://localhost:4000/api/login-user', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
+  credentials: 'include', // Quan trọng để gửi/nhận cookie session
   body: JSON.stringify({
     email: 'hvo6471@gmail.com',
     password: 'Abc123@@',
@@ -145,28 +146,25 @@ fetch('http://localhost:4000/api/check-session', {
   .catch(err => console.error('Lỗi khi kiểm tra session:', err));
 
 
-### Lấy quyền chủ khách sạn
-fetch('http://localhost:4000/api/admin-only', {
+### Lấy role user
+fetch('http://localhost:4000/me', {
   method: 'GET',
-  credentials: 'include' // bắt buộc có để gửi cookie session lên
+  credentials: 'include' // Để gửi cookie session lên backend
 })
-  .then(res => {
-    if (!res.ok) throw new Error('Không có quyền truy cập');
-    return res.text();
-  })
-  .then(data => console.log('Phản hồi admin:', data))
-  .catch(err => console.error('Lỗi admin-only:', err.message));
-  
-  
-### Lấy quyền lễ tân
-fetch('http://localhost:4000/api/receptionist-only', {
-  method: 'GET',
-  credentials: 'include'
-})
-  .then(res => {
-    if (!res.ok) throw new Error('Không có quyền truy cập');
-    return res.text();
-  })
-  .then(data => console.log('Phản hồi lễ tân:', data))
-  .catch(err => console.error('Lỗi receptionist-only:', err.message));
+.then(res => res.json())
+.then(data => {
+  // Truy cập role
+  const role = data.user?.role;
+  console.log('User role:', role);
+});
 
+### Cách check role trực tiếp trong các API (thay vì trên frontend)
+// Route cần quyền Chủ khách sạn
+router.get('/api/admin-only', session.checkHotelOwner, (req, res) => {
+  res.status(200).send('✅ Chào mừng Chủ khách sạn!');
+});
+
+// Route cần quyền Lễ tân
+router.get('/api/receptionist-only', session.checkReceptionist, (req, res) => {
+  res.status(200).send('✅ Chào mừng Lễ tân!');
+});

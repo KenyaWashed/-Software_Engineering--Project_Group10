@@ -4,7 +4,7 @@
 // 3. Kiểm tra có tồn tại người dùng có email và sdt này chưa, chưa thì thôi
 // 6. Nếu đã có, thông báo người dùng về việc đã có tài khoản với email/sdt này, và chọn email/sdt khác.
 // 7. Kiểm tra sự khớp giữa mật khẩu và xác nhận mật khẩu.
-// 8. Nếu không có lỗi, tạo người dùng mới và lưu vào cơ sở dữ liệu, sau đó cho người dùng vào trang chính ngay (không cần đăng nhập nữa)
+// 8. Nếu không có lỗi, tạo người dùng mới và lưu vào cơ sở dữ liệu, sau đó chuyển hướng người dùng đến trang đăng nhập.
 
 const express = require('express');
 const userModels = require('../models/user');
@@ -62,5 +62,5 @@ exports.signup = async (req, res) => {
         return res.status(500).json({ error: 'Tạo người dùng trong CSDL thất bại.' });
     }
     console.log('✅ Tạo người dùng mới thành công');
-    return res.status(200).json({ message: 'Đăng ký thành công'});
+    return res.status(200).json({ message: 'Đăng ký thành công', redirectTo: "/login-user"});
 };

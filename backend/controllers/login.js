@@ -2,7 +2,9 @@
 // 1. Nhận thông tin đăng nhập từ client (email, mật khẩu)
 // 2. Kiểm tra tính hợp lệ của email hoặc sdt (email phải có định dạng hợp lệ, sdt phải là số và dài 10 ký tự).
 // 3. Kiểm tra sự khớp của email và mật khẩu: Kiểm tra tồn tại và kiểm tra đúng mật khẩu.
-// 4. Nếu đăng nhập thành công, lưu thông tin người dùng vào session và chuyển sang trang chính.
+// 4. Nếu đăng nhập thành công, lưu thông tin người dùng vào session
+// 5. Chọn hướng chuyển trang dựa trên vai trò của người dùng (admin, receptionist, khách hàng)
+// 6. Trả về phản hồi cho client (thông báo thành công, thông tin người dùng, hướng chuyển trang)
 
 const express = require('express');
 const userModels = require('../models/user');
@@ -49,5 +51,11 @@ exports.login = async (req, res) => {
         req.session.cookie.expires = false; // session sẽ hết khi đóng trình duyệt
     }
 
-    return res.status(200).json({ message: '✅ Đăng nhập thành công', user: req.session.user, redirectTo: '/home' });
+    // Xử lý chọn hướng chuyển trang
+    let redirectTo = '/home'; // mặc định cho khách hàng
+    if (req.session.user.role === 'admin' || req.session.user.role === 'receptionist') {
+        redirectTo = '/dashboard';
+    }
+
+    return res.status(200).json({ message: '✅ Đăng nhập thành công', user: req.session.user, redirectTo });
 };

@@ -3,13 +3,15 @@ const sql = require('mssql');
 
 const config = {
   user: 'sa',
-  password: '123456',
+  password: '123456', // sửa code cứng chỗ này nếu cần tùy máy
   server: '127.0.0.1',
   port: 1433,
+  //instanceName: 'MSSQLSERVER03', // Nếu dùng SQL Server Express
   database: 'hms',
   options: {
     encrypt: false,
-    trustServerCertificate: true
+    trustServerCertificate: true,
+    //trustedConnection: true
   }
 };
 
