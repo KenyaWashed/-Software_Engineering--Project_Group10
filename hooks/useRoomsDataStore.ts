@@ -1,28 +1,6 @@
 import { useEffect } from "react";
 import { create } from "zustand";
-
-export interface RoomPackage {
-  id: number;
-  name: string;
-  benefits: string[];
-  originalPrice: number;
-  discountPrice: number;
-  available: boolean;
-}
-
-export interface RoomType {
-  id: number;
-  name: string;
-  images: string[];
-  area: string;
-  view: string;
-  maxGuests: number;
-  beds: number;
-  bathrooms: number;
-  description: string;
-  amenities: string[];
-  packages: RoomPackage[];
-}
+import type { RoomType } from "@/lib/room.types";
 
 interface RoomsDataState {
   roomsData: RoomType[];

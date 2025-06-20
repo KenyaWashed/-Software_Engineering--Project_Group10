@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { X, Calendar, Users, Moon } from "lucide-react"
 import { BookingContext } from "@/app/phong/page"
-import { calculatePackagePrice, calculateBookingTotals } from "@/components/utils/pricing"
+import { calculateBookingTotals } from "@/components/utils/pricing"
+import { useSurchargePoliciesOnce } from "@/hooks/useSurchargePolicyStore";
 
 interface SelectedPackage {
   roomId: number
@@ -21,6 +22,7 @@ interface BookingSummaryProps {
 }
 
 export default function BookingSummary({ selectedPackages, onRemovePackage }: BookingSummaryProps) {
+  const { policies, loading: policyLoading, error: policyError } = useSurchargePoliciesOnce();
   const { bookingData } = useContext(BookingContext)
   const router = useRouter()
 
@@ -93,6 +95,10 @@ export default function BookingSummary({ selectedPackages, onRemovePackage }: Bo
     router.push(bookingURL)
   }
 
+  // Lấy giá trị phụ thu từ policies
+  const extraSurcharge = policies.find(p => p.policy_short_name === "KH3")?.policy_value ?? 0;
+  const foreignSurcharge = policies.find(p => p.policy_short_name === "KNN")?.policy_value ?? 0;
+
   if (selectedPackages.length === 0) {
     return (
       <Card className="sticky top-4">
@@ -156,6 +162,7 @@ export default function BookingSummary({ selectedPackages, onRemovePackage }: Bo
           </div>
         </div>
 
+        
         {/* Pricing Policy */}
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
           <h4 className="font-semibold text-sm text-blue-800 mb-2">Chính sách tính giá:</h4>
@@ -164,10 +171,10 @@ export default function BookingSummary({ selectedPackages, onRemovePackage }: Bo
               • Đơn giá phòng cho 2 khách: Giá phòng × {bookingData.nights} đêm
             </li>
             <li>
-              • Khách thứ 3 phụ thu thêm 25%: Giá phòng × 25% × {bookingData.nights} đêm
+              • Khách thứ 3 phụ thu thêm {extraSurcharge * 100}%: Giá phòng × {extraSurcharge} × {bookingData.nights} đêm
             </li>
             <li>
-              • Khách Nước ngoài ( chỉ cần có 1 trong phòng ): Tổng giá × 1.5
+              • Khách Nước ngoài (chỉ cần có 1 trong phòng): Tổng giá × {1 + foreignSurcharge} (Hệ số nước ngoài)
             </li>
           </ul>
         </div>

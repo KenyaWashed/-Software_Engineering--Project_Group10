@@ -1,3 +1,13 @@
+import { useSurchargePolicyStore } from "@/hooks/useSurchargePolicyStore"
+
+// Hàm lấy hệ số phụ thu động từ zustand store
+export function getSurchargeRates() {
+  const { policies } = useSurchargePolicyStore.getState()
+  const extraSurcharge = policies.find(p => p.policy_short_name === "KH3")?.policy_value ?? 0.25
+  const foreignSurcharge = policies.find(p => p.policy_short_name === "KNN")?.policy_value ?? 0.5
+  return { extraSurcharge, foreignSurcharge }
+}
+
 // Hàm tính giá cho từng package/phòng
 export function calculatePackagePrice({
   basePrice,
@@ -12,16 +22,17 @@ export function calculatePackagePrice({
   children: number
   quantity?: number // Số lượng phòng, mặc định là 1
 }) {
+  const { extraSurcharge, foreignSurcharge } = getSurchargeRates()
   const totalGuests = adults + children
   let price = basePrice * nights // Giá cho 2 khách đầu tiên
   let extraCharge = 0
   if (totalGuests > 2) {
-    extraCharge = basePrice * 0.25 * (totalGuests - 2) * nights
+    extraCharge = basePrice * extraSurcharge * (totalGuests - 2) * nights
     price += extraCharge
   }
   let hasForeign = false
   if (children > 0) {
-    price *= 1.5
+    price *= 1 + foreignSurcharge
     hasForeign = true
   }
   return {

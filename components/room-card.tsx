@@ -6,29 +6,8 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Users, Bed, Bath, Wifi, Tv, Coffee, Car, Calculator, Minus, Plus } from "lucide-react"
 import { calculatePackagePrice } from "@/components/utils/pricing"
-
-interface Package {
-  id: number
-  name: string
-  benefits: string[]
-  originalPrice: number
-  discountPrice: number
-  available: boolean
-}
-
-interface Room {
-  id: number
-  name: string
-  images: string[]
-  area: string
-  view: string
-  maxGuests: number
-  beds: number
-  bathrooms: number
-  description: string
-  amenities: string[]
-  packages: Package[]
-}
+import type { RoomType, RoomPackage } from "@/lib/room.types"
+import { useSurchargePoliciesOnce } from "@/hooks/useSurchargePolicyStore";
 
 interface BookingData {
   checkIn: Date | undefined
@@ -39,10 +18,10 @@ interface BookingData {
 }
 
 interface RoomCardProps {
-  room: Room
+  room: RoomType
   onSelectPackage: (
     roomId: number,
-    packageData: Package,
+    packageData: RoomPackage,
     guestDistribution?: { adults: number; children: number }[],
   ) => void
   selectedPackage?: any
@@ -50,9 +29,14 @@ interface RoomCardProps {
 }
 
 export default function RoomCard({ room, onSelectPackage, selectedPackage, bookingData }: RoomCardProps) {
-  const [guestDistribution, setGuestDistribution] = useState<{ adults: number; children: number }[]>([
-    { adults: bookingData.adults, children: bookingData.children },
-  ])
+  const [guestDistribution, setGuestDistribution] = useState<{ adults: number; children: number }[]>(
+    [{ adults: bookingData.adults, children: bookingData.children }],
+  )
+  const { policies, loading: policyLoading, error: policyError } = useSurchargePoliciesOnce();
+  // Lấy giá trị phụ thu từ policies
+  const extraSurcharge = policies.find(p => p.policy_short_name === "KH3")?.policy_value ?? 0;
+  const foreignSurcharge = policies.find(p => p.policy_short_name === "KNN")?.policy_value ?? 0;
+  
   const [currentImage, setCurrentImage] = useState(0)
   const [showModal, setShowModal] = useState(false)
   const totalImages = room.images.length
@@ -319,14 +303,14 @@ export default function RoomCard({ room, onSelectPackage, selectedPackage, booki
                         </div>
                         {pricing.extraCharge > 0 && (
                           <div className="flex justify-between">
-                            <span>Phụ thu khách thứ 3 trở đi (25%/khách):</span>
+                            <span>Phụ thu khách thứ 3 trở đi ({extraSurcharge * 100}%/khách):</span>
                             <span className="font-medium">{formatPrice(pricing.extraCharge)}</span>
                           </div>
                         )}
                         {pricing.hasForeign && (
                           <div className="flex justify-between">
-                            <span>Hệ số nước ngoài (1.5x):</span>
-                            <span className="font-medium">x 1.5</span>
+                            <span>Hệ số khách nước ngoài (x{1 + foreignSurcharge}):</span>
+                            <span className="font-medium">x {1 + foreignSurcharge}</span>
                           </div>
                         )}
                         <div className="border-t pt-1 font-semibold">

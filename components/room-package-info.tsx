@@ -4,32 +4,11 @@ import { Badge } from "@/components/ui/badge"
 import { Users, Bed, Bath, Maximize, Eye } from "lucide-react"
 import { useState } from "react"
 import { calculatePackagePrice } from "@/components/utils/pricing"
+import type { RoomType } from "@/lib/room.types"
 
-interface Package {
-  id: number
-  name: string
-  benefits: string[]
-  originalPrice: number
-  discountPrice: number
-  available: boolean
-}
-
-interface Room {
-  id: number
-  name: string
-  images?: string[] // Chỉ dùng images, bỏ image
-  area: string
-  view: string
-  maxGuests: number
-  beds: number
-  bathrooms: number
-  description: string
-  amenities: string[]
-  packages: Package[]
-}
 
 interface RoomPackageInfoProps {
-  room: Room
+  room: RoomType
   bookingData: {
     adults: number
     children: number
