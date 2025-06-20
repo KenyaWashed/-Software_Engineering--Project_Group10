@@ -12,10 +12,26 @@ fetch('http://localhost:4000/api/login-user', {
 .then(res => res.json())
 .then(data => console.log(data));
 
-// Lấy thông tin user
-fetch('http://localhost:4000/api/me', {
+
+// Lấy role user
+fetch('http://localhost:4000/me', {
   method: 'GET',
-  credentials: 'include' // Gửi cookie session kèm request
+  credentials: 'include' // Để gửi cookie session lên backend
 })
 .then(res => res.json())
-.then(data => console.log(data));
+.then(data => {
+  // Truy cập role
+  const role = data.user?.role;
+  console.log('User role:', role);
+});
+
+// Cách check role trực tiếp trong các API (thay vì trên frontend)
+// Route cần quyền Chủ khách sạn
+router.get('/api/admin-only', session.checkHotelOwner, (req, res) => {
+  res.status(200).send('✅ Chào mừng Chủ khách sạn!');
+});
+
+// Route cần quyền Lễ tân
+router.get('/api/receptionist-only', session.checkReceptionist, (req, res) => {
+  res.status(200).send('✅ Chào mừng Lễ tân!');
+});
