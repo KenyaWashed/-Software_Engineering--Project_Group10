@@ -1,33 +1,33 @@
+// config/db.js
 const sql = require('mssql');
 
-// Cấu hình kết nối
 const config = {
   user: 'sa',
-  password: '123456',
-  server: 'localhost',
+  password: '123456', // sửa code cứng chỗ này nếu cần tùy máy
+  server: '127.0.0.1',
+  port: 1433,
+  //instanceName: 'MSSQLSERVER03', // Nếu dùng SQL Server Express
   database: 'hms',
-  options: { encrypt: false },
-  pool: {
-    max: 100, // Số kết nối tối đa trong pool
-    min: 1,  // Số kết nối tối thiểu luôn duy trì
-    idleTimeoutMillis: 30000 // Thời gian tối đa (ms) một kết nối có thể ở trạng thái nhàn rỗi trước khi bị đóng
+  options: {
+    encrypt: false,
+    trustServerCertificate: true,
+    //trustedConnection: true
   }
 };
 
-
-// Tạo một connection pool dùng chung cho toàn bộ ứng dụng
+// Khởi tạo poolPromise để dùng chung toàn app
 const poolPromise = new sql.ConnectionPool(config)
   .connect()
   .then(pool => {
-    console.log('✅ Kết nối SQL Server thành công');
+    console.log('SQL Server connected');
     return pool;
   })
   .catch(err => {
-    console.error('❌ Lỗi kết nối SQL Server:', err);
-    process.exit(1);
-});
+    console.error('Database connection failed:', err);
+    throw err;
+  });
 
 module.exports = {
-  sql,
-  poolPromise
+  sql,            // export thư viện nếu cần dùng thêm sau này
+  poolPromise     // dùng trong model như getAllRooms
 };

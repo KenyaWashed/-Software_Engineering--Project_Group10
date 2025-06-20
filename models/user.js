@@ -119,8 +119,8 @@ exports.createUser = async (user_name, full_name, user_email, phone_number, user
             .input('phone_number', sql.Char(10), phone_number)
             .input('user_password', sql.VarChar(100), user_password)
             .input('user_role', sql.NVarChar(20), roleString)
-            .query(`INSERT INTO users (user_name, full_name, phone_number, user_password, user_role)
-                VALUES (@user_name, @full_name, @phone_number, @user_password, @user_role)`);
+            .query(`INSERT INTO users (user_name, full_name, user_email, phone_number, user_password, user_role)
+                VALUES (@user_name, @full_name, @user_email, @phone_number, @user_password, @user_role)`);
     } catch (err) {
         console.error('❌ Error creating user:', err);
     }

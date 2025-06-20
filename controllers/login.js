@@ -33,8 +33,8 @@ exports.login = async (req, res) => {
 
     // 3. Kiểm tra mật khẩu
     const isAuthenticated = await userModels.authenticateUserByEmail(user_email, user_password);
-    if (!isAuthenticated) {
-        return res.status(401).json({ error: '❌ Mật khẩu không đúng' });
+    if (isAuthenticated === false) {
+        return res.status(401).json({ error: '❌ Mật khẩu hoặc email không đúng' });
     }
 
     // 4. Lưu thông tin người dùng vào session
