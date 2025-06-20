@@ -16,77 +16,83 @@ import BackButton from "@/components/back-button"
 
 export default function RegisterPage() {
   const router = useRouter()
-  const [formData, setFormData] = useState({
-    fullName: "",
-    email: "",
-    phone: "",
+  const [form, setForm] = useState({
+    username: "",
     password: "",
     confirmPassword: "",
+    fullName: "",
+    email: "",
+    phone: ""
   })
   const [agreeTerms, setAgreeTerms] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
+  const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
+    setForm({ ...form, [e.target.name]: e.target.value })
+  }
+
+  const validateForm = () => {
+    if (!form.fullName) return "Vui lòng nhập họ và tên"
+    if (!form.email.match(/^[^@\s]+@[^@\s]+\.[^@\s]+$/)) return "Email không hợp lệ"
+    if (!form.phone) return "Vui lòng nhập số điện thoại"
+    if (!/^\d+$/.test(form.phone)) return "Số điện thoại chỉ được chứa các chữ số"
+    if (form.phone.length !== 10) return "Số điện thoại phải có đúng 10 chữ số"
+    if (!form.password) return "Vui lòng nhập mật khẩu"
+    if (form.password.length < 6) return "Mật khẩu phải có ít nhất 6 ký tự"
+    if (!/\d/.test(form.password)) return "Mật khẩu phải chứa ít nhất 1 số"
+    if (form.password !== form.confirmPassword) return "Mật khẩu xác nhận không khớp!"
+    return null
   }
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
+    setLoading(true)
     setError("")
     setSuccess("")
-
-    // Validate form
-    if (!formData.fullName || !formData.email || !formData.phone || !formData.password || !formData.confirmPassword) {
-      setError("Vui lòng nhập đầy đủ thông tin")
+    const validationError = validateForm()
+    if (validationError) {
+      setError(validationError)
+      setLoading(false)
       return
     }
-
-    if (formData.password !== formData.confirmPassword) {
-      setError("Mật khẩu xác nhận không khớp")
-      return
-    }
-
-    if (!agreeTerms) {
-      setError("Vui lòng đồng ý với điều khoản dịch vụ")
-      return
-    }
-
-    setIsLoading(true)
-
     try {
-      // Gửi dữ liệu đăng ký lên API server để lưu vào users.json
-      const res = await fetch('/api/register-user', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("http://localhost:4000/api/register-user", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          username: formData.email.split("@")[0],
-          password: formData.password,
-          fullName: formData.fullName,
-          email: formData.email,
-          phone: formData.phone,
-          role: "user"
+          username: form.email.split("@")[0], // Tạo username từ email
+          password: form.password,
+          fullName: form.fullName,
+          email: form.email,
+          phone: form.phone,
+          role: "guest"
         })
       })
-      const result = await res.json()
-      await new Promise((resolve) => setTimeout(resolve, 800))
-      if (!res.ok) {
-        setError(result.error || "Đăng ký thất bại. Vui lòng thử lại sau.")
-        setIsLoading(false)
-        return
+      const data = await res.json()
+      console.log('Kết quả đăng ký:', data);
+      if (res.ok && data && !data.error && !data.errors) {
+        setSuccess("Đăng ký thành công! Bạn có thể đăng nhập.")
+        setError("")
+        await new Promise((resolve) => setTimeout(resolve, 800))
+        setTimeout(() => {
+          router.push("/dang-nhap")
+        }, 1500)
+      } else if (data.errors && Array.isArray(data.errors) && data.errors.length > 0) {
+        // Lấy thông báo lỗi đầu tiên từ mảng errors
+        setError(data.errors[0].msg || "Đăng ký thất bại!")
+        setSuccess("")
+      } else {
+        setError(data.error || data.message || "Đăng ký thất bại!")
+        setSuccess("")
       }
-      setSuccess("Đăng ký thành công! Đang chuyển sang trang đăng nhập...")
-      setTimeout(() => {
-        router.push("/dang-nhap")
-      }, 1500)
-      return
     } catch (err) {
-      setError("Đăng ký thất bại. Vui lòng thử lại sau.")
+      setError("Lỗi kết nối server!")
+      setSuccess("")
     } finally {
-      setIsLoading(false)
+      setLoading(false)
     }
   }
 
@@ -123,9 +129,9 @@ export default function RegisterPage() {
                     name="fullName"
                     placeholder="Nguyễn Văn A"
                     className="pl-10 rounded-full"
-                    value={formData.fullName}
+                    value={form.fullName}
                     onChange={handleChange}
-                    disabled={isLoading}
+                    disabled={loading}
                   />
                 </div>
               </div>
@@ -140,9 +146,9 @@ export default function RegisterPage() {
                     type="email"
                     placeholder="email@example.com"
                     className="pl-10 rounded-full"
-                    value={formData.email}
+                    value={form.email}
                     onChange={handleChange}
-                    disabled={isLoading}
+                    disabled={loading}
                   />
                 </div>
               </div>
@@ -156,9 +162,9 @@ export default function RegisterPage() {
                     name="phone"
                     placeholder="0987654321"
                     className="pl-10 rounded-full"
-                    value={formData.phone}
+                    value={form.phone}
                     onChange={handleChange}
-                    disabled={isLoading}
+                    disabled={loading}
                   />
                 </div>
               </div>
@@ -173,9 +179,9 @@ export default function RegisterPage() {
                     type={showPassword ? "text" : "password"}
                     placeholder="••••••••"
                     className="pl-10 rounded-full"
-                    value={formData.password}
+                    value={form.password}
                     onChange={handleChange}
-                    disabled={isLoading}
+                    disabled={loading}
                   />
                   <Button
                     type="button"
@@ -203,10 +209,23 @@ export default function RegisterPage() {
                     type={showPassword ? "text" : "password"}
                     placeholder="••••••••"
                     className="pl-10 rounded-full"
-                    value={formData.confirmPassword}
+                    value={form.confirmPassword}
                     onChange={handleChange}
-                    disabled={isLoading}
+                    disabled={loading}
                   />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4 text-gray-500" />
+                    ) : (
+                      <Eye className="h-4 w-4 text-gray-500" />
+                    )}
+                  </Button>
                 </div>
               </div>
 
@@ -230,9 +249,9 @@ export default function RegisterPage() {
               <Button
                 type="submit"
                 className="w-full bg-[#eac271] hover:bg-[#d9b05f] text-[#002346] font-bold rounded-full"
-                disabled={isLoading}
+                disabled={loading}
               >
-                {isLoading ? "Đang xử lý..." : "Đăng ký"}
+                {loading ? "Đang xử lý..." : "Đăng ký"}
               </Button>
             </form>
           </CardContent>
