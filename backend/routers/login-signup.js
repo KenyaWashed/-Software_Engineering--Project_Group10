@@ -15,4 +15,7 @@ router.get('/api/check-session', session.checkSession);
 // Lấy thông tin user
 router.get('/api/me', session.getCurrentUser);
 
+// Lấy lịch sử đăng nhập của người dùng
+router.get('/api/login-history', login.getTop10LoginHistory);
+
 module.exports = router;

@@ -2,7 +2,7 @@
 // 1. Nhận thông tin đăng nhập từ client (email, mật khẩu)
 // 2. Kiểm tra tính hợp lệ của email hoặc sdt (email phải có định dạng hợp lệ, sdt phải là số và dài 10 ký tự).
 // 3. Kiểm tra sự khớp của email và mật khẩu: Kiểm tra tồn tại và kiểm tra đúng mật khẩu.
-// 4. Nếu đăng nhập thành công, lưu thông tin người dùng vào session
+// 4. Nếu đăng nhập thành công, ghi lại lịch sử đăng nhập và lưu thông tin người dùng vào session
 // 5. Chọn hướng chuyển trang dựa trên vai trò của người dùng (admin, receptionist, khách hàng)
 // 6. Trả về phản hồi cho client (thông báo thành công, thông tin người dùng, hướng chuyển trang)
 
@@ -20,6 +20,10 @@ exports.userLoginValidator = [
         .matches(/\d/)
         .withMessage('Password must contain a number'),
 ];
+
+exports.getUserIPAddress = (req) => {
+    return req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+}
 
 exports.login = async (req, res) => {
     const { email, password, rememberMe } = req.body;
@@ -39,10 +43,15 @@ exports.login = async (req, res) => {
         return res.status(401).json({ error: '❌ Mật khẩu hoặc email không đúng' });
     }
 
+    // 4. Lưu thông tin đăng nhập vào lịch sử
+    const userId = await userModels.getUserIdByEmail(user_email);
+    const login_id = await userModels.writeLogWhenLogin(userId, this.getUserIPAddress(req));
+
     // 4. Lưu thông tin người dùng vào session
     req.session.user = {
         email: user_email,
         role: await userModels.getUserRoleByEmail(user_email),
+        login_id: login_id,
     };
 
     if (rememberMe) {
@@ -59,3 +68,18 @@ exports.login = async (req, res) => {
 
     return res.status(200).json({ message: '✅ Đăng nhập thành công', user: req.session.user, redirectTo });
 };
+
+exports.getTop10LoginHistory = async (req, res) => {
+    try {
+        const userId = req.session.user?.login_id;
+        if (!userId) {
+            return res.status(401).json({ error: 'Bạn chưa đăng nhập' });
+        }
+
+        const loginHistory = await userModels.getTop10LoginHistory();
+        return res.status(200).json({ loginHistory });
+    } catch (error) {
+        console.error('❌ Lỗi khi lấy lịch sử đăng nhập:', error);
+        return res.status(500).json({ error: 'Lỗi khi lấy lịch sử đăng nhập' });
+    }
+}

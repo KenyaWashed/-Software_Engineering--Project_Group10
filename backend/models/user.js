@@ -142,3 +142,60 @@ exports.authenticateUserByEmail = async (user_email, user_password) => {
         return false;
     }
 }
+
+exports.writeLogWhenLogin = async (user_id, ip_address) => {
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .input('user_id', sql.Int, user_id)
+            .input('ip_address', sql.VarChar(50), ip_address)
+            .query(`
+                INSERT INTO user_login_history (user_id, ip_address)
+                OUTPUT INSERTED.login_id
+                VALUES (@user_id, @ip_address)
+            `);
+        const login_id = result.recordset[0].login_id;
+        return login_id;
+    } catch (err) {
+        console.error('❌ Error writing login log:', err);
+        return -1; // Trả về -1 nếu có lỗi
+    }
+}
+
+exports.getUserLoginHistory = async (user_id) => {
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .input('user_id', sql.Int, user_id)
+            .query('SELECT * FROM user_login_history WHERE user_id = @user_id');
+
+        return result.recordset;
+    } catch (err) {
+        console.error('❌ Error fetching user login history:', err);
+        return [];
+    }
+}
+
+exports.getTop10LoginHistory = async () => {
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .query('SELECT TOP 10 * FROM user_login_history ORDER BY login_time DESC');
+
+        return result.recordset;
+    } catch (err) {
+        console.error('❌ Error fetching top 10 login history:', err);
+        return [];
+    }
+}
+
+exports.writeLogWhenLogOut = async (login_id) => {
+    try {
+        const pool = await poolPromise;
+        await pool.request()
+            .input('login_id', sql.Int, login_id)
+            .query(`UPDATE user_login_history SET logout_time = GETDATE() WHERE login_id = @login_id`);
+    } catch (err) {
+        console.error('❌ Error writing logout log:', err);
+    }
+}

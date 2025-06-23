@@ -14,6 +14,11 @@ exports.logout = async (req, res) => {
             console.log('✅ User logged out successfully');
             return res.status(200).json({ message: 'Logged out successfully' });
         });
+
+        // Ghi log khi người dùng đăng xuất
+        if (req.session.user?.login_id) {
+            await userModels.writeLogWhenLogOut(req.session.user.login_id);
+        }
     } catch (error) {
         console.error('❌ Error during logout:', error);
         return res.status(500).json({ error: 'An error occurred during logout' });
