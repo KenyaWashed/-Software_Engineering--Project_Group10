@@ -12,6 +12,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Label } from "@/components/ui/label"
 import { Eye, EyeOff, Lock, Mail } from "lucide-react"
 import BackButton from "@/components/back-button"
+import { login } from "@/lib/auth/login"
 
 export default function LoginPage() {
   const router = useRouter()
@@ -35,23 +36,16 @@ export default function LoginPage() {
     setIsLoading(true)
 
     try {
-      // Gửi thông tin đăng nhập lên API
-      console.log('Đăng nhập với:', { email, password });
-      const res = await fetch('/api/login-user', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      })
-      const result = await res.json()
+      // Gửi thông tin đăng nhập lên API backend (có session/cookie)
+      console.log('Đăng nhập với:', { email, password, rememberMe });
+      const result = await login({ email, password, rememberMe })
       console.log('Kết quả trả về:', result)
       await new Promise((resolve) => setTimeout(resolve, 800))
-      if (!res.ok) {
+      if (!result || result.error) {
         setError(result.error || "Email hoặc mật khẩu không đúng")
         setIsLoading(false)
         return
       }
-      // Đăng nhập thành công
-      localStorage.setItem('user', JSON.stringify(result.user))
       router.push("/")
     } catch (err) {
       setError("Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.")

@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label"
 import { Eye, EyeOff, Lock, Mail, User, Phone } from "lucide-react"
 import Link from "next/link"
 import BackButton from "@/components/back-button"
+import { register } from "@/lib/auth/register"
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -59,21 +60,14 @@ export default function RegisterPage() {
       return
     }
     try {
-      const res = await fetch("http://localhost:4000/api/register-user", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          username: form.email.split("@")[0], // Tạo username từ email
-          password: form.password,
-          fullName: form.fullName,
-          email: form.email,
-          phone: form.phone,
-          role: "guest"
-        })
+      const data = await register({
+        email: form.email,
+        password: form.password,
+        fullName: form.fullName,
+        phone: form.phone
       })
-      const data = await res.json()
       console.log('Kết quả đăng ký:', data);
-      if (res.ok && data && !data.error && !data.errors) {
+      if (data && !data.error && !data.errors) {
         setSuccess("Đăng ký thành công! Bạn có thể đăng nhập.")
         setError("")
         await new Promise((resolve) => setTimeout(resolve, 800))
@@ -81,7 +75,6 @@ export default function RegisterPage() {
           router.push("/dang-nhap")
         }, 1500)
       } else if (data.errors && Array.isArray(data.errors) && data.errors.length > 0) {
-        // Lấy thông báo lỗi đầu tiên từ mảng errors
         setError(data.errors[0].msg || "Đăng ký thất bại!")
         setSuccess("")
       } else {

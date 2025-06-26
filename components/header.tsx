@@ -3,22 +3,32 @@ import { Button } from "@/components/ui/button"
 import { Users, LogOut } from "lucide-react"
 import Link from "next/link"
 import { useEffect, useState } from "react"
+import { logout } from "@/lib/auth/logout"
+import { checkSession } from "@/lib/auth/checkSession"
 
 export default function Header() {
   const [user, setUser] = useState<any>(null)
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const userStr = localStorage.getItem("user")
-      if (userStr) setUser(JSON.parse(userStr))
-      else setUser(null)
-    }
+    // Kiểm tra session qua API đã tách hàm
+    checkSession().then(data => {
+      if (data.loggedIn) {
+        setUser(data.user)
+      } else {
+        setUser(null)
+      }
+    }).catch(() => setUser(null))
   }, [])
 
-  const handleLogout = () => {
-    localStorage.removeItem("user")
-    setUser(null)
-    window.location.reload()
+  const handleLogout = async () => {
+    try {
+      const data = await logout();
+      console.log('Kết quả logout:', data)
+      setUser(null)
+      window.location.reload()
+    } catch (err) {
+      console.error('Lỗi logout:', err)
+    }
   }
 
   return (
@@ -27,7 +37,6 @@ export default function Header() {
         <nav className="hidden md:flex items-center space-x-8 text-sm font-medium text-[#002346]">
           {user ? (
             <>
-
               <button
                 onClick={handleLogout}
                 className="ml-4 flex items-center space-x-1 text-xs text-[#002346] hover:underline focus:outline-none bg-transparent border-0 shadow-none"
@@ -38,7 +47,7 @@ export default function Header() {
               </button>
               <span className="flex items-center space-x-1 font-semibold">
                 <Users className="w-4 h-4" />
-                <span>{user.fullName || user.username}</span>
+                <span>{user.email || user.username}</span>
               </span>
             </>
           ) : (
