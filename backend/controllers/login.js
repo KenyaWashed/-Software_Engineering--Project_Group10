@@ -44,8 +44,11 @@ exports.login = async (req, res) => {
     }
 
     // 4. Lưu thông tin đăng nhập vào lịch sử
-    const userId = await userModels.getUserIdByEmail(user_email);
-    const login_id = await userModels.writeLogWhenLogin(userId, this.getUserIPAddress(req));
+    const user = await userModels.getUserByEmail(user_email);
+    if (!user) {
+        return res.status(404).json({ error: '❌ Người dùng không tồn tại' });
+    }
+    const login_id = await userModels.writeLogWhenLogin(user.user_id, this.getUserIPAddress(req));
 
     // 4. Lưu thông tin người dùng vào session
     req.session.user = {
