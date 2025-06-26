@@ -5,6 +5,12 @@ const cors = require('cors');
 const session = require('express-session');
 port = 4000;
 
+// Cấu hình CORS
+app.use(cors({
+  origin: 'http://localhost:3000',
+  credentials: true
+}));
+
 // Cấu hình session middleware
 app.use(session({
   secret: 'royal-hotel', // Khóa bí mật để mã hóa session
