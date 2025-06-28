@@ -1,6 +1,7 @@
 "use client"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import type React from "react"
+import { checkSession } from "@/lib/auth/checkSession"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -111,6 +112,19 @@ export default function GuestDetailsForm({ onContinue, isLoggedIn = false, userD
     "22:00 - 23:00",
     "Sau 23:00",
   ]
+
+  useEffect(() => {
+    // Lấy thông tin gmail từ session và gán cứng cho form nếu có
+    checkSession().then(data => {
+      if (data.loggedIn && data.user?.email) {
+        setFormData(prev => ({
+          ...prev,
+          email: data.user.email,
+          confirmEmail: data.user.email
+        }))
+      }
+    })
+  }, [])
 
   return (
     <Card className="max-w-2xl mx-auto">

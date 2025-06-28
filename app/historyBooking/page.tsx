@@ -4,6 +4,7 @@ import Header from "@/components/header"
 import Footer from "@/components/footer"
 import RoomPackageInfo from "@/components/room-package-info"
 import { useRoomsDataOnce } from "@/hooks/useRoomsDataStore"
+import { checkSession } from "@/lib/auth/checkSession"
 
 interface Booking {
   reservationId: number
@@ -25,17 +26,31 @@ export default function BookingHistoryPage() {
   const [loading, setLoading] = useState(true)
 
   // Lấy dữ liệu lịch sử đặt phòng
-  useEffect(() => {
-    fetch('http://localhost:4000/booking/history', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: 'test1@gmail.com' })
-    })
-      .then(res => res.json())
-      .then(data => setBookings(data))
-      .catch(err => console.error('Lỗi:', err))
-      .finally(() => setLoading(false));
-  }, [])
+    useEffect(() => {
+      async function fetchHistory() {
+        try {
+          const session = await checkSession();
+          const email = session?.user?.email;
+          if (!email) {
+            setBookings([]);
+            setLoading(false);
+            return;
+          }
+          const res = await fetch('http://localhost:4000/booking/history', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email })
+          });
+          const data = await res.json();
+          setBookings(data);
+        } catch (err) {
+          console.error('Lỗi:', err);
+        } finally {
+          setLoading(false);
+        }
+      }
+      fetchHistory();
+    }, []);
 
   // Loading state khi roomsData hoặc bookings đang fetch
   if (loading || roomsLoading) {
