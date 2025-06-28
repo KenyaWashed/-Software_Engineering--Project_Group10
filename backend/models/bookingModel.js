@@ -216,8 +216,11 @@ async function getBookingHistoryByEmail(email) {
 
 // Hủy đặt phòng
 async function cancelBooking(reservation_id) {
+  const pool = await poolPromise;
+  const transaction = new sql.Transaction(pool);
+  
   try {
-    const pool = await poolPromise;
+    await transaction.begin();
 
     // Kiểm tra reservation_id có tồn tại không
     const check = await pool.request()
@@ -225,10 +228,17 @@ async function cancelBooking(reservation_id) {
       .query(`SELECT 1 FROM Reservations WHERE reservation_id = @reservation_id`);
 
     if (check.recordset.length === 0) {
+      await transaction.rollback();
       return { success: false };
     }
+    
+    // Xóa ở bẳng Invoice
+    await pool.request()
+      .input('reservation_id', sql.Int, reservation_id)
+      .query(`DELETE FROM Invoice WHERE reservation_id = @reservation_id`);
+    
 
-    // Xóa ở bảng con trước
+    // Xóa ở bảng Reservation_detail
     await pool.request()
       .input('reservation_id', sql.Int, reservation_id)
       .query(`DELETE FROM Reservation_detail WHERE reservation_id = @reservation_id`);
@@ -237,9 +247,11 @@ async function cancelBooking(reservation_id) {
     await pool.request()
       .input('reservation_id', sql.Int, reservation_id)
       .query(`DELETE FROM Reservations WHERE reservation_id = @reservation_id`);
-
+    
+    await transaction.commit();
     return { success: true };
   } catch (err) {
+    await transaction.rollback();
     throw err;
   }
 }
