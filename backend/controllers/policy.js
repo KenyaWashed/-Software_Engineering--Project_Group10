@@ -1,16 +1,39 @@
-const RoomModel = require('../models/policyModel');
+const RoomModel = require("../models/policyModel");
 
 const getPolicies = async (req, res) => {
-    try {
-        const policies = await RoomModel.getPolicies();
-        res.json({
-            policies
-        });
-    } catch (error) {
-        console.error('Error in getPolicies:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
+  try {
+    const policies = await RoomModel.getPolicies();
+    res.json({
+      policies,
+    });
+  } catch (error) {
+    console.error("Error in getPolicies:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+const updatePolicy = async (req, res) => {
+  try {
+    const { policy_short_name, policy_value , policy_notes} = req.body;
+
+    if (!policy_short_name || policy_value === undefined) {
+      return res.status(400).json({ message: "Thiếu tham số." });
     }
-}
+
+    const rowsAffected = await RoomModel.updatePolicy(policy_short_name, policy_value, policy_notes);
+
+    if (rowsAffected === 0) {
+      return res.status(404).json({ message: "Không tìm thấy chính sách." });
+    }
+
+    return res.status(200).json({ message: "Cập nhật thành công." });
+  } catch (error) {
+    console.error("Lỗi khi cập nhật chính sách:", error);
+    return res.status(500).json({ message: "Lỗi server." });
+  }
+};
+
 module.exports = {
-    getPolicies
+  getPolicies,
+  updatePolicy,
 };

@@ -82,6 +82,22 @@ fetch('http://localhost:4000/policy/get', {
   .then(res => res.json())
   .then(data => console.log('Danh sách chính sách:', data));
 
+### Admin cập nhật chính sách
+fetch('http://localhost:4000/policy/update', {
+  method: 'PATCH',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    policy_short_name: 'KH3',
+    policy_value: 0.1,
+    policy_notes: 'Nhà nước giảm thuế'
+  })
+})
+  .then(res => res.json())
+  .then(data => console.log('Kết quả cập nhật chính sách:', data))
+  .catch(error => console.error('Lỗi khi cập nhật:', error));
+
 
 
 
