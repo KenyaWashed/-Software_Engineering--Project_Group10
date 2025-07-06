@@ -7,14 +7,23 @@
 
 ## Frontend
 
-### 🔧 Cách chạy frontend
+### Cách chạy client-user
 
 ```
-cd frontend
+cd client-user
 pnpm install
 pnpm add zustand
 pnpm dev
 ````
+### Cách chạy client-admin
+
+```
+cd client-admin
+pnpm install
+pnpm add zustand
+pnpm dev
+````
+
 ---
 ##  Cấu trúc project
 
