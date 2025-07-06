@@ -1,0 +1,321 @@
+### Trả về các package_id trống
+fetch('http://localhost:4000/room/available', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    checkin_date: '2025-06-10',
+    checkout_date: '2025-06-15'
+  })
+});
+
+
+### Lấy dữ liệu phòng cho hiển thị
+fetch('http://localhost:4000/room/all', {
+  method: 'GET',
+  headers: {
+    'Content-Type': 'application/json'
+  }
+});
+
+
+### tính toán tiền phòng
+fetch('http://localhost:4000/calculation', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+  "room_type_id": 1,
+  "room_package_id": 2,
+  "n_domestic_guests": 2,
+  "n_foreign_guests": 1,
+  "total_days": 3
+})
+});
+
+
+### Đăt phòng
+fetch("http://localhost:4000/booking", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    full_name: "Nguyen a",
+    email: "a@gmail.com",
+    phone: "0912345678",
+    arrival_time: "14:00",
+    special_requests: "Không hút thuốc",
+    room_package_id: 2,
+    n_domestic_guests: 2,
+    n_foreign_guests: 1,
+    check_in_date: "2025-06-10T12:00:00Z",
+    check_out_date: "2025-06-12T12:00:00Z"
+  })
+})
+  .then(response => response.json())
+  .then(data => console.log("Kết quả:", data))
+  .catch(error => console.error("Lỗi:", error));
+
+
+### Xem lịch sử đặt phòng
+fetch('http://localhost:4000/booking/history', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ email: 'guest@example.com' })
+})
+  .then(res => res.json())
+  .then(data => console.log('Booking history:', data));
+  
+  
+### Hủy phòng đã đặt
+await fetch('http://localhost:4000/booking/cancel', {
+  method: 'DELETE',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ reservation_id: 123 })
+});
+
+
+### Lấy chính sách phụ thu
+fetch('http://localhost:4000/policy/get', {
+  method: 'GET',
+  headers: { 'Content-Type': 'application/json' }
+})
+  .then(res => res.json())
+  .then(data => console.log('Danh sách chính sách:', data));
+
+
+### Admin cập nhật chính sách
+fetch('http://localhost:4000/policy/update', {
+  method: 'PATCH',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    policy_short_name: 'KH3',
+    policy_value: 0.1,
+    policy_notes: 'Nhà nước giảm thuế'
+  })
+})
+  .then(res => res.json())
+  .then(data => console.log('Kết quả cập nhật chính sách:', data))
+  .catch(error => console.error('Lỗi khi cập nhật:', error));
+
+
+### Admin đăng ký tài khoản cho nhân viên mới
+fetch('http://localhost:4000/api/register-admin', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    username: 'tuanle123',
+    password: 'Abc123@@',
+    fullName: 'Lê Tuấn',
+    email: 'tuanle@example.com',
+    phone: '0909123456',
+    role: 'receptionist'
+  })
+})
+  .then(res => res.json())
+  .then(data => console.log('Kết quả đăng ký nhân viên:', data))
+  .catch(error => console.error('Lỗi:', error));
+  
+  
+### Thêm một phòng mới
+fetch('http://localhost:4000/room/add', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    room_package_id: 2,
+    room_notes: "Phòng view biển"
+  })
+})
+  .then(res => res.json())
+  .then(data => console.log("Kết quả thêm phòng:", data))
+  .catch(err => console.error("Lỗi:", err));
+
+
+### Xem số lượng nộit thất trong phòng dựa vào room_package_id
+fetch('http://localhost:4000/report/get-furniture', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    room_package_id: 1
+  })
+})
+  .then(res => res.json())
+  .then(data => console.log('Nội thất gói phòng:', data))
+  .catch(err => console.error('Lỗi:', err));
+  
+  
+### Lấy báo cáo doanh thu theo ngày
+fetch('http://localhost:4000/report/get-revenue?period=day&viewDate=2025-07-05', {
+  method: 'GET',
+  headers: {
+    'Content-Type': 'application/json'
+  }
+})
+  .then(res => res.json())
+  .then(data => console.log('Báo cáo doanh thu:', data))
+  .catch(err => console.error('Lỗi:', err));
+
+
+### Lấy báo cáo doanh thu theo tháng
+fetch('http://localhost:4000/report/get-revenue?period=month&viewDate=2025-06-01', {
+  method: 'GET',
+  headers: {
+    'Content-Type': 'application/json'
+  }
+})
+  .then(res => res.json())
+  .then(data => console.log('Báo cáo doanh thu theo tháng:', data));
+
+
+### Lấy báo cáo doanh thu theo tuần
+fetch('http://localhost:4000/report/get-revenue?period=week&viewDate=2025-07-01', {
+  method: 'GET',
+  headers: {
+    'Content-Type': 'application/json'
+  }
+})
+  .then(res => res.json())
+  .then(data => console.log('Báo cáo doanh thu theo tuần:', data));
+
+
+### Xem chi tiết 1 phòng dựa vào room_id
+fetch("http://localhost:4000/room/room-detail?room_id=1", {
+  method: "GET",
+  headers: { "Content-Type": "application/json" }
+})
+  .then(res => res.json())
+  .then(data => console.log("Chi tiết phòng:", data))
+  .catch(err => console.error("Lỗi:", err));
+  
+
+### Lấy danh sách id phòng, số phòng dựa trên package_id cho sơ đồ
+fetch('http://localhost:4000/room/list-room-by-package?room_package_id=2', {
+  method: 'GET',
+  headers: {
+    'Content-Type': 'application/json'
+  }
+})
+  .then(res => res.json())
+  .then(data => console.log('Danh sách phòng:', data))
+  .catch(err => console.error('Lỗi:', err));
+
+
+
+========================= NTD =========================
+
+
+### đăng ký user mới
+fetch('http://localhost:4000/api/register-user', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    username: 'huydeptrai111',
+    password: 'Abc123@@',
+    fullName: 'Nguyễn Văn Đại',
+    email: 'hvo6471@gmail.com',
+    phone: '0987654321',
+    role: 'guest'
+  })
+})
+  .then(res => res.json())
+  .then(data => console.log('Kết quả đăng ký:', data));
+  
+  
+### Đăng nhập
+fetch('http://localhost:4000/api/login-user', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  credentials: 'include', // Quan trọng để gửi/nhận cookie session
+  body: JSON.stringify({
+    email: 'hvo6471@gmail.com',
+    password: 'Abc123@@',
+    rememberMe: true // hoặc false nếu không muốn lưu session lâu dài
+  })
+})
+  .then(res => res.json())
+  .then(data => console.log('Kết quả đăng nhập:', data));
+
+
+### Đăng xuất
+fetch('http://localhost:4000/api/logout', {
+  method: 'GET',
+  credentials: 'include' // để gửi cookie session lên server
+})
+  .then(res => res.json())
+  .then(data => console.log('Kết quả logout:', data))
+  .catch(err => console.error('Lỗi logout:', err));
+
+
+### Kiểm tra session
+fetch('http://localhost:4000/api/check-session', {
+  method: 'GET',
+  credentials: 'include' // để gửi cookie session lên server
+})
+  .then(res => res.json())
+  .then(data => {
+    if (data.loggedIn) {
+      console.log('Người dùng đã đăng nhập:', data.user);
+    } else {
+      console.warn('Chưa đăng nhập:', data.error);
+    }
+  })
+  .catch(err => console.error('Lỗi khi kiểm tra session:', err));
+
+
+### Lấy role user
+fetch('http://localhost:4000/me', {
+  method: 'GET',
+  credentials: 'include' // Để gửi cookie session lên backend
+})
+.then(res => res.json())
+.then(data => {
+  // Truy cập role
+  const role = data.user?.role;
+  console.log('User role:', role);
+});
+
+### Cách check role trực tiếp trong các API (thay vì trên frontend)
+// Route cần quyền Chủ khách sạn
+router.get('/api/admin-only', session.checkHotelOwner, (req, res) => {
+  res.status(200).send('✅ Chào mừng Chủ khách sạn!');
+});
+
+// Route cần quyền Lễ tân
+router.get('/api/receptionist-only', session.checkReceptionist, (req, res) => {
+  res.status(200).send('✅ Chào mừng Lễ tân!');
+});
+
+### Lấy lịch sử đăng nhập (top 10)
+fetch('http://localhost:4000/api/login-history', {
+  method: 'GET',
+  credentials: 'include' // Để gửi cookie session lên backend
+})
+.then(res => res.json())
+.then(data => console.log('Danh sách:', data));
+loginHistory trong data sẽ có dạng:
+[
+  {
+    "login_id": 105,
+    "user_id": 3,
+    "login_datetime": "2025-06-23T07:15:23.000Z",
+    "logout_datetime": "2025-06-23T08:12:44.000Z",
+    "ip_address": "192.168.1.10"
+  },
+  {
+    "login_id": 104,
+    "user_id": 3,
+    "login_datetime": "2025-06-22T17:44:01.000Z",
+    "logout_datetime": null,
+    "ip_address": "192.168.1.10"
+  },
+  ...
+]
