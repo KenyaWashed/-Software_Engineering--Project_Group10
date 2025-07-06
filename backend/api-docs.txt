@@ -197,7 +197,7 @@ fetch("http://localhost:4000/room/room-detail?room_id=1", {
   .catch(err => console.error("Lỗi:", err));
   
 
-### Lấy danh sách id phòng, số phòng dựa trên package cho sơ đồ
+### Lấy danh sách id phòng, số phòng dựa trên package_id cho sơ đồ
 fetch('http://localhost:4000/room/list-room-by-package?room_package_id=2', {
   method: 'GET',
   headers: {
