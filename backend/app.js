@@ -56,5 +56,8 @@ app.use("/booking", bookingRoutes);
 const policyRoutes = require("./routers/policy");
 app.use("/policy", policyRoutes);
 
+// Lấy báo cáo doanh thu, báo cáo nội thất
+const reportRoutes = require("./routers/report");
+app.use("/report", reportRoutes);
 
 app.listen(port, () => console.log("Server running... http://localhost:" + port));

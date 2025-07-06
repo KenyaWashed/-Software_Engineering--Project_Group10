@@ -10,6 +10,7 @@ fetch('http://localhost:4000/room/available', {
   })
 });
 
+
 ### Lấy dữ liệu phòng cho hiển thị
 fetch('http://localhost:4000/room/all', {
   method: 'GET',
@@ -17,6 +18,7 @@ fetch('http://localhost:4000/room/all', {
     'Content-Type': 'application/json'
   }
 });
+
 
 ### tính toán tiền phòng
 fetch('http://localhost:4000/calculation', {
@@ -32,6 +34,7 @@ fetch('http://localhost:4000/calculation', {
   "total_days": 3
 })
 });
+
 
 ### Đăt phòng
 fetch("http://localhost:4000/booking", {
@@ -74,6 +77,7 @@ await fetch('http://localhost:4000/booking/cancel', {
   body: JSON.stringify({ reservation_id: 123 })
 });
 
+
 ### Lấy chính sách phụ thu
 fetch('http://localhost:4000/policy/get', {
   method: 'GET',
@@ -81,6 +85,7 @@ fetch('http://localhost:4000/policy/get', {
 })
   .then(res => res.json())
   .then(data => console.log('Danh sách chính sách:', data));
+
 
 ### Admin cập nhật chính sách
 fetch('http://localhost:4000/policy/update', {
@@ -116,6 +121,7 @@ fetch('http://localhost:4000/api/register-admin', {
   .then(data => console.log('Kết quả đăng ký nhân viên:', data))
   .catch(error => console.error('Lỗi:', error));
   
+  
 ### Thêm một phòng mới
 fetch('http://localhost:4000/room/add', {
   method: 'POST',
@@ -131,6 +137,54 @@ fetch('http://localhost:4000/room/add', {
   .then(data => console.log("Kết quả thêm phòng:", data))
   .catch(err => console.error("Lỗi:", err));
 
+
+### Xem số lượng nộit thất trong phòng dựa vào room_package_id
+fetch('http://localhost:4000/report/get-furniture', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    room_package_id: 1
+  })
+})
+  .then(res => res.json())
+  .then(data => console.log('Nội thất gói phòng:', data))
+  .catch(err => console.error('Lỗi:', err));
+  
+  
+### Lấy báo cáo doanh thu theo ngày
+fetch('http://localhost:4000/report/get-revenue?period=day&viewDate=2025-07-05', {
+  method: 'GET',
+  headers: {
+    'Content-Type': 'application/json'
+  }
+})
+  .then(res => res.json())
+  .then(data => console.log('Báo cáo doanh thu:', data))
+  .catch(err => console.error('Lỗi:', err));
+
+
+### Lấy báo cáo doanh thu theo tháng
+fetch('http://localhost:4000/report/get-revenue?period=month&viewDate=2025-06-01', {
+  method: 'GET',
+  headers: {
+    'Content-Type': 'application/json'
+  }
+})
+  .then(res => res.json())
+  .then(data => console.log('Báo cáo doanh thu theo tháng:', data));
+
+
+### Lấy báo cáo doanh thu theo tuần
+fetch('http://localhost:4000/report/get-revenue?period=week&viewDate=2025-07-01', {
+  method: 'GET',
+  headers: {
+    'Content-Type': 'application/json'
+  }
+})
+  .then(res => res.json())
+  .then(data => console.log('Báo cáo doanh thu theo tuần:', data));
 
 
 
