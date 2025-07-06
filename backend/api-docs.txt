@@ -99,6 +99,39 @@ fetch('http://localhost:4000/policy/update', {
   .catch(error => console.error('Lỗi khi cập nhật:', error));
 
 
+### Admin đăng ký tài khoản cho nhân viên mới
+fetch('http://localhost:4000/api/register-admin', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    username: 'tuanle123',
+    password: 'Abc123@@',
+    fullName: 'Lê Tuấn',
+    email: 'tuanle@example.com',
+    phone: '0909123456',
+    role: 'receptionist'
+  })
+})
+  .then(res => res.json())
+  .then(data => console.log('Kết quả đăng ký nhân viên:', data))
+  .catch(error => console.error('Lỗi:', error));
+  
+### Thêm một phòng mới
+fetch('http://localhost:4000/room/add', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    room_package_id: 2,
+    room_notes: "Phòng view biển"
+  })
+})
+  .then(res => res.json())
+  .then(data => console.log("Kết quả thêm phòng:", data))
+  .catch(err => console.error("Lỗi:", err));
+
+
 
 
 ========================= NTD =========================

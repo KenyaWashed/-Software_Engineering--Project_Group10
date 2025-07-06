@@ -31,7 +31,27 @@ const getAvailableRooms = async (req, res) => {
   }
 };
 
+const addRoom = async (req, res) => {
+  const { room_package_id, room_notes, room_number} = req.body;
+  if (!room_package_id) {
+    return res.status(400).json({ error: "Missing room package ID" });
+  }
+  
+  try {
+    const result = await RoomModel.addRoom(room_package_id, room_notes, room_number);
+    if (result) {
+      res.status(201).json({ message: "Room added successfully" });
+    } else {
+      res.status(500).json({ error: "Failed to add room" });
+    }
+  } catch (error) {
+    console.error('Error in addRoom:', error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
 module.exports = { 
   getAllRooms,
-  getAvailableRooms
+  getAvailableRooms,
+  addRoom
 };

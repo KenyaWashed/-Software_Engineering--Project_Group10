@@ -206,6 +206,56 @@ async function getRoomType() {
   }
 }
 
+async function getRoomTypeByRomPackageId(room_package_id) {
+  const pool = await poolPromise;
+  const request = pool.request();
+  request.input('room_package_id', sql.Int, room_package_id); 
+  res = await request.query(`SELECT room_type_id FROM Rooms WHERE room_package_id = @room_package_id`);
+  return res.recordset[0];
+}
+
+async function getMaxRoomNumber(room_package_id) {
+  const pool = await poolPromise;
+  const request = pool.request();
+  request.input('room_package_id', sql.Int, room_package_id); 
+  maxNumber = await request.query(`
+        SELECT MAX(room_number) AS maxRoomNumber FROM Rooms WhERE room_package_id = @room_package_id
+      `);
+  return maxNumber;
+}
+
+
+async function addRoom(room_package_id, room_notes, room_number){
+  try {
+    const pool = await poolPromise;
+    const request = pool.request();
+
+    request.input('room_package_id', sql.Int, room_package_id);
+    request.input('room_notes', sql.NVarChar, room_notes);
+    room_type = await getRoomTypeByRomPackageId(room_package_id);
+    request.input('room_type_id', sql.Int, room_type.room_type_id);
+
+    
+    if (!room_number) {
+      const maxRoom = await getMaxRoomNumber(room_package_id);
+      const lastNumber = parseInt(maxRoom?.recordset[0]?.maxRoomNumber || '0', 10);
+      const nextRoomNumber = String(lastNumber + 1).padStart(3, '0'); // '001', '002', ...
+      request.input('room_number', sql.Char(3), nextRoomNumber);
+    } else {
+      request.input('room_number', sql.Char(3), room_number);
+    }
+    result = await request.query(`
+      INSERT INTO Rooms (room_package_id, room_notes, room_number, room_status, room_type_id)
+      VALUES (@room_package_id, @room_notes, @room_number, N'Trống', @room_type_id)
+    `);
+    return result.rowsAffected[0] > 0; 
+  }
+  catch (error) {
+    console.error('DB Error:', error);
+    throw error;
+  }
+}
+
 
 
 module.exports = {
@@ -214,5 +264,6 @@ module.exports = {
   getTypeAndPackageAvailable,
   getPackage,
   getPackageOffers,
-  getRoomType
+  getRoomType,
+  addRoom
 };
