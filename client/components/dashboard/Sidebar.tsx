@@ -1,40 +1,47 @@
 import { cn } from "@/lib/utils";
+import { Link, useLocation } from "react-router-dom";
 
 interface MenuItem {
   icon: React.ReactNode | null;
   label: string;
-  active?: boolean;
+  path: string;
 }
 
 const menuItems: MenuItem[] = [
   {
     icon: null,
     label: "Trang chủ",
-    active: true,
+    path: "/",
   },
   {
     icon: null,
     label: "Phòng",
+    path: "/phong",
   },
   {
     icon: null,
     label: "Trạng thái",
+    path: "/trang-thai",
   },
   {
     icon: null,
     label: "Doanh thu",
+    path: "/doanh-thu",
   },
   {
     icon: null,
     label: "Nhân viên",
+    path: "/nhan-vien",
   },
   {
     icon: null,
     label: "Báo cáo",
+    path: "/bao-cao",
   },
   {
     icon: null,
     label: "Chính sách",
+    path: "/chinh-sach",
   },
 ];
 
@@ -43,10 +50,12 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ className }: SidebarProps) {
+  const location = useLocation();
+
   return (
     <div
       className={cn(
-        "w-60 bg-white h-screen fixed left-0 top-0 z-40",
+        "w-60 bg-white h-screen fixed left-0 top-0 z-10",
         className,
       )}
     >
@@ -73,25 +82,29 @@ export default function Sidebar({ className }: SidebarProps) {
       {/* Navigation Menu */}
       <nav className="px-7">
         <div className="space-y-2">
-          {menuItems.map((item, index) => (
-            <div key={index} className="relative">
-              {/* Active indicator */}
-              {item.active && (
-                <div className="absolute left-[-28px] top-2 w-1.5 h-10 bg-dashboard-primary rounded-r-full"></div>
-              )}
-
-              <div
-                className={cn(
-                  "flex items-center py-2 px-0 text-sm font-lato",
-                  item.active
-                    ? "text-dashboard-primary"
-                    : "text-dashboard-text hover:text-dashboard-primary",
+          {menuItems.map((item, index) => {
+            const isActive = location.pathname === item.path;
+            return (
+              <div key={index} className="relative">
+                {/* Active indicator */}
+                {isActive && (
+                  <div className="absolute left-[-28px] top-2 w-1.5 h-10 bg-dashboard-primary rounded-r-full"></div>
                 )}
-              >
-                <span className="font-normal leading-6">{item.label}</span>
+
+                <Link
+                  to={item.path}
+                  className={cn(
+                    "flex items-center py-2 px-0 text-sm font-lato transition-colors",
+                    isActive
+                      ? "text-dashboard-primary"
+                      : "text-dashboard-text hover:text-dashboard-primary",
+                  )}
+                >
+                  <span className="font-normal leading-6">{item.label}</span>
+                </Link>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </nav>
 
