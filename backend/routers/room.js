@@ -5,7 +5,9 @@ const router = express.Router();
 const {
   getAllRooms,
   getAvailableRooms,
-  addRoom
+  addRoom,
+  getRoomDetail,
+  getListRoomByPackageId
 } = require("../controllers/room");
 
 // GET /rooms/all
@@ -16,5 +18,8 @@ router.post('/available', getAvailableRooms);
 
 // POST /rooms/add
 router.post('/add', addRoom);
+
+router.get('/room-detail', getRoomDetail)
+router.get('/list-room-by-package', getListRoomByPackageId);
 
 module.exports = router;

@@ -21,7 +21,7 @@ const getAvailableRooms = async (req, res) => {
   }
   
   try {
-    const availableRoom = await RoomModel.getAvailableRooms(checkin_date, checkout_date);
+    const availableRoom = await RoomModel.fetchAvailableRooms(checkin_date, checkout_date);
     res.json({
       availableRoom
     });
@@ -50,8 +50,45 @@ const addRoom = async (req, res) => {
   }
 };
 
+const getRoomDetail = async (req, res) => {
+  const { room_id } = req.query;
+  if (!room_id) {
+    return res.status(400).json({ error: "Missing room ID" });
+  }
+  
+  try {
+    const roomDetail = await RoomModel.getRoomDetailByRoomId(room_id);
+    if (roomDetail) {
+      res.json({ roomDetail });
+    } else {
+      res.status(404).json({ error: "Room not found" });
+    }
+  } catch (error) {
+    console.error('Error in getRoomDetail:', error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+const getListRoomByPackageId = async (req, res) => {
+  const { room_package_id } = req.query;
+  if (!room_package_id) {
+    return res.status(400).json({ error: "Missing room package ID" });
+  }
+  
+  try {
+    const rooms = await RoomModel.getListRoomByPackageId(room_package_id);
+    res.json({ rooms });
+  } catch (error) {
+    console.error('Error in getListRoomByPackageId:', error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+
 module.exports = { 
   getAllRooms,
   getAvailableRooms,
-  addRoom
+  addRoom,
+  getRoomDetail,
+  getListRoomByPackageId
 };

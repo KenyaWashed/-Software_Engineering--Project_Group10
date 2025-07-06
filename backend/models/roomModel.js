@@ -2,7 +2,7 @@ const { poolPromise } = require('../config/db');
 const sql = require('mssql');
 
 
-async function getAvailableRooms(checkin_date, checkout_date) {
+async function fetchAvailableRooms(checkin_date, checkout_date) {
   try {
     const pool = await poolPromise;
     const request = pool.request();
@@ -256,14 +256,77 @@ async function addRoom(room_package_id, room_notes, room_number){
   }
 }
 
+async function getRoomDetailByRoomId(room_id) {
+  try {
+    const pool = await poolPromise;
+    const request = pool.request();
+    request.input('room_id', sql.Int, room_id);
+
+    const result = await request.query(`
+      SELECT 
+        r.room_id,
+        r.room_number,
+        r.room_status,
+        r.room_notes,
+    
+        rt.room_type_name,
+        rt.max_guests,
+        rt.room_type_beds,
+        rt.room_type_bathrooms,
+        rt.room_type_description,
+        rt.room_type_area,
+        rt.view_direction,
+    
+        rp.room_package_id,
+        rp.room_package_name,
+        rp.room_package_description,
+        rp.list_price,
+        rp.sale_price,
+        rp.room_package_status
+    
+      FROM Rooms r
+      JOIN room_types rt ON r.room_type_id = rt.room_type_id
+      JOIN room_packages rp ON r.room_package_id = rp.room_package_id
+      WHERE r.room_id = @room_id
+    `);
+
+    if (result.recordset.length === 0) {
+      return null; // Không tìm thấy phòng
+    }
+
+    return result.recordset[0];
+  } catch (error) {
+    console.error('DB Error:', error);
+    throw error;
+  }
+};
+
+async function getListRoomByPackageId(room_package_id) {
+  try {
+    const pool = await poolPromise;
+    const request = pool.request();
+    request.input('room_package_id', sql.Int, room_package_id);
+
+    const result = await request.query(`
+      SELECT room_id, room_number FROM Rooms WHERE room_package_id = @room_package_id
+    `);
+
+    return result.recordset;
+  } catch (error) {
+    console.error('DB Error:', error);
+    throw error;
+  }
+};
 
 
 module.exports = {
-  getAvailableRooms,
+  fetchAvailableRooms,
   getAvailableRoomTypes,
   getTypeAndPackageAvailable,
   getPackage,
   getPackageOffers,
   getRoomType,
-  addRoom
+  addRoom,
+  getRoomDetailByRoomId,
+  getListRoomByPackageId,
 };

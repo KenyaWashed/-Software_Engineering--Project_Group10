@@ -187,6 +187,28 @@ fetch('http://localhost:4000/report/get-revenue?period=week&viewDate=2025-07-01'
   .then(data => console.log('Báo cáo doanh thu theo tuần:', data));
 
 
+### Xem chi tiết 1 phòng dựa vào room_id
+fetch("http://localhost:4000/room/room-detail?room_id=1", {
+  method: "GET",
+  headers: { "Content-Type": "application/json" }
+})
+  .then(res => res.json())
+  .then(data => console.log("Chi tiết phòng:", data))
+  .catch(err => console.error("Lỗi:", err));
+  
+
+### Lấy danh sách id phòng, số phòng dựa trên package cho sơ đồ
+fetch('http://localhost:4000/room/list-room-by-package?room_package_id=2', {
+  method: 'GET',
+  headers: {
+    'Content-Type': 'application/json'
+  }
+})
+  .then(res => res.json())
+  .then(data => console.log('Danh sách phòng:', data))
+  .catch(err => console.error('Lỗi:', err));
+
+
 
 ========================= NTD =========================
 
