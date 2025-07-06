@@ -1,0 +1,46 @@
+# Hotel Management System - Nhóm 10
+
+**Website quản lý khách sạn** được phát triển theo kiến trúc **Client - Server** sử dụng **Node.js**, **SQL Server**, và **React (Vite)**.
+
+---
+
+## Kiến trúc hệ thống
+
+- **Frontend**: React + Node.js
+- **Backend**: Node.js + Express + SQL Server  
+- **Database**: Microsoft SQL Server
+
+---
+
+## Cách chạy dự án
+
+### Frontend
+
+#### 1. Cài đặt `pnpm` nếu chưa có:
+
+
+npm install -g pnpm
+
+#### 2. Cài thư viện:
+
+```bash
+cd frontend
+pnpm install
+pnpm add zustand
+
+#### 3. Chạy project:
+
+```bash
+pnpm dev
+
+## Backend
+### Cấu trúc thư mục:
+/backend
+│
+├── app.js                # Điểm khởi chạy server Express
+├── config/
+│   └── db.js             # Cấu hình kết nối SQL Server
+├── routes/               # Định nghĩa các route (API endpoints)
+├── controllers/          # Xử lý logic từ routes
+├── models/               # Tương tác với database (SQL queries)
+
