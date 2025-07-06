@@ -5,6 +5,16 @@
 ## Phần mềm được tổ chức theo kiến trúc Client - Server
 Đây là phần mềm cho phía server chạy ở ```localhost:4000```
 
+## Frontend
+
+### 🔧 Cách chạy frontend
+
+```
+cd frontend
+pnpm install
+pnpm add zustand
+pnpm dev
+````
 ---
 ##  Cấu trúc project
 
