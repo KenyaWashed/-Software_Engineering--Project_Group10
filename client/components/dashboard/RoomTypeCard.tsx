@@ -73,6 +73,8 @@ export default function RoomTypeCard({
   furnitureItems,
   className,
 }: RoomTypeCardProps) {
+  // Lấy dữ liệu stats theo roomType
+  const stats = roomTypeStats[roomType] || {};
   // Calculate stroke dasharray for pie chart
   const circumference = 2 * Math.PI * 70;
   const strokeDasharray = `${
@@ -104,32 +106,23 @@ export default function RoomTypeCard({
           {roomType}
         </div>
         <div className="ml-auto w-21 h-8.5 rounded border border-zinc-600 bg-neutral-800 flex items-center gap-2 px-4">
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 16 16"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
+          <button
+            className="text-white font-montserrat text-base font-normal leading-normal hover:bg-zinc-700 px-4 py-1 rounded transition-colors"
+            type="button"
+            // onClick={() => ...} // Thêm logic khi cần
           >
-            <path
-              fillRule="evenodd"
-              clipRule="evenodd"
-              d="M10.3907 1.99976C10.6407 1.7498 10.9798 1.60938 11.3333 1.60938C11.6869 1.60938 12.026 1.7498 12.276 1.99976L14 3.72376C14.25 3.97379 14.3904 4.31287 14.3904 4.66642C14.3904 5.01998 14.25 5.35905 14 5.60909L12.9427 6.66642L9.33333 3.05709L10.3907 1.99976ZM8.39067 3.99976L2.39067 9.99976C2.1406 10.2497 2.00008 10.5888 2 10.9424V12.6664C2 13.02 2.14048 13.3592 2.39052 13.6092C2.64057 13.8593 2.97971 13.9998 3.33333 13.9998H5.05733C5.41093 13.9997 5.75001 13.8592 6 13.6091L12 7.60909L8.39067 3.99976Z"
-              fill="white"
-            />
-          </svg>
-          <div className="text-white font-montserrat text-base font-normal leading-normal">
             Sửa
-          </div>
+          </button>
         </div>
       </div>
 
       {/* Stats Cards */}
       <div className="flex gap-8 mb-8">
         <StatCard title="Tổng số phòng" value={totalRooms} />
-        <StatCard title="Trống" value={available} />
+        <StatCard title="Đã thuê" value={totalRooms - available} />
         <StatCard title="Giá thuê" value={rentPrice} />
-        <StatCard title="Số nội thất" value={furnitureCount} />
+        <StatCard title="Số lượng khách" value={stats.currentGuests ?? furnitureCount} />
+        <StatCard title="Số khách tối đa" value={stats.maxGuests ?? (roomType === 'Phòng đơn' ? 2 : roomType === 'Phòng đôi' ? 4 : 6)} />
       </div>
 
       {/* Revenue and Furniture - Side by side horizontally */}
@@ -199,7 +192,10 @@ export default function RoomTypeCard({
         {/* Furniture List */}
         <div className="bg-black rounded-2xl p-5 flex-1">
           <div className="text-white font-montserrat text-base font-normal leading-normal mb-5">
-            Hiện có
+            Tổng số nội thất hiện có
+          </div>
+          <div className="text-dashboard-yellow font-montserrat text-2xl font-bold leading-normal mb-2">
+            {furnitureCount}
           </div>
           <div className="grid grid-cols-2 gap-2">
             {furnitureItems.map((item, index) => (
@@ -211,3 +207,34 @@ export default function RoomTypeCard({
     </div>
   );
 }
+
+// Thông tin mẫu cho các loại phòng (có thể lấy từ API hoặc props thực tế)
+const roomTypeStats = {
+  'Phòng đơn': {
+    totalRooms: 10,
+    rented: 6,
+    currentGuests: 8,
+    rentPrice: '500,000đ',
+    furnitureCount: 5,
+    maxGuests: 2,
+    revenues: ['5,000,000đ', '6,000,000đ'],
+  },
+  'Phòng đôi': {
+    totalRooms: 8,
+    rented: 5,
+    currentGuests: 10,
+    rentPrice: '800,000đ',
+    furnitureCount: 7,
+    maxGuests: 4,
+    revenues: ['7,000,000đ', '8,000,000đ'],
+  },
+  'Phòng gia đình': {
+    totalRooms: 6,
+    rented: 3,
+    currentGuests: 12,
+    rentPrice: '1,200,000đ',
+    furnitureCount: 10,
+    maxGuests: 6,
+    revenues: ['10,000,000đ', '12,000,000đ'],
+  },
+};

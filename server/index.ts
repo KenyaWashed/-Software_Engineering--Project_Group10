@@ -1,6 +1,10 @@
 import express from "express";
 import cors from "cors";
 import { handleDemo } from "./routes/demo";
+import furnitureRoutes from './routes/furniture.js';
+import furnitureItemsRoutes from './routes/furnitureItems.js';
+import furnitureItemsByRoomTypeRoutes from './routes/furnitureItemsByRoomType.js';
+import policiesRouter from './routes/policies.js';
 
 export function createServer() {
   const app = express();
@@ -16,6 +20,10 @@ export function createServer() {
   });
 
   app.get("/api/demo", handleDemo);
+  app.use('/api/furniture', furnitureRoutes);
+  app.use('/api/furniture-items', furnitureItemsRoutes);
+  app.use('/api/furniture-items-by-room-type', furnitureItemsByRoomTypeRoutes);
+  app.use('/policies', policiesRouter);
 
   return app;
 }
