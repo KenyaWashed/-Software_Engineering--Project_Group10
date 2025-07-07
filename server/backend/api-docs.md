@@ -145,12 +145,25 @@ fetch('http://localhost:4000/report/get-furniture', {
     'Content-Type': 'application/json'
   },
   body: JSON.stringify({
-    room_package_id: 1
+    "room_type_id": 2
   })
 })
   .then(res => res.json())
   .then(data => console.log('Nội thất gói phòng:', data))
   .catch(err => console.error('Lỗi:', err));
+  
+res:
+{
+    "furniture": {
+        "room_type_id": 2,
+        "ceiling_fan": 5,
+        "table_count": 8,
+        "chair_count": 12,
+        "fridge_count": 3,
+        "kettle_count": 3,
+        "air_conditioner_count": 6
+    }
+}
   
   
 ### Lấy báo cáo doanh thu theo ngày
@@ -231,6 +244,7 @@ res:
 
 
 ### Tính tỷ lệ tăng trưởng đơn đặt phòng giữa hai khoảng: 30 ngày gần nhất và 30 ngày trước đó
+(Nếu tháng tháng trước kh có đơn thì mặc định là 100)
 fetch('http://localhost:4000/report/get-reservation-rate-between-two-months', {
   method: 'GET',
   headers: {
@@ -241,7 +255,7 @@ fetch('http://localhost:4000/report/get-reservation-rate-between-two-months', {
   .then(data => console.log('Tỷ lệ tăng trưởng đặt phòng:', data))
   .catch(err => console.error('Lỗi:', err));
 
-# Nếu tháng tháng trước kh có đơn thì mặc định là 100
+
 res:
 {
     "success": true,

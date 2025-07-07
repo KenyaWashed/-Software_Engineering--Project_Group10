@@ -1,4 +1,4 @@
-const { getRevenueReport, getFurnitureByPackageId} = require('../models/reportModel');
+const { getRevenueReport, getFurnitureByRoomTypeId} = require('../models/reportModel');
 const ReportModel = require("../models/reportModel");
 
 
@@ -100,16 +100,16 @@ exports.revenueReport = async (req, res) => {
 };
 
 exports.getFurniture = async (req, res) => {
-    const { room_package_id } = req.body;
+    const { room_type_id } = req.body;
 
-    if (!room_package_id) {
-        return res.status(400).json({ error: 'Thiếu room_package_id' });
+    if (!room_type_id) {
+        return res.status(400).json({ error: 'Thiếu room_type_id' });
     }
 
     try {
-        const data = await getFurnitureByPackageId(room_package_id);
+        const data = await getFurnitureByRoomTypeId(room_type_id);
         if (!data) {
-            return res.status(404).json({ message: 'Không tìm thấy nội thất cho gói phòng này' });
+            return res.status(404).json({ message: 'Không tìm thấy nội thất cho loại phòng này' });
     }
     return res.status(200).json({ furniture: data });
     } catch (error) {

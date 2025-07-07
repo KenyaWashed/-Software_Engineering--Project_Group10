@@ -150,7 +150,7 @@ create table user_login_history (
 );
 
 CREATE TABLE Furniture (
-    room_package_id INT PRIMARY KEY,
+    room_type_id INT PRIMARY KEY,
     ceiling_fan INT,
     table_count INT,
     chair_count INT,
@@ -305,15 +305,13 @@ GO
 ------------------------
 
 INSERT INTO Furniture (
-    room_package_id, ceiling_fan, table_count, chair_count,
+    room_type_id, ceiling_fan, table_count, chair_count,
     fridge_count, kettle_count, air_conditioner_count
 )
 VALUES
 (1, 10, 10, 20, 5, 5, 10),
 (2, 5, 8, 12, 3, 3, 6),
 (3, 0, 6, 10, 0, 2, 4),
-(4, 12, 12, 24, 8, 8, 12),
-(5, 2, 4, 6, 1, 1, 2);
 
 -----------------------
 

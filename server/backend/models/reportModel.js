@@ -28,14 +28,14 @@ async function getRevenueReport(startDate, endDate, periodLabel) {
 }
 
 
-async function getFurnitureByPackageId(room_package_id) {
+async function getFurnitureByRoomTypeId(room_type_id) {
   try {
     const pool = await poolPromise;
     const request = pool.request();
-    request.input('room_package_id', sql.Int, room_package_id);
+    request.input('room_type_id', sql.Int, room_type_id);
 
     const result = await request.query(`
-      SELECT * FROM Furniture WHERE room_package_id = @room_package_id
+      SELECT * FROM Furniture WHERE room_type_id = @room_type_id
     `);
 
     return result.recordset[0]; // chỉ lấy 1 dòng vì là PK
@@ -131,7 +131,7 @@ async function getReservationRatebetweenTwoMonths() {
 
 module.exports = {
   getRevenueReport,
-  getFurnitureByPackageId,
+  getFurnitureByRoomTypeId,
   getReservationRate,
   getReservationRatebetweenTwoMonths
 };
