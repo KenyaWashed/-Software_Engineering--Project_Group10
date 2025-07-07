@@ -1,4 +1,5 @@
 const { poolPromise, sql } = require('../config/db');
+const ExcelJS = require('exceljs');
 
 /**
  * Lấy doanh thu tổng từ startDate đến endDate, luôn trả về 1 bản ghi
@@ -95,9 +96,9 @@ async function getReservationRate() {
 
 // Tính tỷ lệ đặt phòng giữa tháng này và tháng trước
 async function getReservationRatebetweenTwoMonths() {
-  try {
-    const pool = await poolPromise;
-    const request = pool.request();
+    try {
+      const pool = await poolPromise;
+      const request = pool.request();
 
     const result = await request.query(`
       SELECT
@@ -127,11 +128,29 @@ async function getReservationRatebetweenTwoMonths() {
   }
 }
 
+async function getRevenueData() {
+  const pool = await poolPromise;
+  const result = await pool.request().query(`
+    SELECT 
+      R.reservation_id,
+      R.check_in_date,
+      R.check_out_date,
+      R.reservation_status,
+      P.payment_datetime,
+      I.total_amount,
+      I.invoice_status
+    FROM Reservations R
+    JOIN Invoice I ON R.reservation_id = I.reservation_id
+    JOIN Payment_detail P ON I.invoice_id = P.invoice_id
+  `);
+  return result.recordset;
+}
 
 
 module.exports = {
-  getRevenueReport,
+  //getRevenueReport,
   getFurnitureByRoomTypeId,
   getReservationRate,
-  getReservationRatebetweenTwoMonths
+  getReservationRatebetweenTwoMonths,
+  getRevenueData
 };

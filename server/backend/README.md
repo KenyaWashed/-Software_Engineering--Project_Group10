@@ -49,6 +49,7 @@ npm install express-validator
 npm install node-cron
 npm install cors
 npm install express-session
+npm install exceljs
 ```
 
 ---
