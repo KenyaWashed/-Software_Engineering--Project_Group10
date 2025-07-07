@@ -33,7 +33,31 @@ const updatePolicy = async (req, res) => {
   }
 };
 
+const addPolicy = async (req, res) => {
+  try {
+    const { policy_name, policy_short_name, policy_value, policy_notes } = req.body;
+
+    // Kiểm tra dữ liệu đầu vào (có thể dùng express-validator nâng cao hơn)
+    if (!policy_name || !policy_short_name || !policy_value) {
+      return res.status(400).json({ message: 'Thiếu thông tin bắt buộc' });
+    }
+
+    const result = await RoomModel.insertPolicy({
+      policy_name,
+      policy_short_name,
+      policy_value,
+      policy_notes
+    });
+
+    res.status(201).json({ message: '✅ Thêm chính sách thành công', result });
+  } catch (error) {
+    console.error('❌ Lỗi thêm chính sách:', error);
+    res.status(500).json({ message: '❌ Lỗi server khi thêm chính sách' });
+  }
+};
+
 module.exports = {
   getPolicies,
   updatePolicy,
+  addPolicy
 };

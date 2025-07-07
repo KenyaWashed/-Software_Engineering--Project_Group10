@@ -318,6 +318,28 @@ async function getListRoomByPackageId(room_package_id) {
   }
 };
 
+const updateMaxGuest = async (room_type_id, max_guest) => {
+  try {
+    const pool = await poolPromise;
+    const request = pool.request(); // KHÔNG dùng lại db.request() ở dưới nữa
+
+    request.input('room_type_id', sql.Int, room_type_id);
+    request.input('max_guest', sql.Int, max_guest);
+
+    const query = `
+      UPDATE room_types
+      SET max_guests = @max_guest
+      WHERE room_type_id = @room_type_id
+    `;
+
+    const result = await request.query(query);
+    return result.rowsAffected[0]; // trả về số dòng bị ảnh hưởng (thường là 1)
+  } catch (err) {
+    console.error('DB Update Error:', err);
+    throw err;
+  }
+};
+
 
 module.exports = {
   fetchAvailableRooms,
@@ -329,4 +351,5 @@ module.exports = {
   addRoom,
   getRoomDetailByRoomId,
   getListRoomByPackageId,
+  updateMaxGuest
 };

@@ -84,11 +84,28 @@ const getListRoomByPackageId = async (req, res) => {
   }
 };
 
+const updateMaxGuest = async (req, res) => {
+  const { room_type_id, max_guest } = req.body;
+
+  if (!room_type_id || max_guest == null) {
+    return res.status(400).json({ error: "Thiếu room_type_id hoặc max_guest" });
+  }
+
+  try {
+    const result = await RoomModel.updateMaxGuest(room_type_id, max_guest);
+    res.json({ message: "✅ Cập nhật số khách tối đa thành công", result });
+  } catch (error) {
+    console.error('❌ Error in updateMaxGuest:', error);
+    res.status(500).json({ error: "Lỗi server khi cập nhật max_guest" });
+  }
+};
+
 
 module.exports = { 
   getAllRooms,
   getAvailableRooms,
   addRoom,
   getRoomDetail,
-  getListRoomByPackageId
+  getListRoomByPackageId,
+  updateMaxGuest
 };

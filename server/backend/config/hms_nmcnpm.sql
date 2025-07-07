@@ -311,10 +311,12 @@ INSERT INTO Furniture (
 VALUES
 (1, 10, 10, 20, 5, 5, 10),
 (2, 5, 8, 12, 3, 3, 6),
-(3, 0, 6, 10, 0, 2, 4),
+(3, 0, 6, 10, 0, 2, 4)
+GO
 
 -----------------------
-
+DROP FUNCTION IF EXISTS dbo.checkAvailableRoom;
+GO
 CREATE FUNCTION dbo.checkAvailableRoom (
     @check_in_date DATETIME,
     @check_out_date DATETIME

@@ -54,7 +54,7 @@ Tải và cài đặt từ: https://nodejs.org/
 Mở terminal:
 
 ```bash
-cd /backend
+cd server/backend
 npm install
 ```
 
@@ -84,7 +84,7 @@ Mở **SQL Server Management Studio**, sau đó:
 
 1. Chạy file: 
 ```
-./backend/config/hms_nmcnpm.sql
+.server/backend/config/hms_nmcnpm.sql
 ```
 
 ---
@@ -114,8 +114,12 @@ const config = {
 ##  Chạy Server
 
 ```bash
-cd /backend
+# Cách 1 vào thư mục backend
+cd server/backend
 node app.js
+
+# Cách 2 chạy trực tiếp tại thư mục gốc
+node server\backend\app.js
 ```
 
 Sau khi chạy thành công, terminal sẽ hiện:

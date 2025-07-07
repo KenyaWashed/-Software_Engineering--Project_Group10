@@ -94,9 +94,9 @@ fetch('http://localhost:4000/policy/update', {
     'Content-Type': 'application/json'
   },
   body: JSON.stringify({
-    policy_short_name: 'KH3',
+    policy_short_name: 'KH3', // mã phụ thu khách 3 là 'KH3', phụ thu khách nước ngoài là 'KNN'
     policy_value: 0.1,
-    policy_notes: 'Nhà nước giảm thuế'
+    policy_notes: 'Nhà nước giảm thuế' // có thể bỏ trống
   })
 })
   .then(res => res.json())
@@ -255,12 +255,39 @@ fetch('http://localhost:4000/report/get-reservation-rate-between-two-months', {
   .then(data => console.log('Tỷ lệ tăng trưởng đặt phòng:', data))
   .catch(err => console.error('Lỗi:', err));
 
-
 res:
 {
     "success": true,
     "data": 67
 }
+
+
+### Thêm một chính sách mới
+fetch('http://localhost:4000/me', {
+  method: 'GET',
+  credentials: 'include' // Gửi cookie session lên server
+})
+.then(res => res.json())
+.then(data => {
+  const role = data.user?.role;
+  console.log('User role:', role);
+});
+
+
+### Sửa số khách tối đa của loại phòng
+fetch('http://localhost:4000/room/update-max-guest', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    room_type_id: 2,
+    max_guest: 6
+  })
+})
+.then(res => res.json())
+.then(data => console.log(data.message));
+
 
 
 
