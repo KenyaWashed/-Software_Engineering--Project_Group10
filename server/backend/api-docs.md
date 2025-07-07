@@ -140,7 +140,7 @@ fetch('http://localhost:4000/room/add', {
 
 ### Xem số lượng nộit thất trong phòng dựa vào room_package_id
 fetch('http://localhost:4000/report/get-furniture', {
-  method: 'GET',
+  method: 'POST',
   headers: {
     'Content-Type': 'application/json'
   },
@@ -207,6 +207,46 @@ fetch('http://localhost:4000/room/list-room-by-package?room_package_id=2', {
   .then(res => res.json())
   .then(data => console.log('Danh sách phòng:', data))
   .catch(err => console.error('Lỗi:', err));
+  
+  
+### Lấy tỉ lệ đặt phòng giữa các loại phòng trong 30 ngày gần đây
+fetch('http://localhost:4000/report/get-reservation-rate', {
+  method: 'GET',
+  headers: {
+    'Content-Type': 'application/json'
+  }
+})
+  .then(res => res.json())
+  .then(data => console.log('Tỷ lệ đặt phòng theo loại:', data))
+  .catch(err => console.error('Lỗi:', err));
+res:
+{
+    "success": true,
+    "data": {
+        "type1": 0,
+        "type2": 0,
+        "type3": 100
+    }
+}
+
+
+### Tính tỷ lệ tăng trưởng đơn đặt phòng giữa hai khoảng: 30 ngày gần nhất và 30 ngày trước đó
+fetch('http://localhost:4000/report/get-reservation-rate-between-two-months', {
+  method: 'GET',
+  headers: {
+    'Content-Type': 'application/json'
+  }
+})
+  .then(res => res.json())
+  .then(data => console.log('Tỷ lệ tăng trưởng đặt phòng:', data))
+  .catch(err => console.error('Lỗi:', err));
+
+# Nếu tháng tháng trước kh có đơn thì mặc định là 100
+res:
+{
+    "success": true,
+    "data": 67
+}
 
 
 

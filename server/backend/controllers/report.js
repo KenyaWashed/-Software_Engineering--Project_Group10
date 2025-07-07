@@ -1,4 +1,6 @@
 const { getRevenueReport, getFurnitureByPackageId} = require('../models/reportModel');
+const ReportModel = require("../models/reportModel");
+
 
 /**
  * Kiểm tra xem chuỗi viewDate có phải là 'YYYY-MM-DD' và là ngày hợp lệ không
@@ -114,4 +116,32 @@ exports.getFurniture = async (req, res) => {
         console.error('Lỗi lấy nội thất:', error);
         return res.status(500).json({ error: 'Lỗi server' });
     }
+};
+
+exports.getReservationRate = async (req, res) => {
+  try {
+    result = await ReportModel.getReservationRate();
+    return res.status(200).json({
+      success: true,
+      data: result
+    });
+  }
+  catch (err) {
+    console.error('Lỗi logic:', err);
+    return res.status(500).json({ success: false, message: 'Lỗi server' });
+  }
+};
+
+exports.getReservationRatebetweenTwoMonths = async (req, res) => {
+  try {
+    result = await ReportModel.getReservationRatebetweenTwoMonths();
+    return res.status(200).json({
+      success: true,
+      data: result
+    });
+  }
+  catch (err) {
+    console.error('Lỗi logic:', err);
+    return res.status(500).json({ success: false, message: 'Lỗi server' });
+  }
 };
