@@ -9,7 +9,7 @@
 ## 📁 Cấu trúc project
 
 ```
-/backend
+/server
 │
 ├── app.js                # Điểm khởi chạy server Express
 ├── config/
@@ -35,7 +35,8 @@ Tải và cài đặt từ: https://nodejs.org/
 Mở terminal:
 
 ```bash
-cd /backend
+# Vào nơi chứa các gói package-lock.json để install các thư viện đã dùng
+cd server/backend 
 npm install
 ```
 
@@ -95,7 +96,10 @@ const config = {
 ## ▶️ Chạy Server
 
 ```bash
-cd /backend
+# Cách 1 đứng ở thu mục gốc run:
+node server\backend\app.js
+
+# Cách 2 đứng ở thư mục ./server/backend run:
 node app.js
 ```
 

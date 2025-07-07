@@ -3,6 +3,6 @@ const router = express.Router();
 const { revenueReport , getFurniture} = require('../controllers/report');
 
 router.get('/get-revenue', revenueReport);
-router.get('/get-furniture', getFurniture)
+router.post('/get-furniture', getFurniture)
 
 module.exports = router;

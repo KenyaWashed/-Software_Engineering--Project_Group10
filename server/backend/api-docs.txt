@@ -140,7 +140,7 @@ fetch('http://localhost:4000/room/add', {
 
 ### Xem số lượng nộit thất trong phòng dựa vào room_package_id
 fetch('http://localhost:4000/report/get-furniture', {
-  method: 'POST',
+  method: 'GET',
   headers: {
     'Content-Type': 'application/json'
   },
