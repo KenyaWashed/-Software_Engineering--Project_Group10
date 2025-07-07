@@ -100,6 +100,22 @@ const updateMaxGuest = async (req, res) => {
   }
 };
 
+const getRoomStatus = async (req, res) => {
+  const { room_number } = req.body;
+
+  if (!room_number) {
+    return res.status(400).json({ error: "Thiếu room_number" });
+  }
+
+  try {
+    const status = await RoomModel.getRoomStatus(room_number);
+    res.json({ status });
+  } catch (error) {
+    console.error('❌ Error in getRoomStatus:', error);
+    res.status(500).json({ error: "Lỗi server khi lấy trạng thái phòng" });
+  }
+};
+
 
 module.exports = { 
   getAllRooms,
@@ -107,5 +123,6 @@ module.exports = {
   addRoom,
   getRoomDetail,
   getListRoomByPackageId,
-  updateMaxGuest
+  updateMaxGuest,
+  getRoomStatus
 };
