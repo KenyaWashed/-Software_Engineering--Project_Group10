@@ -6,6 +6,6 @@
     "express-session": "^1.18.1",
     "express-validator": "^7.2.1",
     "mssql": "^11.0.1",
-    "node-cron": "^4.0.7"
+    "node-cron": "^4.2.0"
   }
 }

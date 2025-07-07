@@ -54,7 +54,7 @@ export default function LoginPage() {
       }
 
       if (result.user && result.user.role === "admin") {
-        router.push("/dashboard");
+        router.push("/admin/dashboard"); // chuyển sang dashboard admin nội bộ
       } else {
         router.push("/");
       }

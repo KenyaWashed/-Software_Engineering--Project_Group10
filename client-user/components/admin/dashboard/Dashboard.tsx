@@ -1,4 +1,4 @@
-
+"use client";
 import { useEffect } from "react";
 import { cn } from "@/lib/utils";
 import Sidebar from "./Sidebar";
@@ -6,18 +6,17 @@ import CircularProgress from "./CircularProgress";
 import RevenueCards from "./RevenueCards";
 import RevenuePieChart from "./RevenuePieChart";
 import TrendsChart from "./TrendsChart";
-import { checkSession } from "../../../../client-user/lib/auth/checkSession";
+import { checkSession } from "@/lib/auth/checkSession";
 
 interface DashboardProps {
   className?: string;
 }
 
 export default function Dashboard({ className }: DashboardProps) {
-
   useEffect(() => {
     checkSession().then((data) => {
       if (!data.user || data.user.role !== "admin") {
-        window.location.href = "http://localhost:3000"; // hoặc router.push nếu muốn
+        window.location.href = "/login";
       }
     });
   }, []);
