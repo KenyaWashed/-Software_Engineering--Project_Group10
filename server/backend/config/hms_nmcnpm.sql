@@ -108,7 +108,7 @@ CREATE TABLE Invoice (
     service_fee DECIMAL(18,2),
     extra_fee DECIMAL(18,2) default 0, -- default = 0
     total_amount DECIMAL(18,2), -- = base_fee + service_fee + extra_fee
-    invoice_status NVARCHAR(20) check (invoice_status in (N'Đã thanh toán', N'Đã hủy', N'Chờ thanh toán')),
+    invoice_status NVARCHAR(20), --check (invoice_status in (N'Đã thanh toán', N'Đã hủy', N'Chờ thanh toán')),
     reservation_id INT FOREIGN KEY REFERENCES Reservations(reservation_id)
 );
 
@@ -117,8 +117,8 @@ CREATE TABLE Payment_detail (
     invoice_id INT PRIMARY KEY,
     payment_datetime DATETIME, -- <= getdate()
     payment_method NVARCHAR(50) check (payment_method in (N'Tiền mặt', N'Momo', N'Tài khoản ngân hàng')),
-    payment_account NVARCHAR(100),
-    FOREIGN KEY (invoice_id) REFERENCES Invoice(invoice_id)
+    payment_account NVARCHAR(100)
+    --FOREIGN KEY (invoice_id) REFERENCES Invoice(invoice_id)
 );
 
 -- Bảng Support_history
@@ -167,7 +167,6 @@ alter table room_type_photos add constraint fk_room_type_photos foreign key (roo
 alter table room_type_amenities add constraint fk_room_type_amenities foreign key (room_type_id) references room_types(room_type_id);
 alter table room_packages add constraint fk_room_package_room_type foreign key (room_type_id) references room_types(room_type_id);
 alter table room_package_offers add constraint fk_room_package_offers foreign key (room_package_id) references room_packages(room_package_id);
-alter table Reservation_detail add constraint fk_reservation_detail_reservation foreign key (reservation_id) references Reservations(reservation_id);
 
 INSERT INTO room_types (
 	room_type_name, max_guests, room_type_beds, room_type_bathrooms,
