@@ -167,6 +167,7 @@ alter table room_type_photos add constraint fk_room_type_photos foreign key (roo
 alter table room_type_amenities add constraint fk_room_type_amenities foreign key (room_type_id) references room_types(room_type_id);
 alter table room_packages add constraint fk_room_package_room_type foreign key (room_type_id) references room_types(room_type_id);
 alter table room_package_offers add constraint fk_room_package_offers foreign key (room_package_id) references room_packages(room_package_id);
+alter table Reservation_detail add constraint fk_reservation_detail_reservation foreign key (reservation_id) references Reservations(reservation_id);
 
 INSERT INTO room_types (
 	room_type_name, max_guests, room_type_beds, room_type_bathrooms,
