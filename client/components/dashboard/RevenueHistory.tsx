@@ -1,38 +1,48 @@
+import fakeTransactions from "./fakeTransactions";
+
 export default function RevenueHistory() {
-  const historyItems = [
-    { date: "21/06/2025", amount: "VND 10,560,000" },
-    { date: "20/06/2025", amount: "VND 19,120,000" },
-    { date: "19/06/2025", amount: "VND 7,231,000" },
-    { date: "18/06/2025", amount: "VND 11,560,000" },
-    { date: "17/06/2025", amount: "VND 12,209,000" },
-    { date: "16/06/2025", amount: "VND 15,121,502" },
-  ];
+  // Tính tổng doanh thu theo ngày từ fakeTransactions
+  const revenueByDate: { [date: string]: number } = {};
+  fakeTransactions.forEach((row) => {
+    // Lấy số tiền dạng "VND 1,000,000" => 1000000
+    const amount = Number((row.amount || "").replace(/[^\d]/g, "")) || 0;
+    if (!revenueByDate[row.date]) revenueByDate[row.date] = 0;
+    revenueByDate[row.date] += amount;
+  });
+  const revenueRows = Object.entries(revenueByDate)
+    .filter(([_, v]) => v !== 0)
+    .sort((a, b) => {
+      // dd/mm/yyyy -> yyyy-mm-dd
+      const parse = (d: string) => {
+        const [day, month, year] = d.split("/");
+        return new Date(`${year}-${month}-${day}`).getTime();
+      };
+      return parse(b[0]) - parse(a[0]);
+    });
+  const totalRevenue = revenueRows.reduce((sum, [_, v]) => sum + v, 0);
+
+  // Chỉ lấy 10 dòng gần nhất
+  const latestRevenueRows = revenueRows.slice(0, 10);
 
   return (
     <div className="bg-[#202020] rounded-md p-4 text-white">
       <h3 className="text-xl font-semibold font-montserrat mb-6">
         Lịch sử doanh thu
       </h3>
-
       <div className="space-y-5">
-        {historyItems.map((item, index) => (
+        {latestRevenueRows.map(([date, amount], index) => (
           <div
             key={index}
             className="flex items-center justify-between bg-[#111111] rounded-md p-4"
           >
-            <span className="text-base">{item.date}</span>
-            <div className="flex items-center gap-4">
-              <span className="text-base">{item.amount}</span>
-              <button className="w-16 h-6 bg-[#111111] rounded-md flex items-center justify-center">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                  <circle cx="8" cy="4" r="1" fill="currentColor" />
-                  <circle cx="8" cy="8" r="1" fill="currentColor" />
-                  <circle cx="8" cy="12" r="1" fill="currentColor" />
-                </svg>
-              </button>
-            </div>
+            <span className="text-base">{date}</span>
+            <span className="text-base">VND {amount.toLocaleString()}</span>
           </div>
         ))}
+        <div className="flex items-center justify-between bg-[#232323] rounded-md p-4 font-bold text-yellow-400 mt-4">
+          <span>Tổng cộng</span>
+          <span>VND {totalRevenue.toLocaleString()}</span>
+        </div>
       </div>
     </div>
   );
