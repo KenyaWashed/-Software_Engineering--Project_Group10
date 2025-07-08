@@ -1,4 +1,5 @@
 const { poolPromise, sql } = require('../config/db');
+const ExcelJS = require('exceljs');
 
 /**
  * Lấy doanh thu tổng từ startDate đến endDate, luôn trả về 1 bản ghi
@@ -28,14 +29,14 @@ async function getRevenueReport(startDate, endDate, periodLabel) {
 }
 
 
-async function getFurnitureByPackageId(room_package_id) {
+async function getFurnitureByRoomTypeId(room_type_id) {
   try {
     const pool = await poolPromise;
     const request = pool.request();
-    request.input('room_package_id', sql.Int, room_package_id);
+    request.input('room_type_id', sql.Int, room_type_id);
 
     const result = await request.query(`
-      SELECT * FROM Furniture WHERE room_package_id = @room_package_id
+      SELECT * FROM Furniture WHERE room_type_id = @room_type_id
     `);
 
     return result.recordset[0]; // chỉ lấy 1 dòng vì là PK
@@ -45,7 +46,111 @@ async function getFurnitureByPackageId(room_package_id) {
   }
 }
 
+// Đếm số lượng đặt phòng trong 1 tháng gần đây theo loại phòng
+async function countReservationsByRoomTypeInLastMonth(roomTypeId) {
+  try {
+    const pool = await poolPromise;
+    const request = pool.request();
+    request.input('roomTypeId', roomTypeId);
+
+    const result = await request.query(`
+      SELECT COUNT(*) AS total
+      FROM Reservations Res
+      JOIN Rooms R ON Res.room_id = R.room_id
+      WHERE 
+        R.room_type_id = @roomTypeId AND
+        Res.reservation_date >= DATEADD(MONTH, -1, GETDATE())
+    `);
+
+    return result.recordset[0].total;
+  } catch (err) {
+    console.error(`Lỗi khi đếm reservation cho room_type_id = ${roomTypeId}:`, err);
+    throw err;
+  }
+}
+
+// Tính phần trăm đặt phòng theo từng loại
+async function getReservationRate() {
+  try {
+    const [countType1, countType2, countType3] = await Promise.all([
+      countReservationsByRoomTypeInLastMonth(1),
+      countReservationsByRoomTypeInLastMonth(2),
+      countReservationsByRoomTypeInLastMonth(3),
+    ]);
+
+    const total = countType1 + countType2 + countType3;
+
+    const toPercent = (count) =>
+      total > 0 ? Math.round((count / total) * 100) : 0;
+
+    return {
+      type1: toPercent(countType1),
+      type2: toPercent(countType2),
+      type3: toPercent(countType3),
+    };
+  } catch (err) {
+    console.error('Lỗi khi tính tỷ lệ đặt phòng:', err);
+    throw err;
+  }
+}
+
+// Tính tỷ lệ đặt phòng giữa tháng này và tháng trước
+async function getReservationRatebetweenTwoMonths() {
+    try {
+      const pool = await poolPromise;
+      const request = pool.request();
+
+    const result = await request.query(`
+      SELECT
+        SUM(CASE 
+          WHEN reservation_date >= DATEADD(DAY, -30, GETDATE()) AND reservation_date < GETDATE()
+          THEN 1 ELSE 0 END) AS recent_30_days,
+
+        SUM(CASE 
+          WHEN reservation_date >= DATEADD(DAY, -60, GETDATE()) AND reservation_date < DATEADD(DAY, -30, GETDATE())
+          THEN 1 ELSE 0 END) AS previous_30_days
+      FROM Reservations;
+    `);
+
+    const { recent_30_days, previous_30_days } = result.recordset[0];
+
+    let rate = 0;
+    if (previous_30_days === 0) {
+      rate = recent_30_days > 0 ? 100 : 0;
+    } else {
+      rate = ((recent_30_days - previous_30_days) / previous_30_days) * 100;
+    }
+
+    return Math.round(rate);
+  } catch (err) {
+    console.error('Lỗi khi tính tỷ lệ tăng trưởng đặt phòng:', err);
+    throw err;
+  }
+}
+
+async function getRevenueData() {
+  const pool = await poolPromise;
+  const result = await pool.request().query(`
+    SELECT 
+      R.reservation_id,
+      R.check_in_date,
+      R.check_out_date,
+      R.reservation_status,
+      P.payment_datetime,
+      I.total_amount,
+      I.invoice_status
+    FROM Reservations R
+    JOIN Invoice I ON R.reservation_id = I.reservation_id
+    JOIN Payment_detail P ON I.invoice_id = P.invoice_id
+  `);
+  return result.recordset;
+}
+
+
 module.exports = {
-  getRevenueReport,
-  getFurnitureByPackageId
+  //getRevenueReport,
+  getFurnitureByRoomTypeId,
+  getReservationRate,
+  getReservationRatebetweenTwoMonths,
+  getRevenueData
 };

@@ -318,6 +318,130 @@ async function getListRoomByPackageId(room_package_id) {
   }
 };
 
+const updateMaxGuest = async (room_type_id, max_guest) => {
+  try {
+    const pool = await poolPromise;
+    const request = pool.request(); // KHÔNG dùng lại db.request() ở dưới nữa
+
+    request.input('room_type_id', sql.Int, room_type_id);
+    request.input('max_guest', sql.Int, max_guest);
+
+    const query = `
+      UPDATE room_types
+      SET max_guests = @max_guest
+      WHERE room_type_id = @room_type_id
+    `;
+
+    const result = await request.query(query);
+    return result.rowsAffected[0]; // trả về số dòng bị ảnh hưởng (thường là 1)
+  } catch (err) {
+    console.error('DB Update Error:', err);
+    throw err;
+  }
+};
+
+const getRoomIdByRoomNumber = async (room_number) => {
+  try {
+    const pool = await poolPromise;
+    const request = pool.request();
+
+    request.input('room_number', sql.Char(3), room_number);
+
+    const result = await request.query(`
+      SELECT room_id
+      FROM Rooms
+      WHERE room_number = @room_number
+    `);
+
+    // Trả về room_id nếu có
+    if (result.recordset.length > 0) {
+      return result.recordset[0].room_id;
+    } else {
+      return null; // Không tìm thấy
+    }
+  } catch (error) {
+    console.error('❌ Lỗi khi lấy room_id theo room_number:', error);
+    throw error;
+  }
+};
+
+const getRoomPackageIdByRoomId = async (room_id) => {
+  try {
+    const pool = await poolPromise;
+    const result = await pool.request()
+      .input('room_id', sql.Int, room_id)
+      .query(`
+        SELECT room_package_id 
+        FROM Rooms 
+        WHERE room_id = @room_id
+      `);
+
+    if (result.recordset.length > 0) {
+      return result.recordset[0].room_package_id;
+    } else {
+      return null; // Không tìm thấy phòng
+    }
+  } catch (error) {
+    console.error("❌ Lỗi khi lấy room_package_id theo room_id:", error);
+    throw error;
+  }
+};
+
+
+const getRoomStatus = async (input_room_number) => {
+  try {
+    const pool = await poolPromise;
+    const request = pool.request();
+    
+    let room_number = String(input_room_number).padStart(3, '0'); // ví dụ: 1 → "001"
+
+    // Gọi hàm lấy room_id
+    const room_id = await getRoomIdByRoomNumber(room_number);
+    if (!room_id) {
+      return {
+        room_number,
+        room_status: "Không tìm thấy phòng",
+        room_package_id: "Unknown",
+        check_in_date: "Unknown",
+        check_out_date: "Unknown"
+      };
+    }
+
+    // Lấy room_package_id
+      const room_package_id = await getRoomPackageIdByRoomId(room_id); // hàm này đại ca cần định nghĩa sẵn
+
+    // Kiểm tra có đơn đặt phòng hiện tại hay không
+    request.input('room_id', sql.Int, room_id);
+
+    const query = `
+      SELECT TOP 1 check_in_date, check_out_date
+      FROM Reservations
+      WHERE room_id = @room_id
+        AND reservation_status IN (N'Đã đặt', N'Đã thanh toán')
+        AND check_in_date <= GETDATE()
+        AND check_out_date >= GETDATE()
+      ORDER BY reservation_date DESC
+    `;
+
+    const result = await request.query(query);
+    const isBooked = result.recordset.length > 0;
+
+    const check_in_date = isBooked ? result.recordset[0].check_in_date : "Unknown";
+    const check_out_date = isBooked ? result.recordset[0].check_out_date : "Unknown";
+
+    return {
+      room_number,
+      room_package_id,
+      room_status: isBooked ? "Đang được đặt" : "Trống",
+      check_in_date,
+      check_out_date
+    };
+  } catch (err) {
+    console.error("❌ Lỗi khi kiểm tra trạng thái phòng:", err);
+    throw err;
+  }
+};
+
 
 module.exports = {
   fetchAvailableRooms,
@@ -329,4 +453,8 @@ module.exports = {
   addRoom,
   getRoomDetailByRoomId,
   getListRoomByPackageId,
+  updateMaxGuest,
+  getRoomPackageIdByRoomId,
+  getRoomIdByRoomNumber,
+  getRoomStatus
 };

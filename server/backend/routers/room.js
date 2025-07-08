@@ -7,7 +7,9 @@ const {
   getAvailableRooms,
   addRoom,
   getRoomDetail,
-  getListRoomByPackageId
+  getListRoomByPackageId,
+  updateMaxGuest,
+  getRoomStatus
 } = require("../controllers/room");
 
 // GET /rooms/all
@@ -21,5 +23,8 @@ router.post('/add', addRoom);
 
 router.get('/room-detail', getRoomDetail)
 router.get('/list-room-by-package', getListRoomByPackageId);
+router.post('/update-max-guest', updateMaxGuest);
+router.post('/get-room-status', getRoomStatus)
+
 
 module.exports = router;

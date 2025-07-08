@@ -5,7 +5,8 @@ const router = express.Router();
 
 const {
   getPolicies,
-  updatePolicy
+  updatePolicy,
+  addPolicy,
 } = require("../controllers/policy");
 
 // GET /policy/get
@@ -13,6 +14,8 @@ router.get('/get', getPolicies);
 
 // PATCH /policy/update
 router.patch('/update', updatePolicy);
+
+router.post('/add', addPolicy);
 
 
 

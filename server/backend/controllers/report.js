@@ -1,4 +1,7 @@
-const { getRevenueReport, getFurnitureByPackageId} = require('../models/reportModel');
+const { getRevenueReport, getFurnitureByRoomTypeId} = require('../models/reportModel');
+const ReportModel = require("../models/reportModel");
+const ExcelJS = require('exceljs');
+const { getRevenueData } = require('../models/reportModel');
 
 /**
  * Kiểm tra xem chuỗi viewDate có phải là 'YYYY-MM-DD' và là ngày hợp lệ không
@@ -98,20 +101,86 @@ exports.revenueReport = async (req, res) => {
 };
 
 exports.getFurniture = async (req, res) => {
-    const { room_package_id } = req.body;
+    const { room_type_id } = req.body;
 
-    if (!room_package_id) {
-        return res.status(400).json({ error: 'Thiếu room_package_id' });
+    if (!room_type_id) {
+        return res.status(400).json({ error: 'Thiếu room_type_id' });
     }
 
     try {
-        const data = await getFurnitureByPackageId(room_package_id);
+        const data = await getFurnitureByRoomTypeId(room_type_id);
         if (!data) {
-            return res.status(404).json({ message: 'Không tìm thấy nội thất cho gói phòng này' });
+            return res.status(404).json({ message: 'Không tìm thấy nội thất cho loại phòng này' });
     }
     return res.status(200).json({ furniture: data });
     } catch (error) {
         console.error('Lỗi lấy nội thất:', error);
         return res.status(500).json({ error: 'Lỗi server' });
     }
+};
+
+exports.getReservationRate = async (req, res) => {
+  try {
+    result = await ReportModel.getReservationRate();
+    return res.status(200).json({
+      success: true,
+      data: result
+    });
+  }
+  catch (err) {
+    console.error('Lỗi logic:', err);
+    return res.status(500).json({ success: false, message: 'Lỗi server' });
+  }
+};
+
+exports.getReservationRatebetweenTwoMonths = async (req, res) => {
+  try {
+    result = await ReportModel.getReservationRatebetweenTwoMonths();
+    return res.status(200).json({
+      success: true,
+      data: result
+    });
+  }
+  catch (err) {
+    console.error('Lỗi logic:', err);
+    return res.status(500).json({ success: false, message: 'Lỗi server' });
+  }
+};
+
+
+exports.revenueReportExcel = async (req, res) => {
+  try {
+    const data = await getRevenueData();
+
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Báo cáo doanh thu');
+
+    worksheet.columns = [
+      { header: 'Mã đặt phòng', key: 'reservation_id', width: 15 },
+      { header: 'Ngày nhận phòng', key: 'check_in_date', width: 20 },
+      { header: 'Ngày trả phòng', key: 'check_out_date', width: 20 },
+      { header: 'Trạng thái đặt', key: 'reservation_status', width: 20 },
+      { header: 'Ngày thanh toán', key: 'payment_datetime', width: 20 },
+      { header: 'Tổng tiền', key: 'total_amount', width: 15 },
+      { header: 'Trạng thái hóa đơn', key: 'invoice_status', width: 20 }
+    ];
+
+    data.forEach(row => worksheet.addRow(row));
+
+    res.setHeader(
+      'Content-Type',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    );
+    res.setHeader(
+      'Content-Disposition',
+      'attachment; filename=bao_cao_doanh_thu.xlsx'
+    );
+
+    await workbook.xlsx.write(res);
+    res.end();
+
+  } catch (error) {
+    console.error('❌ Lỗi xuất báo cáo doanh thu:', error);
+    res.status(500).json({ success: false, message: 'Lỗi server khi xuất báo cáo' });
+  }
 };

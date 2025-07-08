@@ -1,31 +1,25 @@
-#  Hotel Management System - Backend
+# Hotel Management System - Backend
 
-*Project Group 10 - Software Engineering*
+_Project Group 10 - Software Engineering_
 
 ## Phần mềm được tổ chức theo kiến trúc Client - Server
-Đây là phần mềm cho phía server chạy ở ```localhost:4000```
+
+Đây là phần mềm cho phía server chạy ở `localhost:4000`
 
 ## Frontend
 
-### Cách chạy client-user
+### Cách chạy client
 
 ```
 cd client-user
 pnpm install
-pnpm add zustand
+pnpm add xlsx jspdf jspdf-autotable zustand
 pnpm dev
-````
-### Cách chạy client-admin
-
 ```
-cd client-admin
-pnpm install
-pnpm add zustand
-pnpm dev
-````
 
 ---
-##  Cấu trúc project
+
+## Cấu trúc project
 
 ```
 /backend
@@ -41,7 +35,7 @@ pnpm dev
 
 ---
 
-##  Hướng dẫn cài đặt
+## Hướng dẫn cài đặt
 
 ### 1. Cài Node.js
 
@@ -71,7 +65,7 @@ npm install express-session
 
 ---
 
-##  Cấu hình Database (SQL Server)
+## Cấu hình Database (SQL Server)
 
 ### Yêu cầu:
 
@@ -82,7 +76,8 @@ npm install express-session
 
 Mở **SQL Server Management Studio**, sau đó:
 
-1. Chạy file: 
+1. Chạy file:
+
 ```
 ./backend/config/hms_nmcnpm.sql
 ```
@@ -93,25 +88,26 @@ Mở **SQL Server Management Studio**, sau đó:
 
 ```js
 const config = {
-  user: 'sa',                // Tên tài khoản SQL Server
-  password: '123456',        // Mật khẩu SQL Server (chỉnh lại nếu khác)
-  server: '127.0.0.1',       // Hoặc localhost
-  port: 1433,                // Cổng mặc định SQL Server
-  database: 'hms',
+  user: "sa", // Tên tài khoản SQL Server
+  password: "123456", // Mật khẩu SQL Server (chỉnh lại nếu khác)
+  server: "127.0.0.1", // Hoặc localhost
+  port: 1433, // Cổng mặc định SQL Server
+  database: "hms",
   options: {
     encrypt: false,
     trustServerCertificate: true,
-  }
+  },
 };
 ```
 
->  **Lưu ý:**  
-> - Đảm bảo SQL Server bật chế độ **SQL Server Authentication**  
+> **Lưu ý:**
+>
+> - Đảm bảo SQL Server bật chế độ **SQL Server Authentication**
 > - Nếu dùng SQL Server Express, có thể cần khai báo `instanceName`
 
 ---
 
-##  Chạy Server
+## Chạy Server
 
 ```bash
 cd /backend
@@ -127,14 +123,14 @@ Server is running on port 3000
 
 ---
 
-##  Kết nối từ Frontend
+## Kết nối từ Frontend
 
 Frontend có thể gửi request đến API thông qua:  
 `http://localhost:3000`
 
 ---
 
-##  Ghi chú lỗi kết nối
+## Ghi chú lỗi kết nối
 
 - Kiểm tra lại `user/password`
 - Đảm bảo SQL Server mở port 1433
@@ -143,9 +139,9 @@ Frontend có thể gửi request đến API thông qua:
 
 ---
 
-##  Nhóm thực hiện
+## Nhóm thực hiện
 
-- Thành viên: Nhóm 10  
+- Thành viên: Nhóm 10
 - Môn học: Công nghệ Phần mềm
 
 ---
