@@ -4,16 +4,27 @@ _Project Group 10 - Software Engineering_
 
 ## Phần mềm được tổ chức theo kiến trúc Client - Server
 
-Đây là phần mềm cho phía server chạy ở `localhost:4000`
+Đây là phần mềm cho phía client chạy ở `localhost:3000` và server chạy ở `localhost:4000`
 
 ## Frontend
 
-### Cách chạy client
+### Cài Node.js
+
+```
+Tải và cài đặt từ: https://nodejs.org/
+```
+
+### Cách các thư viện cho client
 
 ```
 cd client-user
 pnpm install
 pnpm add xlsx jspdf jspdf-autotable zustand
+```
+
+### Chạy client ở port 3000
+
+```
 pnpm dev
 ```
 
@@ -48,7 +59,7 @@ Tải và cài đặt từ: https://nodejs.org/
 Mở terminal:
 
 ```bash
-cd /backend
+cd /server/backend
 npm install
 ```
 
