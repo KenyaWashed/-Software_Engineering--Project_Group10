@@ -1,26 +1,17 @@
 "use client";
-import { useEffect } from "react";
+
 import { cn } from "@/lib/utils";
 import Sidebar from "./Sidebar";
 import CircularProgress from "./CircularProgress";
 import RevenueCards from "./RevenueCards";
 import RevenuePieChart from "./RevenuePieChart";
 import TrendsChart from "./TrendsChart";
-import { checkSession } from "@/lib/auth/checkSession";
 
 interface DashboardProps {
   className?: string;
 }
 
 export default function Dashboard({ className }: DashboardProps) {
-  useEffect(() => {
-    checkSession().then((data) => {
-      if (!data.user || data.user.role !== "admin") {
-        window.location.href = "/login";
-      }
-    });
-  }, []);
-
   return (
     <div className={cn("min-h-screen bg-dashboard-bg font-lato", className)}>
       {/* Sidebar */}
@@ -60,9 +51,8 @@ export default function Dashboard({ className }: DashboardProps) {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
             {/* Revenue Pie Chart */}
             <div className="lg:col-span-4">
-              <RevenuePieChart 
-               percentage={85}
-              />
+              <RevenuePieChart
+              percentage={0} />
             </div>
 
             {/* Trends Chart */}

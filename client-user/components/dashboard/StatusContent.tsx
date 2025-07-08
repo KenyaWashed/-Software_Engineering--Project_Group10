@@ -1,6 +1,8 @@
+"use client"
 import { cn } from "@/lib/utils";
 import Sidebar from "./Sidebar";
 import RoomPackageCard from "./RoomPackageCard";
+import React, { useState } from "react";
 
 interface StatusContentProps {
   className?: string;
@@ -121,6 +123,9 @@ const package04Rooms = [
 ];
 
 export default function StatusContent({ className }: StatusContentProps) {
+  const [selectedPackage, setSelectedPackage] = useState("all");
+  const [selectedStatus, setSelectedStatus] = useState("all");
+
   return (
     <div className={cn("min-h-screen bg-dashboard-bg font-lato", className)}>
       {/* Sidebar */}
@@ -129,82 +134,72 @@ export default function StatusContent({ className }: StatusContentProps) {
       {/* Main Content */}
       <div className="ml-60 pt-4 px-6 lg:px-12">
         <div className="max-w-7xl mx-auto">
-          {/* Search Bar */}
-          <div className="w-full h-18 bg-gray-200 rounded-2xl relative mb-8">
-            <svg
-              className="absolute left-4 top-5 w-7 h-7"
-              viewBox="0 0 30 30"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M13.75 2.5C19.96 2.5 25 7.54 25 13.75C25 19.96 19.96 25 13.75 25C7.54 25 2.5 19.96 2.5 13.75C2.5 7.54 7.54 2.5 13.75 2.5ZM13.75 22.5C18.5837 22.5 22.5 18.5837 22.5 13.75C22.5 8.915 18.5837 5 13.75 5C8.915 5 5 8.915 5 13.75C5 18.5837 8.915 22.5 13.75 22.5ZM24.3563 22.5887L27.8925 26.1238L26.1238 27.8925L22.5887 24.3563L24.3563 22.5887Z"
-                fill="#B0B0B0"
-              />
-            </svg>
-            <div className="absolute left-16 top-6 text-gray-400 font-montserrat text-lg font-normal leading-normal">
-              Tìm kiếm...
-            </div>
-          </div>
-
           {/* Filter Controls */}
           <div className="flex gap-5 mb-8">
+            {/* Gói phòng filter */}
             <div className="bg-black rounded px-4 py-2 flex items-center gap-4">
               <span className="text-gray-400 font-montserrat text-lg font-normal">
-                Room Types
+                Gói phòng
               </span>
-              <span className="text-white font-montserrat text-lg font-normal">
-                All
-              </span>
-              <svg
-                width="12"
-                height="8"
-                viewBox="0 0 12 8"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                className="text-white"
+              {/* Dropdown filter for package 1-4 */}
+              <select
+                className="bg-black text-white font-montserrat text-lg font-normal border-none outline-none"
+                value={selectedPackage}
+                onChange={e => setSelectedPackage(e.target.value)}
               >
-                <path
-                  d="M1 1L6 6L11 1"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
+                <option value="all">Tất cả</option>
+                <option value="01">Gói 1</option>
+                <option value="02">Gói 2</option>
+                <option value="03">Gói 3</option>
+                <option value="04">Gói 4</option>
+              </select>
             </div>
+            {/* Status filter */}
             <div className="bg-black rounded px-4 py-2 flex items-center gap-4">
               <span className="text-gray-400 font-montserrat text-lg font-normal">
-                Package
+                Trạng thái
               </span>
-              <span className="text-white font-montserrat text-lg font-normal">
-                All
-              </span>
-              <svg
-                width="12"
-                height="8"
-                viewBox="0 0 12 8"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                className="text-white"
+              <button
+                className={`rounded px-3 py-1 font-montserrat text-lg font-normal border-none outline-none ${selectedStatus === 'all' ? 'bg-gray-600 text-white' : 'bg-neutral-800 text-gray-300'}`}
+                onClick={() => setSelectedStatus('all')}
               >
-                <path
-                  d="M1 1L6 6L11 1"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
+                Tất cả
+              </button>
+              <button
+                className={`rounded px-3 py-1 font-montserrat text-lg font-normal border-none outline-none ${selectedStatus === 'occupied' ? 'bg-red-500 text-white' : 'bg-neutral-800 text-red-400'}`}
+                onClick={() => setSelectedStatus('occupied')}
+              >
+                Có người ở
+              </button>
+              <button
+                className={`rounded px-3 py-1 font-montserrat text-lg font-normal border-none outline-none ${selectedStatus === 'maintenance' ? 'bg-orange-500 text-white' : 'bg-neutral-800 text-orange-400'}`}
+                onClick={() => setSelectedStatus('maintenance')}
+              >
+                Đã đặt
+              </button>
+              <button
+                className={`rounded px-3 py-1 font-montserrat text-lg font-normal border-none outline-none ${selectedStatus === 'available' ? 'bg-gray-400 text-white' : 'bg-neutral-800 text-gray-400'}`}
+                onClick={() => setSelectedStatus('available')}
+              >
+                Trống
+              </button>
             </div>
           </div>
 
           {/* Room Package Cards Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 gap-y-8">
-            <RoomPackageCard packageNumber="01" rooms={package01Rooms} />
-            <RoomPackageCard packageNumber="02" rooms={package02Rooms} />
-            <RoomPackageCard packageNumber="03" rooms={package03Rooms} />
-            <RoomPackageCard packageNumber="04" rooms={package04Rooms} />
+            {(selectedPackage === "all" || selectedPackage === "01") && (
+              <RoomPackageCard packageNumber="01" rooms={package01Rooms.filter(room => selectedStatus === 'all' ? true : room.status === selectedStatus)} />
+            )}
+            {(selectedPackage === "all" || selectedPackage === "02") && (
+              <RoomPackageCard packageNumber="02" rooms={package02Rooms.filter(room => selectedStatus === 'all' ? true : room.status === selectedStatus)} />
+            )}
+            {(selectedPackage === "all" || selectedPackage === "03") && (
+              <RoomPackageCard packageNumber="03" rooms={package03Rooms.filter(room => selectedStatus === 'all' ? true : room.status === selectedStatus)} />
+            )}
+            {(selectedPackage === "all" || selectedPackage === "04") && (
+              <RoomPackageCard packageNumber="04" rooms={package04Rooms.filter(room => selectedStatus === 'all' ? true : room.status === selectedStatus)} />
+            )}
           </div>
         </div>
       </div>

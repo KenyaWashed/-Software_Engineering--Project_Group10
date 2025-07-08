@@ -1,268 +1,201 @@
+"use client";
 import Sidebar from "./Sidebar";
+import fakeTransactions from "./fakeTransactions";
+import React, { use, useState } from "react";
+import * as XLSX from "xlsx";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+
+// Sắp xếp ngày mới nhất về trước và loại bỏ phòng unknown
+const sortedTransactions = fakeTransactions
+  .filter(row => {
+    // Tách số phòng từ row.room
+    const match = row.room.match(/(Phòng [^ ]+) (\d+)/);
+    return match && match[2] !== 'unknown';
+  })
+  .sort((a, b) => {
+    // Chuyển ngày dd/mm/yyyy thành yyyy-mm-dd để so sánh
+    const parse = (d: string) => {
+      const [day, month, year] = d.split('/');
+      return new Date(`${year}-${month}-${day}`).getTime();
+    };
+    return parse(b.date) - parse(a.date);
+  });
+
+// Tính tổng doanh thu theo ngày
+const revenueByDate: { [date: string]: number } = {};
+sortedTransactions.forEach(row => {
+  const date = row.date;
+  const amount = Number(row.amount) || 0;
+  if (!revenueByDate[date]) revenueByDate[date] = 0;
+  revenueByDate[date] += amount;
+});
+const revenueRows = Object.entries(revenueByDate)
+  .sort((a, b) => {
+    // dd/mm/yyyy -> yyyy-mm-dd
+    const parse = (d: string) => {
+      const [day, month, year] = d.split('/');
+      return new Date(`${year}-${month}-${day}`).getTime();
+    };
+    return parse(b[0]) - parse(a[0]);
+  });
+const totalRevenue = revenueRows.reduce((sum, [_, v]) => sum + v, 0);
 
 export default function ReportsContent() {
-  const reportData = [
-    {
-      name: "Ramakant Sharma",
-      amount: "VND 1,560,000",
-      date: "23/06/2025",
-      method: "CK",
-      room: "415",
-      surcharge: "25%",
-      phone: "+91 52345 64545",
-    },
-    {
-      name: "Ramakant Sharma",
-      amount: "VND 2,560,000",
-      date: "21/06/2025",
-      method: "TT",
-      room: "121",
-      surcharge: "12%",
-      phone: "+91 52345 64545",
-    },
-    {
-      name: "Ramakant Sharma",
-      amount: "VND 9,056,000",
-      date: "19/06/2025",
-      method: "TT",
-      room: "112",
-      surcharge: "0%",
-      phone: "+91 52345 64545",
-    },
-    {
-      name: "Ramakant Sharma",
-      amount: "VND 9,056,000",
-      date: "19/06/2025",
-      method: "CK",
-      room: "212",
-      surcharge: "10%",
-      phone: "+91 52345 64545",
-    },
-    {
-      name: "Ramakant Sharma",
-      amount: "VND 2,560,000",
-      date: "18/06.2025",
-      method: "TT",
-      room: "127",
-      surcharge: "15%",
-      phone: "+91 52345 64545",
-    },
-    {
-      name: "Ramakant Sharma",
-      amount: "VND 1,560,000",
-      date: "17/06/2025",
-      method: "CK",
-      room: "223",
-      surcharge: "0%",
-      phone: "+91 52345 64545",
-    },
-    {
-      name: "Ramakant Sharma",
-      amount: "VND 4,160,000",
-      date: "16/06/2025",
-      method: "CK",
-      room: "112",
-      surcharge: "20%",
-      phone: "+91 52345 64545",
-    },
-    {
-      name: "Ramakant Sharma",
-      amount: "VND 1,563,341",
-      date: "16/06/2025",
-      method: "TT",
-      room: "112",
-      surcharge: "0%",
-      phone: "+91 52345 64545",
-    },
-  ];
+  // Pagination state
+  const [page, setPage] = useState(1);
+  const pageSize = 15;
+  const totalPages = Math.ceil(sortedTransactions.length / pageSize);
+  const pagedData = sortedTransactions.slice((page - 1) * pageSize, page * pageSize);
+
+  // Hàm xuất dữ liệu ra Excel
+  const exportToExcel = () => {
+    // Chuyển đổi dữ liệu thành mảng các object đơn giản
+    const data = sortedTransactions.map(row => {
+      let soPhong = 'unknown';
+      let goiPhong = 'unknown';
+      const match = row.room.match(/(Phòng [^ ]+) (\d+)/);
+      if (match) {
+        goiPhong = match[1];
+        soPhong = match[2];
+      }
+      // Sửa dữ liệu gói phòng thành 'Gói phòng 1' đến 'Gói phòng 4' (random)
+      const goiPhongNumber = 1 + (parseInt(soPhong) % 4 || Math.floor(Math.random() * 4));
+      goiPhong = `Gói phòng ${goiPhongNumber}`;
+      return {
+        "Tên": row.name,
+        "Số tiền": row.amount,
+        "Ngày": row.date,
+        "Số phòng": soPhong,
+        "Gói phòng": goiPhong,
+        "Tỉ lệ phụ thu": row.surcharge,
+        "Số điện thoại": row.phone
+      };
+    });
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "LichSuGiaoDich");
+    XLSX.writeFile(wb, `lich_su_giao_dich_${new Date().toISOString().slice(0,10)}.xlsx`);
+  };
+
+  // Hàm xuất dữ liệu ra PDF
+  const exportToPDF = () => {
+    const doc = new jsPDF();
+    doc.text("Lịch sử giao dịch", 14, 16);
+    const data = sortedTransactions.map(row => {
+      let soPhong = 'unknown';
+      let goiPhong = 'unknown';
+      const match = row.room.match(/(Phòng [^ ]+) (\d+)/);
+      if (match) {
+        goiPhong = match[1];
+        soPhong = match[2];
+      }
+      // Sửa dữ liệu gói phòng thành 'Gói phòng 1' đến 'Gói phòng 4' (random)
+      const goiPhongNumber = 1 + (parseInt(soPhong) % 4 || Math.floor(Math.random() * 4));
+      goiPhong = `Gói phòng ${goiPhongNumber}`;
+      return [
+        row.name,
+        row.amount,
+        row.date,
+        soPhong,
+        goiPhong,
+        row.surcharge,
+        row.phone
+      ];
+    });
+    autoTable(doc, {
+      head: [["Tên", "Số tiền", "Ngày", "Số phòng", "Gói phòng", "Tỉ lệ phụ thu", "Số điện thoại"]],
+      body: data,
+      startY: 22,
+    });
+    doc.save(`lich_su_giao_dich_${new Date().toISOString().slice(0,10)}.pdf`);
+  };
 
   return (
-    <div className="flex min-h-screen bg-dashboard-bg">
+    <div className="flex min-h-[calc(100vh-32px)] bg-dashboard-bg font-montserrat">
       <Sidebar />
       <div className="flex-1 ml-64">
-        <div className="bg-[#202020] rounded-md m-4 p-5 text-white">
-          <div className="px-3">
+        <div className="bg-[#202020] rounded-md m-4 p-5 text-white min-h-[80vh] flex flex-col">
+          <div className="px-3 flex-1 flex flex-col">
             {/* Header */}
-            <div className="flex justify-between items-center mb-7">
+            <div className="flex items-center mb-7 gap-4">
               <h1 className="text-xl font-semibold font-montserrat text-white">
-                Credit History
+                Lịch sử giao dịch
               </h1>
-
-              <div className="flex items-center gap-6">
-                {/* Export Buttons */}
-                <div className="flex gap-3">
-                  <button className="bg-[#20744A] rounded-md px-5 py-2 flex items-center gap-3 text-white font-medium">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                      <path
-                        d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
-                        fill="#1D6F42"
-                      />
-                      <polyline points="14,2 14,8 20,8" fill="#ffffff" />
-                      <line
-                        x1="16"
-                        y1="13"
-                        x2="8"
-                        y2="13"
-                        stroke="#ffffff"
-                        strokeWidth="2"
-                      />
-                      <line
-                        x1="16"
-                        y1="17"
-                        x2="8"
-                        y2="17"
-                        stroke="#ffffff"
-                        strokeWidth="2"
-                      />
-                      <polyline
-                        points="10,9 9,9 8,9"
-                        stroke="#ffffff"
-                        strokeWidth="2"
-                      />
-                    </svg>
-                    Export to Excel
-                  </button>
-
-                  <button className="bg-[#DC2626] rounded-md px-5 py-2 flex items-center gap-3 text-white font-medium">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                      <path
-                        d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
-                        fill="#DC2626"
-                      />
-                      <polyline points="14,2 14,8 20,8" fill="#ffffff" />
-                      <line
-                        x1="16"
-                        y1="13"
-                        x2="8"
-                        y2="13"
-                        stroke="#ffffff"
-                        strokeWidth="2"
-                      />
-                      <line
-                        x1="16"
-                        y1="17"
-                        x2="8"
-                        y2="17"
-                        stroke="#ffffff"
-                        strokeWidth="2"
-                      />
-                      <polyline
-                        points="10,9 9,9 8,9"
-                        stroke="#ffffff"
-                        strokeWidth="2"
-                      />
-                    </svg>
-                    Export to PDF
-                  </button>
-                </div>
-
-                {/* Entries per page */}
-                <div className="flex items-center gap-2">
-                  <span className="text-white font-montserrat">
-                    Entries /Page
-                  </span>
-                  <div className="bg-[#111111] rounded-md px-3 py-1 min-w-[72px] h-8 flex items-center justify-center">
-                    <span className="text-white text-sm">10</span>
-                  </div>
-                </div>
-              </div>
+              <button
+                className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded font-montserrat"
+                onClick={exportToExcel}
+              >
+                Xuất Excel
+              </button>
+              <button
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded font-montserrat"
+                onClick={exportToPDF}
+              >
+                Xuất PDF
+              </button>
             </div>
-
-            {/* Table Header */}
-            <div className="grid grid-cols-7 gap-4 mb-5 text-white font-semibold font-montserrat">
-              <div>Tên</div>
-              <div>Số tiền</div>
-              <div>Ngày</div>
-              <div>Hình thức</div>
-              <div>Phòng</div>
-              <div>Tỉ lệ phụ thu</div>
-              <div>Số điện thoại</div>
+            {/* Table */}
+            <div className="overflow-x-auto flex-1">
+              <table className="min-w-full divide-y divide-gray-700 font-montserrat">
+                <thead>
+                  <tr>
+                    <th className="px-4 py-2 text-left">Tên</th>
+                    <th className="px-4 py-2 text-left">Số tiền</th>
+                    <th className="px-4 py-2 text-left">Ngày</th>
+                    <th className="px-4 py-2 text-left">Số phòng</th>
+                    <th className="px-4 py-2 text-left">Gói phòng</th>
+                    <th className="px-4 py-2 text-left">Tỉ lệ phụ thu</th>
+                    <th className="px-4 py-2 text-left">Số điện thoại</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {pagedData.map((row, idx) => {
+                    // Tách số phòng và gói phòng từ row.room
+                    let soPhong = 'unknown';
+                    let goiPhong = 'unknown';
+                    const match = row.room.match(/(Phòng [^ ]+) (\d+)/);
+                    if (match) {
+                      goiPhong = match[1];
+                      soPhong = match[2];
+                    }
+                    // Sửa dữ liệu gói phòng thành 'Gói phòng 1' đến 'Gói phòng 4' (random hoặc theo số phòng)
+                    const goiPhongNumber = 1 + (parseInt(soPhong) % 4 || Math.floor(Math.random() * 4));
+                    goiPhong = `Gói phòng ${goiPhongNumber}`;
+                    return (
+                      <tr key={idx} className="border-b border-gray-800 hover:bg-gray-900 font-montserrat">
+                        <td className="px-4 py-2">{row.name}</td>
+                        <td className="px-4 py-2">{row.amount}</td>
+                        <td className="px-4 py-2">{row.date}</td>
+                        <td className="px-4 py-2">{soPhong}</td>
+                        <td className="px-4 py-2">{goiPhong}</td>
+                        <td className="px-4 py-2">{row.surcharge}</td>
+                        <td className="px-4 py-2">{row.phone}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
-
-            {/* Table Rows */}
-            <div className="space-y-5">
-              {reportData.map((row, index) => (
-                <div
-                  key={index}
-                  className="bg-[#111111] rounded-md p-6 grid grid-cols-7 gap-4 text-white font-montserrat"
-                >
-                  <div>{row.name}</div>
-                  <div>{row.amount}</div>
-                  <div>{row.date}</div>
-                  <div>{row.method}</div>
-                  <div>{row.room}</div>
-                  <div>{row.surcharge}</div>
-                  <div>{row.phone}</div>
-                </div>
-              ))}
-            </div>
-
             {/* Pagination */}
-            <div className="flex items-center justify-center gap-5 mt-8 text-white font-montserrat">
-              <div className="flex items-center gap-2">
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                <span>Prev.</span>
-              </div>
-
-              <div className="flex items-center gap-1">
-                <div className="bg-[#111111] rounded-md w-9 h-9 flex items-center justify-center">
-                  1
-                </div>
-                <div className="bg-[#202020] rounded-md w-9 h-9 flex items-center justify-center">
-                  2
-                </div>
-                <div className="bg-[#202020] rounded-md w-9 h-9 flex items-center justify-center">
-                  3
-                </div>
-                <div className="bg-[#202020] rounded-md w-9 h-9 flex items-center justify-center">
-                  4
-                </div>
-                <div className="bg-[#202020] rounded-md w-9 h-9 flex items-center justify-center">
-                  5
-                </div>
-                <div className="bg-[#202020] rounded-md px-2 h-9 flex items-center justify-center text-sm">
-                  . . .
-                </div>
-                <div className="bg-[#202020] rounded-md w-9 h-9 flex items-center justify-center">
-                  97
-                </div>
-                <div className="bg-[#202020] rounded-md w-9 h-9 flex items-center justify-center">
-                  98
-                </div>
-                <div className="bg-[#202020] rounded-md w-9 h-9 flex items-center justify-center">
-                  99
-                </div>
-                <div className="bg-[#202020] rounded-md w-10 h-9 flex items-center justify-center">
-                  100
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <span>Next</span>
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </div>
+            <div className="flex justify-center items-center gap-2 mt-6">
+              <button
+                className="px-3 py-1 rounded bg-gray-700 text-white disabled:opacity-50 font-montserrat"
+                onClick={() => setPage(page - 1)}
+                disabled={page === 1}
+              >
+                Trước
+              </button>
+              <span className="font-montserrat">
+                Trang {page} / {totalPages}
+              </span>
+              <button
+                className="px-3 py-1 rounded bg-gray-700 text-white disabled:opacity-50 font-montserrat"
+                onClick={() => setPage(page + 1)}
+                disabled={page === totalPages}
+              >
+                Sau
+              </button>
             </div>
           </div>
         </div>
