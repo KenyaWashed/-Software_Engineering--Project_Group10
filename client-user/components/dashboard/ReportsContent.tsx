@@ -1,4 +1,5 @@
-"use client";
+'use client'; // nếu dùng Next.js 13+ với app directory
+
 import Sidebar from "./Sidebar";
 import fakeTransactions from "./fakeTransactions";
 import React, { use, useState } from "react";
@@ -133,6 +134,31 @@ export default function ReportsContent() {
                 onClick={exportToPDF}
               >
                 Xuất PDF
+              </button>
+              <button
+                className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded font-montserrat"
+                onClick={async () => {
+                  try {
+                    const res = await fetch("http://localhost:4000/report/get-export-revenue-excel", {
+                      method: "GET",
+                      credentials: "include"
+                    });
+                    if (!res.ok) throw new Error("Tải file thất bại");
+                    const blob = await res.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = `export_revenue_${new Date().toISOString().slice(0,10)}.xlsx`;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    window.URL.revokeObjectURL(url);
+                  } catch (err) {
+                    alert("Không thể tải file từ API!");
+                  }
+                }}
+              >
+                Export từ API
               </button>
             </div>
             {/* Table */}
